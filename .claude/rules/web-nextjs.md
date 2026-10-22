@@ -17,7 +17,7 @@ Next.js 16.3+ ships version-matched docs in `node_modules/next/dist/docs`, and w
 
 `create-next-app` also turns on `experimental.agentFeedback`, which needs Next.js telemetry, has the agent run `next internal agent-feedback-instructions` and opens issue-report forms in the browser. Set it to `false` at TECH-09, and decide whether to keep `experimental.agentUpgrade`, whose reminders stop `next dev` and `next build` when an agent runs them.
 
-Task skills: `next-bundle-optimizer` (bundle audits against the public-page budget), `web-page`, `shadcn`, `orval` (the generated client).
+Task skills: `next-bundle-optimizer` (bundle audits against the public-page budget), `react-best-practices` (performance rules), `web-page`, `shadcn`, `orval` (the generated client).
 
 ## Three surfaces
 

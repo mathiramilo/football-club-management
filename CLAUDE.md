@@ -35,6 +35,8 @@ Third-party references, vendored and pinned (sources and changes in `.claude/ski
 |---|---|
 | `shadcn` | shadcn/ui components, forms, composition and CLI in `apps/web` |
 | `react-composition-patterns` | Compound components and providers instead of boolean props (web and mobile) |
+| `react-best-practices` | React and Next.js performance: waterfalls, bundle size, server rendering, re-renders |
+| `react-native-skills` | React Native and Expo rules: lists, animation, navigation, UI patterns, monorepo |
 | `web-design-guidelines` | A terse `file:line` review of web UI against Vercel's interface guidelines |
 | `accessibility` | WCAG 2.2 audits and fixes on the web |
 | `expo-animation` | Motion, gestures, sheets and haptics in the Expo app |
