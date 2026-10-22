@@ -120,10 +120,19 @@ Propose the cheapest fix that works, in this order: delete, use the platform, re
 
 Fix in the critique's priority order. Fix drift at the narrowest level: add a missing token, reuse an existing component, or fix the local defect. Verify by looking at the rendered result at the sizes it ships at: a 360 dp Android emulator, an iPhone, and 1280 px and 768 px for the portal, in light and dark, and at 200% font scale. Batch fixes, then look again, rather than screenshotting after every tweak.
 
-## Optional: Impeccable as a personal plugin
+## Going deeper: `impeccable` and `design-taste-frontend`
 
-For deeper design-direction work, a developer can install Impeccable for themselves (`/plugin marketplace add pbakaus/impeccable`). It is **not** committed to this repo: its launcher downloads a native binary on first run, its hooks run that binary after every edit, and it writes `PRODUCT.md`, `DESIGN.md` and `.impeccable/` at the repo root. If you use it, don't commit those artifacts without team agreement, and ignore its suggestion to add unit tests (NFR-MAINT-02).
+This skill is the project's floor. Two vendored skills go further (see `THIRD_PARTY.md`), and where they disagree with this skill or the rules, this skill and the rules win:
+
+| Work | Use |
+|---|---|
+| A new visual direction for the product, critique, audit, or a focused pass (`typeset`, `layout`, `colorize`, `clarify`, `harden`) | `impeccable` |
+| Portal dashboards, tables and settings | This skill, plus `design-taste-frontend`'s app-screen run (`references/app-screens.md`) |
+| The marketing landing page, once specified | `design-taste-frontend`'s page run for art direction, then `impeccable` `critique` and `polish` |
+| Expo screens | `expo-design-system` and `impeccable`'s native references; the taste scripts are web-only |
+
+Their project notes cover what each downloads or contacts, where their files go, and how their house rules map to our surfaces.
 
 ## Optional: a marketing landing page
 
-No marketing site is specified yet; "landing" in `docs/` means the `/e`, `/j` and `/c` link pages. A marketing page needs a story with an ID in the backlog first. When it has one, Hallmark ([nutlope/hallmark](https://github.com/nutlope/hallmark), MIT) is the recommended personal skill for it. Its honest-copy gates apply regardless: no invented metrics, client logos or testimonials ("+500 clubes"), and real screenshots instead of fake device frames. Don't commit its `.hallmark/` folder or the comments it stamps into CSS.
+No marketing site is specified yet; "landing" in `docs/` means the `/e`, `/j` and `/c` link pages. A marketing page needs a story with an ID in the backlog first. When it has one, follow the table above; Hallmark ([nutlope/hallmark](https://github.com/nutlope/hallmark), MIT) is an optional personal alternative. Honest copy applies either way: no invented metrics, client logos or testimonials ("+500 clubes"), and real screenshots instead of fake device frames. If you use Hallmark, don't commit its `.hallmark/` folder or the comments it stamps into CSS.
