@@ -1,7 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "skillOverrides": {
-    "vercel:shadcn": "off"
+    "vercel:shadcn": "off",
+    "vercel:react-best-practices": "off"
   },
   "permissions": {
     "allow": [
