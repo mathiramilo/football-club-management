@@ -1,0 +1,68 @@
+# Football Club Management
+
+Mobile app (Expo), web app (Next.js) and API (NestJS) for amateur and semi-professional football clubs in Uruguay and Argentina. The specs live in `docs/`; start with `docs/README.md`.
+
+**Status:** specs only (v0.1). Next is R0: scaffold the monorepo (TECH-01) and run the spikes in `docs/tech/00-tech-stack.md` § 8.
+
+## How Claude is set up here
+
+- **Rules** (`.claude/rules/`) load automatically. Four always apply: project context, glossary, git and delivery, privacy. The rest load when you touch matching paths: API, contracts, Prisma, jobs, backend tests, domain, web, mobile, i18n, AI.
+- **Skills** (`.claude/skills/`) are task workflows. Start a story with `/implement-story <ID>` and finish with `/definition-of-done`.
+
+Project workflows:
+
+| Skill | Use it to |
+|---|---|
+| `implement-story` | Plan and build a story end to end from its spec |
+| `api-endpoint` | Add or change a REST endpoint, contract-first |
+| `nestjs` | NestJS mechanics: lifecycle order, decorators, modules, filter, worker context, OpenAPI, Vitest setup, Nest 11 vs 12 |
+| `prisma-migration` | Change the database schema safely |
+| `background-job` | Add outbox events, scheduled jobs and worker handlers |
+| `notification` | Add or change an `N-xx` notification |
+| `authorization-policy` | Add or change a permission, with the role and tenant test matrix |
+| `offline-mutation` | Make a mobile write work offline |
+| `mobile-screen` | Build or change an Expo screen |
+| `mobile-performance` | Diagnose and fix mobile speed, jank and size against the NFR targets |
+| `web-page` | Build or change a Next.js page |
+| `ui-design` | Shape, critique or polish a screen so it looks designed, not generic |
+| `ai-feature` | Change the AI assistant or plan generator (R3) |
+| `adr` | Record or change a technical decision |
+| `definition-of-done` | Check a change before calling it done or opening a PR |
+
+Third-party references, vendored and pinned (sources and changes in `.claude/skills/THIRD_PARTY.md`):
+
+| Skill | Use it for |
+|---|---|
+| `shadcn` | shadcn/ui components, forms, composition and CLI in `apps/web` |
+| `react-composition-patterns` | Compound components and providers instead of boolean props (web and mobile) |
+| `web-design-guidelines` | A terse `file:line` review of web UI against Vercel's interface guidelines |
+| `accessibility` | WCAG 2.2 audits and fixes on the web |
+| `expo-animation` | Motion, gestures, sheets and haptics in the Expo app |
+| `expo-design-system` | Mobile tokens, primitives, drift audits and the 20 named "native slop" tells |
+| `next-bundle-optimizer` | Audit and cut client JS in `apps/web` against the public-page budget |
+| `orval` | Configure the generated client in `packages/api-client` and its fetch mutator |
+| `expo-dev-client` · `eas-update` · `expo-upgrade` | Development builds, OTA updates and Expo SDK upgrades |
+| `prisma-client-api` | Prisma Client queries, transactions and raw SQL |
+| `postgres-best-practices` | Indexes, locking, query plans and schema design in Postgres |
+
+## Commands
+
+These are the **planned** root scripts. TECH-01 must implement them with exactly these names. Until the monorepo exists, none of them run.
+
+| Task | Command |
+|---|---|
+| Install | `pnpm install` |
+| Local Postgres | `docker compose up -d postgres` |
+| Run everything in dev | `pnpm dev` |
+| Lint and format check | `pnpm lint` · `pnpm format:check` |
+| Typecheck | `pnpm typecheck` |
+| Backend tests (Docker must be running for Testcontainers) | `pnpm test` |
+| One workspace | `pnpm --filter ./apps/api test` |
+| Build | `pnpm build` |
+| Regenerate the OpenAPI document and `packages/api-client` | `pnpm codegen` |
+| OpenAPI breaking-change check against `main` | `pnpm contract:check` |
+| Create a migration without applying it | `pnpm --filter ./apps/api exec prisma migrate dev --create-only --name <verb_noun>` |
+| Apply migrations and seed (local) | `pnpm --filter ./apps/api db:migrate` · `pnpm --filter ./apps/api db:seed` |
+| Mobile dev client | `pnpm --filter ./apps/mobile start` |
+
+When the scaffold lands, replace "planned" with the real state and keep this table in sync with the root `package.json`.
