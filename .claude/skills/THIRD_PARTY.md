@@ -1,0 +1,47 @@
+# Third-party skills
+
+Skills in this folder that came from other projects, pinned to the commit we reviewed. Each vendored `SKILL.md` starts with a **Project notes** block that overrides generic advice where it conflicts with this project. Popularity and selection notes are from two research passes on 2026-10-22.
+
+## Vendored
+
+| Skill | Source | Pinned at | License | Our changes |
+|---|---|---|---|---|
+| `eas-update` | [expo/skills](https://github.com/expo/skills) | `3d1ca4e` | MIT | Removed `allowed-tools` (it pre-approved unpinned `eas` and `npx eas-cli@*` runs, including publishing) and the feedback section (it ran `npx submit-expo-feedback@latest`). Added project notes. |
+| `expo-animation` | [expo/skills](https://github.com/expo/skills), written with Emil Kowalski | `3d1ca4e` | MIT | Removed the feedback section. Added project notes. |
+| `expo-upgrade` | [expo/skills](https://github.com/expo/skills) | `3d1ca4e` | MIT | Removed the feedback section and a third-party `bunx` CLI line. Added project notes (monorepo, NativeWind configs, MMKV, CNG). |
+| `expo-dev-client` | [expo/skills](https://github.com/expo/skills) | `3d1ca4e` | MIT | Removed the feedback section, a troubleshooting line that would publish an OTA update (`eas update`), and a link to a skill we don't vendor. Added project notes. |
+| `web-design-guidelines` | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) with rules from [vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines) | rules at `434b7f9` (2026-10-05) | MIT | Rules pinned locally in `guidelines.md` instead of fetched on every run. "Title Case" replaced with Spanish sentence case. `SKILL.md` rewritten around the local file. |
+| `accessibility` | [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills) | `afa8da9` (2026-08-24) | MIT | Removed a link to a skill we don't vendor. Added project notes. |
+| `shadcn` | [shadcn-ui/ui](https://github.com/shadcn-ui/ui) `skills/shadcn` | `ba1503c` | MIT | Removed the load-time `npx shadcn@latest info` injection and `allowed-tools` (it pre-approved every CLI command, including overwrites). Every CLI call now runs the version pinned in `apps/web`. Dropped the design-system, design-system-page, registry and MCP guides, evals, assets and scripts, and the project-creation commands. Added project notes. |
+| `react-composition-patterns` | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) `vercel-composition-patterns` | `063bee9` | MIT (stated in the repo README; the repo has no LICENSE file) | Renamed. Dropped the compiled `AGENTS.md` duplicate and the rule template. Added project notes. |
+| `postgres-best-practices` | [supabase/agent-skills](https://github.com/supabase/agent-skills) `supabase-postgres-best-practices` | `c9be0e9` | MIT | Renamed. Dropped the template, contributing guide and changelog. Added project notes (Prisma, UUID v7, Spanish full-text search, RLS deferred). |
+| `prisma-client-api` | [prisma/skills](https://github.com/prisma/skills) | `ba3f9d7` (Prisma 7.9) | MIT | Added project notes (tenant-scoped lookups, `tx`-only transactions, cursor pagination, error mapping, no parameter logging). |
+| `expo-design-system` | [expo/skills](https://github.com/expo/skills) `plugins/expo/skills/expo-design-system` | `0d03555` | MIT | Removed the feedback section (it ran `npx --yes @expo/agent-cli@latest`) and `agents/openai.yaml`. Description points at our skills instead of the unvendored `expo-native-ui` and `expo-project-structure`. Added project notes (NativeWind and `packages/ui-tokens` are the system, `@gorhom/bottom-sheet`, no `@expo/ui` or `NativeTabs` without an ADR). |
+| `next-bundle-optimizer` | [vercel/next.js](https://github.com/vercel/next.js) `skills/next-bundle-optimizer` | tag `v16.4.2` (`2864b17`) | MIT | Added project notes (`apps/web`, public-page budget first, no frontend tests, sibling skills not vendored). |
+| `orval` | [orval-labs/orval](https://github.com/orval-labs/orval) `skills/orval` | `d391bb9` | MIT | Description rewritten for `packages/api-client`. Dropped the Angular, SolidStart, Zod, MSW and Hono guides. Added project notes (fetch + `react-query`, `tags-split`, the mutator's headers, cookie and secure-store auth instead of the `localStorage` examples). |
+
+## Adapted, not vendored
+
+Our own skills and rules distill guidance from these sources, with credit in each file:
+
+| Our file | Sources |
+|---|---|
+| `ui-design` skill | Impeccable ([pbakaus/impeccable](https://github.com/pbakaus/impeccable), Apache-2.0), taste-skill (MIT), Emil Kowalski's skills including `break-ui` (MIT), ui-ux-pro-max (MIT), Jakub Krehel's [`better-*` skills](https://github.com/jakubkrehel/skills) (MIT, `4c66b1f`), Dammyjay93's [interface-design](https://github.com/Dammyjay93/interface-design) (MIT, `2f9be32`), Expo's `expo-native-ui` behavior checklist (MIT), Vercel's Web Interface Guidelines (MIT) |
+| `nestjs` skill | [NestJS docs](https://docs.nestjs.com) (MIT), amirtaherkhani's [nestjs-skills](https://github.com/amirtaherkhani/nestjs-skills) (MIT, `31f798a`), mattiavalerio's nestjs-architecture (MIT), ECC nestjs-patterns (MIT), Kadajett's NestJS best practices (ideas only) |
+| `mobile-performance` skill | Callstack's [react-native-best-practices](https://github.com/callstackincubator/agent-skills) (MIT), Expo skills (MIT), Software Mansion's and Vercel's React Native guidance |
+| `web-page` skill, `web-nextjs` rule | Vercel React best practices (MIT), TanStack Table and Query guidance, Next.js agent docs, Emil Kowalski's `mobile-native` (MIT) |
+| `backend-nestjs`, `database-prisma`, `backend-testing`, `jobs-and-notifications` rules; `prisma-migration` skill | Prisma CLI skill (MIT), ECC prisma-patterns (MIT), Kadajett's NestJS best practices (ideas only: its repo has no license file), mcollina's Node skill (MIT), Supabase Postgres (MIT) |
+
+## Optional, per developer (not committed)
+
+- **Impeccable** (`/plugin marketplace add pbakaus/impeccable`): deep design-direction work. Not committed because its launcher downloads a native binary, its hooks run that binary after every edit, and it writes `PRODUCT.md`, `DESIGN.md` and `.impeccable/` at the repo root. The skill alone (`npx skills add pbakaus/impeccable`) runs without the binary, but loses `detect`, `live`, `generate` and half of `critique`, and still offers to download the engine each session.
+- **Hallmark** ([nutlope/hallmark](https://github.com/nutlope/hallmark), MIT): the best fit for a marketing landing page, once one is specified. Don't commit `.hallmark/` or its CSS stamp comments.
+- **Jakub Krehel's `better-*` skills** ([jakubkrehel/skills](https://github.com/jakubkrehel/skills), MIT): web color, layout, typography and copy reviews. Its advice to rename `--color-primary` to `accent` clashes with shadcn's tokens.
+- **Callstack's react-native-best-practices**: full profiling walkthroughs. Its examples assume Callstack's `agent-device` CLI; the animation reference is on Reanimated 4, the bottom-sheet one still on Reanimated 3.
+- **Software Mansion's `gestures` skill** ([software-mansion-labs/skills](https://github.com/software-mansion-labs/skills)): useful for Gesture Handler 3. Not vendored because the repo has no LICENSE file (its README says MIT).
+- **`next-dev-loop`** ([vercel/next.js](https://github.com/vercel/next.js) `skills/`): drives the running app in a browser. Needs a global `agent-browser` install.
+- **Vercel plugin skills** (`vercel:nextjs`, `vercel:react-best-practices`, …): fine to keep. `vercel:shadcn` is turned off in `.claude/settings.json` because the vendored `shadcn` skill replaces it.
+
+## Updating a vendored skill
+
+Download the new upstream version into a scratch folder, read every changed file, re-apply the changes in the table above, update the pinned commit here, and ship it as its own PR.
