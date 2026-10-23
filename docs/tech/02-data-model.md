@@ -1,6 +1,6 @@
 # Data Model
 
-> Status: **Proposed v0.1** · Last updated: 2026-10-22
+> Status: **Proposed v0.1** · Last updated: 2026-10-23
 > This is a logical model. Exact column types and indexes are finalized in migrations. Names follow the [Glossary](../product/03-glossary.md).
 
 ## 1. Conventions
@@ -8,11 +8,11 @@
 | Topic | Convention |
 |---|---|
 | IDs | UUID v7 (time-ordered) primary keys named `id`. Public tokens (share, invite, claim, consent) are separate random values and **stored hashed** when they grant access. |
-| Tenancy | Every club-owned table has `club_id` (FK, indexed). Starter-library rows use `club_id = NULL` with `source = 'starter'`. |
+| Tenancy | Every club-owned table has `club_id` (FK, indexed). A child of a club-owned row references it through a composite foreign key `(parent_id, club_id) → parent (id, club_id)`, so it can't point into another club. Starter-library rows use `club_id = NULL` with `source = 'starter'`. |
 | Timestamps | `created_at` and `updated_at` (`timestamptz`, UTC) on every table. Local dates (`date`) only where the business rule is about a calendar day in the club time zone (e.g. `wellness_checkins.local_date`). |
 | Soft delete | `archived_at` for user-facing archiving. `deleted_at` + `purge_at` for scheduled hard deletes (accounts, clubs). Hard deletes happen in purge jobs. |
 | Enums | Text columns with check constraints (easier to evolve than native enums). The values are listed in the Glossary. |
-| Audit | `created_by` / `updated_by` (user id) on mutable business tables. Sensitive changes are also written to `audit_log`. |
+| Audit | `created_by` / `updated_by` (user id) on mutable business tables. These and the other `*_by` user-id columns have no foreign key, so purging an account (BR-AUTH-12) leaves history intact. Columns that hold a membership id (`rsvp_set_by`) do have one. Sensitive changes are also written to `audit_log`. |
 | Concurrency | A `version` integer on documents edited collaboratively (`session_plans`, `events`) for optimistic locking. |
 | Sensitive data | **[H]** = health-related (special category). **[P]** = personal data. **[M]** = minor-related. See [Privacy § 2](../product/06-privacy-and-compliance.md#2-data-inventory-and-classification). |
 
@@ -61,9 +61,9 @@ erDiagram
 |---|---|---|
 | email | citext unique | Verified primary identity (BR-AUTH-01). |
 | email_verified_at | timestamptz | |
-| first_name, last_name | text | Required at profile completion. |
+| first_name, last_name | text null | Required at profile completion (AUTH-05); null between first sign-in and completion. |
 | nickname | text null | Display name source (BR-AUTH-07). |
-| birthdate | date | Required. Minor status is derived from it (BR-AUTH-05). [M] |
+| birthdate | date null | Required at profile completion, like the names. Minor status is derived from it (BR-AUTH-05). [M] |
 | photo_key | text null | Object storage key. |
 | phone | text null | E.164. |
 | locale | text | Default `es`. |
@@ -95,7 +95,7 @@ erDiagram
 | plan_tier | text (OQ-04). |
 | deleted_at, purge_at | BR-CLUB-13. |
 
-**categories**: `club_id`, `name`, `format`, `gender`, `age_group`, `color`, `min_players_practice`, `settings` (jsonb validated by a shared schema, see below), `archived_at`. Unique (`club_id`, `lower(unaccent(name))`) where `archived_at IS NULL`.
+**categories**: `club_id`, `name`, `format`, `gender`, `age_group`, `color`, `min_players_practice`, `settings` (jsonb validated by a shared schema, see below; defaults to `{}`, and missing keys take the BR-CLUB-14 defaults), `archived_at`. Unique (`club_id`, `lower(immutable_unaccent(name))`) where `archived_at IS NULL` (BR-CLUB-02). `immutable_unaccent()` wraps `unaccent()` with a fixed dictionary, because Postgres only allows immutable functions in indexes.
 
 `categories.settings` schema (defaults from BR-CLUB-14):
 ```jsonc
@@ -252,7 +252,7 @@ Indexes: (`club_membership_id`, `event_id`); (`event_id`, `rsvp_status`).
 | One wellness check-in per person per local day | Unique (`club_membership_id`, `local_date`). |
 | Content assignment targets exactly one of category or person | Check constraint (xor). |
 | Exactly one plan per event | Unique `session_plans.event_id`. |
-| Tenant consistency (child `club_id` = parent `club_id`) | Composite foreign keys where practical; otherwise service-layer checks plus tests. |
+| Tenant consistency (child `club_id` = parent `club_id`) | Composite foreign keys `(parent_id, club_id) → parent (id, club_id)`, also on nullable parent columns. Service-layer checks plus tests only where a foreign key can't express it. |
 
 ## 5. Derived data and performance
 
