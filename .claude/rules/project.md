@@ -48,7 +48,7 @@ Contract flow: `packages/contracts` → API validates with the same schemas → 
 
 ## Commands
 
-In the root `CLAUDE.md`. They are planned until TECH-01 scaffolds the monorepo; until then, say that checks couldn't run instead of claiming they passed.
+In the root `CLAUDE.md`, which marks the ones that arrive with a later enabler. If a check's command doesn't exist yet, say it couldn't run instead of claiming it passed.
 
 ## Language
 

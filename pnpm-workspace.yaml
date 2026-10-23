@@ -1,0 +1,11 @@
+packages:
+  - apps/*
+  - packages/*
+
+catalog:
+  eslint: 9.39.5
+  prettier: 3.9.10
+  typescript: 6.0.3
+
+savePrefix: ''
+minimumReleaseAge: 1440

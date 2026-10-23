@@ -1,6 +1,6 @@
 # Tech Stack
 
-> Status: **Proposed v0.1**. Recommended stack, to be confirmed in R0 (OQ-15, [ADR log](adr-log.md)). · Last updated: 2026-10-22
+> Status: **Proposed v0.1**. Recommended stack, to be confirmed in R0 (OQ-15, [ADR log](adr-log.md)). · Last updated: 2026-10-23
 > Related: [Architecture overview](01-architecture-overview.md) · [API guidelines](03-api-guidelines.md) · [AI architecture](04-ai-architecture.md) · [NFRs](05-non-functional-requirements.md)
 
 **In one sentence**: a TypeScript monorepo with three apps that share contracts and business rules:
@@ -136,6 +136,7 @@ flowchart LR
 | Concern | Choice |
 |---|---|
 | Monorepo | **pnpm** workspaces + **Turborepo** (remote cache in CI) |
+| Runtime and package manager | Node.js 24 LTS and pnpm 12, pinned in `devEngines` (pnpm downloads both when missing) and `.nvmrc`. Shared versions live in the pnpm catalog; new releases are installable after 24 h (`minimumReleaseAge`) |
 | Language settings | TypeScript `strict` everywhere; shared `tsconfig` presets |
 | Lint and format | ESLint (flat config) + Prettier, shared from `packages/config` |
 | Commits | Conventional Commits enforced with **commitlint** |
@@ -145,6 +146,16 @@ flowchart LR
 | Frontend tests | **None at unit or component level** (team standard, NFR-MAINT-02) |
 | End-to-end (QA-owned, once QA is staffed) | **Playwright** (web) and **Maestro** (mobile) for critical flows: sign-in, RSVP from a link, roll call, check-in |
 | Local development | Docker Compose (Postgres); seed script with synthetic clubs; Expo development build; `.env` templates without secrets |
+
+### Versions held below latest
+
+Chosen at TECH-01 (2026-10-23). Lift a hold when its condition is met, in its own PR.
+
+| Tool | Held at | Latest | Why | Lift when |
+|---|---|---|---|---|
+| TypeScript | 6.0 | 7.0 | typescript-eslint supports `<6.1` and `@nestjs/swagger` 12 supports `^6.0`. Expo SDK 58 also ships 6.0. | Both support 7 |
+| ESLint | 9.39, deprecated upstream | 10 | `eslint-plugin-react`, used by `eslint-config-next` and `eslint-config-expo`, crashes on ESLint 10 (eslint-plugin-react #3977, next.js #89764) | Both configs support 10 |
+| Node.js | 24, Active LTS | 26, LTS from late October 2026 | Vercel, EAS and the container host must support it first | All three support 26 |
 
 ## 8. R0 spikes (risks to retire before R1 development)
 

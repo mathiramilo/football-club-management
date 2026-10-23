@@ -1,6 +1,6 @@
 # Product Backlog
 
-> Status: **Draft v0.1** · Owner: Product · Last updated: 2026-10-22
+> Status: **Draft v0.1** · Owner: Product · Last updated: 2026-10-23
 > Ordered by release, then milestone, then priority. Story details and acceptance criteria live in the linked feature specs: **the spec is the source of truth**, and this file is the index. When a story changes in a spec, update its row here in the same PR.
 
 ## 1. How to use this backlog
@@ -15,12 +15,12 @@
 
 | ID | Enabler | Release | Priority | Size | Notes |
 |---|---|---|---|---|---|
-| TECH-01 | Monorepo (pnpm + Turborepo), TypeScript strict, lint and format, CI (lint, typecheck, backend tests, builds) | R0 | Must | M | ADR-001; root scripts named as in `CLAUDE.md` § Commands |
+| TECH-01 | Monorepo (pnpm + Turborepo), TypeScript strict, lint and format, CI (lint, typecheck, backend tests, builds) | R0 | Must | M | ADR-001; root scripts named as in `CLAUDE.md` § Commands. `codegen` and `contract:check` land with TECH-06, the database scripts with TECH-03 |
 | TECH-02 | Environments (dev/preview, staging, production), hosting setup, secrets management, deploy pipelines | R0 | Must | M | ADR-011 |
-| TECH-03 | PostgreSQL setup, Prisma schema and migrations workflow, seed data generator (synthetic clubs), ORM spike confirmation | R0 | Must | M | ADR-005, ADR-013 |
+| TECH-03 | PostgreSQL setup, Prisma schema and migrations workflow, seed data generator (synthetic clubs), ORM spike confirmation | R0 | Must | M | ADR-005, ADR-013; adds `docker compose`, `db:migrate` and `db:seed` |
 | TECH-04 | Authentication foundation: spike, then implementation of tokens, refresh rotation and provider integration | R0 | Must | L | ADR-007; unblocks AUTH-01–03 |
 | TECH-05 | Authorization policy module, tenant-scoped data access, cross-tenant and role test harness | R0 | Must | L | NFR-SEC-02, NFR-SEC-03 |
-| TECH-06 | Contracts package → OpenAPI → typed client; problem+json errors; idempotency middleware; app-version headers | R0 | Must | M | [API guidelines](../tech/03-api-guidelines.md) |
+| TECH-06 | Contracts package → OpenAPI → typed client; problem+json errors; idempotency middleware; app-version headers | R0 | Must | M | [API guidelines](../tech/03-api-guidelines.md); adds `pnpm codegen` and `pnpm contract:check` |
 | TECH-07 | pg-boss job queue and scheduler, transactional outbox, idempotent handlers, dead-letter alerts | R0 | Must | M | ADR-006 |
 | TECH-08 | Mobile shell: Expo Router, auth screens, i18n, club theming, persisted cache, offline mutation queue, Sentry, EAS channels, universal/app links | R0 | Must | L | ADR-002, NFR-OFF-01 |
 | TECH-09 | Web shell: Next.js, auth, i18n, design-system base, public SSR pages with OG images, association files | R0 | Must | M | ADR-003 |
