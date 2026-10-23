@@ -27,6 +27,7 @@
 | AI conversations | Staff questions, model outputs | Personal (staff), may reference players | `ai_*` | The staff member only |
 | Device and technical | Push tokens, app version, IP (logs) | Personal [P] | `devices`, logs | Platform |
 | Sessions | Session token, IP, browser or app | Personal [P] | `auth_sessions` | Platform |
+| Stored responses | The response to a retried mobile write, as sent: an RSVP with its reason and note, a check-in from R2 | Personal; **possibly health** [P][H] | `idempotency_keys` | Replayed only to the same user |
 | Analytics events | Usage events (no free text, no health data) | Pseudonymous | Analytics provider | Platform |
 
 ## 3. Health-related data (wellness)
@@ -79,6 +80,7 @@ Requirements for [F07](../features/F07-player-wellness.md):
 | Club data | While the club exists | Club deletion: 30-day grace, then purge (BR-CLUB-13) |
 | Backups | 30 days rolling | Expire automatically. Deleted data disappears from backups within 30 days. |
 | Application logs | 30 days | Age-based purge |
+| Stored responses (idempotency) | 24 hours | Age-based purge (TECH-13); account deletion |
 
 ## 7. Data subject rights
 

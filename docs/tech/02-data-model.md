@@ -246,6 +246,7 @@ Indexes: (`club_membership_id`, `event_id`); (`event_id`, `rsvp_status`).
 
 **audit_log**: `club_id`, `actor_user_id`, `action`, `entity_type`, `entity_id`, `before`, `after` (jsonb, with sensitive fields redacted), `created_at`.
 **outbox_events**: `type`, `payload`, `created_at`, `processed_at`, `attempts`, `last_error`.
+**idempotency_keys** [P][H]: `user_id`, `key` (the client's `Idempotency-Key` UUID, unique per user), `request_hash` (SHA-256 of method, URL and body), `started_at`, and `response_status` and `response_body`, null while the request runs. The body is the response as sent, so it holds whatever the endpoint returns, such as an RSVP reason or, from R2, a check-in. A CHECK keeps statuses between 200 and 499 and a body only with its status. Rows are deleted with the user, kept 24 hours after `started_at`, and removed by a purge job (TECH-13).
 **app_config**: minimum versions per platform, flags.
 
 ## 4. Key invariants (enforced in the database where possible)
