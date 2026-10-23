@@ -19,12 +19,14 @@
     },
     "test": {
       "dependsOn": ["db:generate"],
-      "outputs": []
+      "outputs": [],
+      "passThroughEnv": ["DOCKER_*", "TESTCONTAINERS_*"]
     },
     "dev": {
       "dependsOn": ["db:generate"],
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "passThroughEnv": ["DATABASE_URL", "PORT", "SHUTDOWN_DRAIN_MS"]
     }
   }
 }
