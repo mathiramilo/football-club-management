@@ -41,7 +41,6 @@ model CategoryMembership {
   category       Category       @relation(fields: [categoryId, clubId], references: [id, clubId])
   clubMembership ClubMembership @relation(fields: [clubMembershipId, clubId], references: [id, clubId])
 
-  @@unique([categoryId, clubMembershipId], map: "category_memberships_one_open_per_person", where: { endsOn: null })
   @@index([categoryId, endsOn])
   @@index([clubMembershipId])
   @@index([clubId])
@@ -49,10 +48,10 @@ model CategoryMembership {
 }
 ```
 
-Checklist: `club_id` on tenant tables · UUID v7 id · `timestamptz` timestamps · `@default(now()) @updatedAt` so raw SQL inserts work · `@map` / `@@map` snake_case · enum as `String` · indexes for the queries the story needs · hashed tokens · `version` on collaboratively edited documents.
+Checklist: `club_id` on tenant tables, with the `forbid_club_id_change` trigger · UUID v7 id · `timestamptz` timestamps · `@default(now()) @updatedAt` so raw SQL inserts work · `@map` / `@@map` snake_case · enum as `String` · indexes for the queries the story needs · hashed tokens · `version` on collaboratively edited documents.
 
 - **Tenant consistency**: a club-owned parent declares `@@unique([id, clubId])`, and each child references it with `@relation(fields: [parentId, clubId], references: [id, clubId])`, so a child can't point at another club's row. This works for nullable parent columns too.
-- **Partial indexes** live in the schema (`where:` on `@@unique` / `@@index`, `partialIndexes` preview feature), so drift checks see them.
+- **Partial indexes** live in the schema (`where:` on `@@unique` / `@@index`, `partialIndexes` preview feature), so drift checks see them: `@@unique([clubId], map: "club_memberships_one_owner_per_club", where: raw("is_owner"))`.
 
 ## 3. Generate, then add what Prisma can't express
 
@@ -69,9 +68,12 @@ ALTER TABLE event_invitees
 CREATE UNIQUE INDEX categories_club_id_name_active_key
   ON categories (club_id, lower(immutable_unaccent(name)))
   WHERE archived_at IS NULL;
+
+CREATE TRIGGER event_invitees_club_id_immutable BEFORE UPDATE OF club_id ON event_invitees
+  FOR EACH ROW EXECUTE FUNCTION forbid_club_id_change();
 ```
 
-   Prisma's drift check ignores CHECK constraints and expression indexes, so they stay. `unaccent()` isn't immutable: use the `immutable_unaccent()` wrapper in indexes and generated columns. Also: generated `tsvector` columns (Spanish config + `unaccent`) and extensions.
+   Prisma's drift check ignores CHECK and exclusion constraints, expression indexes and triggers, so they stay. `unaccent()` isn't immutable: use the `immutable_unaccent()` wrapper in indexes and generated columns. Also: generated `tsvector` columns (Spanish config + `unaccent`) and extensions.
 3. Apply it with `pnpm --filter ./apps/api db:migrate` (Prisma 7's `migrate dev` no longer regenerates the client; the script does), then run it again and confirm it reports **no drift**. The `Prisma migrations` integration test repeats this check in CI. If Prisma tries to drop a hand-written object, the pinned Prisma version can express it in the schema: use the schema instead.
 
 ## 4. Review the SQL

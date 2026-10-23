@@ -18,7 +18,8 @@ Specs: `docs/tech/02-data-model.md`, ADR-005, ADR-013. See the `prisma-migration
 - Soft delete: `archived_at` for user-facing archiving; `deleted_at` + `purge_at` for scheduled hard deletes done by purge jobs.
 - `created_by` / `updated_by` on mutable business tables. A `version` integer on collaboratively edited documents (`events`, `session_plans`).
 - Access-granting tokens are stored as hashes (`token_hash`), never in plain text.
-- Extensions in use: `citext`, `unaccent`, `pg_trgm`.
+- Extensions in use: `btree_gist`, `citext`, `unaccent`, `pg_trgm`.
+- Every club-owned table gets the `forbid_club_id_change` trigger in its migration: a row never moves to another club.
 - Enforce invariants in the database where possible (data model § 4): partial unique indexes, check constraints, composite FKs for tenant consistency. Partial indexes and composite FKs go in the schema (`partialIndexes` preview; parent `@@unique([id, clubId])`, child `references: [id, clubId]`); CHECK constraints and expression indexes go in the migration SQL.
 
 ## Migrations
@@ -30,6 +31,7 @@ Specs: `docs/tech/02-data-model.md`, ADR-005, ADR-013. See the `prisma-migration
 ## Queries
 
 - Repositories are the only code that uses the Prisma client, and every method takes the club context first.
+- On club-scoped relations write the scalar foreign keys (`venueId`, `rsvpSetBy`), never relation `connect` / `disconnect`: `connect` rewrites `club_id` (the trigger rejects it) and `disconnect` tries to null `club_id`.
 - Look up tenant rows with the club in the filter: `findFirst` / `findFirstOrThrow({ where: { id, clubId } })` or a compound unique that includes `club_id`. Never `findUnique({ where: { id } })` on a tenant table.
 - Interactive transactions use only `tx`, stay short, and contain no provider calls. The outbox row is written with the same `tx`.
 - Map `P2002` (unique), `P2003` (foreign key), `P2039` (check) and `P2025` (not found) to problem+json codes at the service boundary. A Prisma error's `meta` carries Postgres's `detail`, which for a CHECK violation is the whole failing row: never log, report or return `meta`.

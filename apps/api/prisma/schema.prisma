@@ -8,7 +8,7 @@ generator client {
 
 datasource db {
   provider   = "postgresql"
-  extensions = [citext, pg_trgm, unaccent]
+  extensions = [btree_gist, citext, pg_trgm, unaccent]
 }
 
 model User {
@@ -130,7 +130,6 @@ model CategoryMembership {
   category       Category       @relation(fields: [categoryId, clubId], references: [id, clubId])
   clubMembership ClubMembership @relation(fields: [clubMembershipId, clubId], references: [id, clubId])
 
-  @@unique([categoryId, clubMembershipId], map: "category_memberships_one_open_per_person", where: { endsOn: null })
   @@index([categoryId, endsOn])
   @@index([clubMembershipId])
   @@index([clubId])

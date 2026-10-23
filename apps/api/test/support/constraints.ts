@@ -2,16 +2,12 @@ import { expect } from 'vitest';
 
 import { Prisma } from '../../src/generated/prisma/client.js';
 
-interface DriverAdapterErrorMeta {
-  cause?: { originalMessage?: string };
-}
-
 function violatedConstraint(error: unknown): string | undefined {
   if (!(error instanceof Prisma.PrismaClientKnownRequestError)) {
     return undefined;
   }
-  const adapterError = error.meta?.driverAdapterError as DriverAdapterErrorMeta | undefined;
-  return /constraint "([^"]+)"/.exec(adapterError?.cause?.originalMessage ?? '')?.[1];
+  const text = `${error.message} ${JSON.stringify(error.meta ?? {})}`;
+  return /constraint \\?"([^"\\]+)\\?"/.exec(text)?.[1];
 }
 
 export async function expectViolation(write: Promise<unknown>, constraint: string): Promise<void> {
