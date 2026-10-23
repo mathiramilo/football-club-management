@@ -22,6 +22,14 @@
       "outputs": [],
       "passThroughEnv": ["DOCKER_*", "TESTCONTAINERS_*"]
     },
+    "openapi": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
+    "codegen": {
+      "dependsOn": ["@repo/api#openapi"],
+      "cache": false
+    },
     "dev": {
       "dependsOn": ["^build", "db:generate"],
       "cache": false,

@@ -4,6 +4,7 @@ import { ClsModule } from 'nestjs-cls';
 
 import { AuthModule } from './core/auth/auth.module.js';
 import { envSchema } from './core/config/env.js';
+import { ContractModule } from './core/contract/contract.module.js';
 import { DatabaseModule } from './core/database/database.module.js';
 import { ErrorsModule } from './core/errors/errors.module.js';
 import { HealthModule } from './core/health/health.module.js';
@@ -14,6 +15,7 @@ import { HealthModule } from './core/health/health.module.js';
     ClsModule.forRoot({ global: true, middleware: { mount: true } }),
     DatabaseModule,
     ErrorsModule,
+    ContractModule,
     AuthModule,
     HealthModule,
   ],

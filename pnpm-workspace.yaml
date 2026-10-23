@@ -16,6 +16,7 @@ minimumReleaseAge: 1440
 
 allowBuilds:
   '@prisma/engines': true
+  '@scarf/scarf': false
   cpu-features: false
   esbuild: false
   prisma: true

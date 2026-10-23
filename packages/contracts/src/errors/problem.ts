@@ -1,9 +1,10 @@
 import { z } from 'zod';
 
+import { extensibleEnum } from '../extensible-enum.js';
 import { errorCode } from './codes.js';
 
 export const fieldError = z.object({
-  in: z.enum(['body', 'query', 'path']),
+  in: extensibleEnum(['body', 'query', 'path']),
   pointer: z.string().describe('JSON Pointer (RFC 6901) into that part of the request'),
   code: z.string(),
   detail: z.string().optional(),
@@ -12,7 +13,7 @@ export const fieldError = z.object({
 export const problemDetails = z.object({
   type: z.string(),
   title: z.string(),
-  status: z.int(),
+  status: z.int().min(400).max(599),
   code: errorCode,
   detail: z.string().optional(),
   errors: z.array(fieldError).optional(),

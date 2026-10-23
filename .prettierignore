@@ -5,3 +5,4 @@ pnpm-lock.yaml
 next-env.d.ts
 .expo/
 expo-env.d.ts
+packages/api-client/openapi.json

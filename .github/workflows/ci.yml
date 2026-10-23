@@ -51,3 +51,18 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+
+      - name: Generated contract and client are committed
+        run: |
+          pnpm codegen
+          if [ -n "$(git status --porcelain -- packages/api-client)" ]; then
+            git status --short -- packages/api-client
+            echo "::error::The OpenAPI document or packages/api-client is out of date. Run pnpm codegen and commit the result."
+            exit 1
+          fi
+
+      - name: No breaking change to v1
+        if: github.event_name == 'pull_request'
+        run: pnpm contract:check
+        env:
+          CONTRACT_BASE_REF: origin/${{ github.base_ref }}
