@@ -3,10 +3,156 @@ generator client {
   output              = "../src/generated/prisma"
   moduleFormat        = "esm"
   importFileExtension = "js"
-  previewFeatures     = ["postgresqlExtensions"]
+  previewFeatures     = ["partialIndexes", "postgresqlExtensions"]
 }
 
 datasource db {
   provider   = "postgresql"
   extensions = [citext, pg_trgm, unaccent]
+}
+
+model User {
+  id                  String    @id @default(uuid(7)) @db.Uuid
+  email               String    @unique @db.Citext
+  emailVerifiedAt     DateTime? @map("email_verified_at") @db.Timestamptz(6)
+  firstName           String?   @map("first_name")
+  lastName            String?   @map("last_name")
+  nickname            String?
+  birthdate           DateTime? @db.Date
+  photoKey            String?   @map("photo_key")
+  phone               String?
+  locale              String    @default("es")
+  deletionRequestedAt DateTime? @map("deletion_requested_at") @db.Timestamptz(6)
+  purgeAt             DateTime? @map("purge_at") @db.Timestamptz(6)
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  clubMemberships ClubMembership[]
+
+  @@map("users")
+}
+
+model Club {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  name            String
+  shortName       String?   @map("short_name")
+  crestKey        String?   @map("crest_key")
+  primaryColor    String?   @map("primary_color")
+  secondaryColor  String?   @map("secondary_color")
+  countryCode     String    @map("country_code")
+  timezone        String
+  defaultLocale   String    @default("es") @map("default_locale")
+  quietHoursStart DateTime  @default(dbgenerated("'22:00:00'::time without time zone")) @map("quiet_hours_start") @db.Time(6)
+  quietHoursEnd   DateTime  @default(dbgenerated("'08:00:00'::time without time zone")) @map("quiet_hours_end") @db.Time(6)
+  aiEnabled       Boolean   @default(true) @map("ai_enabled")
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(6)
+  purgeAt         DateTime? @map("purge_at") @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  categories          Category[]
+  clubMemberships     ClubMembership[]
+  categoryMemberships CategoryMembership[]
+  venues              Venue[]
+
+  @@map("clubs")
+}
+
+model Category {
+  id                 String    @id @default(uuid(7)) @db.Uuid
+  clubId             String    @map("club_id") @db.Uuid
+  name               String
+  format             String    @default("f11")
+  gender             String?
+  ageGroup           String?   @map("age_group")
+  color              String?
+  minPlayersPractice Int?      @map("min_players_practice") @db.SmallInt
+  settings           Json      @default("{}")
+  archivedAt         DateTime? @map("archived_at") @db.Timestamptz(6)
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  club                Club                 @relation(fields: [clubId], references: [id])
+  categoryMemberships CategoryMembership[]
+
+  @@unique([id, clubId])
+  @@index([clubId])
+  @@map("categories")
+}
+
+model ClubMembership {
+  id                 String    @id @default(uuid(7)) @db.Uuid
+  clubId             String    @map("club_id") @db.Uuid
+  userId             String?   @map("user_id") @db.Uuid
+  isOwner            Boolean   @default(false) @map("is_owner")
+  isAdmin            Boolean   @default(false) @map("is_admin")
+  status             String    @default("active")
+  managedFirstName   String?   @map("managed_first_name")
+  managedLastName    String?   @map("managed_last_name")
+  managedNickname    String?   @map("managed_nickname")
+  managedBirthdate   DateTime? @map("managed_birthdate") @db.Date
+  contactEmail       String?   @map("contact_email") @db.Citext
+  contactPhone       String?   @map("contact_phone")
+  primaryPosition    String?   @map("primary_position")
+  secondaryPositions String[]  @default([]) @map("secondary_positions")
+  jerseyNumber       Int?      @map("jersey_number") @db.SmallInt
+  // TODO(AUTH-10): add dominant_foot once the glossary lists its values.
+  joinedAt           DateTime  @default(now()) @map("joined_at") @db.Timestamptz(6)
+  removedAt          DateTime? @map("removed_at") @db.Timestamptz(6)
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  club                Club                 @relation(fields: [clubId], references: [id])
+  user                User?                @relation(fields: [userId], references: [id], onDelete: Restrict)
+  categoryMemberships CategoryMembership[]
+
+  @@unique([id, clubId])
+  @@unique([clubId, userId])
+  @@unique([clubId], map: "club_memberships_one_owner_per_club", where: raw("is_owner"))
+  @@index([userId])
+  @@map("club_memberships")
+}
+
+model CategoryMembership {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  clubId           String    @map("club_id") @db.Uuid
+  categoryId       String    @map("category_id") @db.Uuid
+  clubMembershipId String    @map("club_membership_id") @db.Uuid
+  staffRole        String?   @map("staff_role")
+  staffTitle       String?   @map("staff_title")
+  isPlayer         Boolean   @default(false) @map("is_player")
+  startsOn         DateTime  @map("starts_on") @db.Date
+  endsOn           DateTime? @map("ends_on") @db.Date
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  club           Club           @relation(fields: [clubId], references: [id])
+  category       Category       @relation(fields: [categoryId, clubId], references: [id, clubId])
+  clubMembership ClubMembership @relation(fields: [clubMembershipId, clubId], references: [id, clubId])
+
+  @@unique([categoryId, clubMembershipId], map: "category_memberships_one_open_per_person", where: { endsOn: null })
+  @@index([categoryId, endsOn])
+  @@index([clubMembershipId])
+  @@index([clubId])
+  @@map("category_memberships")
+}
+
+model Venue {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  clubId     String    @map("club_id") @db.Uuid
+  name       String
+  address    String?
+  mapsUrl    String?   @map("maps_url")
+  lat        Float?
+  lng        Float?
+  notes      String?
+  archivedAt DateTime? @map("archived_at") @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  club Club @relation(fields: [clubId], references: [id])
+
+  @@unique([id, clubId])
+  @@index([clubId])
+  @@map("venues")
 }
