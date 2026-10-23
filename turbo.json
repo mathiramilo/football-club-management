@@ -12,18 +12,18 @@
       "outputs": ["dist/**"]
     },
     "lint": {
-      "dependsOn": ["db:generate"]
+      "dependsOn": ["^build", "db:generate"]
     },
     "typecheck": {
-      "dependsOn": ["db:generate"]
+      "dependsOn": ["^build", "db:generate"]
     },
     "test": {
-      "dependsOn": ["db:generate"],
+      "dependsOn": ["^build", "db:generate"],
       "outputs": [],
       "passThroughEnv": ["DOCKER_*", "TESTCONTAINERS_*"]
     },
     "dev": {
-      "dependsOn": ["db:generate"],
+      "dependsOn": ["^build", "db:generate"],
       "cache": false,
       "persistent": true,
       "passThroughEnv": [

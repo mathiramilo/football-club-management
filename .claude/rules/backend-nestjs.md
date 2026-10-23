@@ -69,7 +69,7 @@ Framework mechanics (decorators, dynamic modules, the filter, the worker context
 - Request context (actor, club, request id) lives in AsyncLocalStorage (e.g. `nestjs-cls`), not in request-scoped providers, whose scope spreads to everything that injects them. Never keep per-request state on a singleton.
 - Each provider belongs to one module and is exported from it. `@Global` only for config, logging, Prisma and the job queue. Break circular imports by extracting a module or using domain events, never `forwardRef`.
 - Every fire-and-forget promise has a `.catch`. Job handlers catch, report and rethrow so pg-boss retries.
-- One `configureApp(app)` function applies the global prefix, pipes, filters and interceptors. Both `main.ts` and the integration-test harness use it, so tests run the production pipeline.
+- Global guards, pipes, filters and interceptors are `APP_*` providers in their `core/` module (`AuthModule`, `ErrorsModule`), and one `configureApp(app)` function applies the global prefix and mounts the Better Auth handler. Both `main.ts` and the integration-test harness build `AppModule` and call `configureApp`, so tests run the production pipeline.
 - `enableShutdownHooks()`: close Prisma and pg-boss on shutdown, and make the readiness endpoint return 503 while draining.
 - Sentry: `instrument.ts` is imported first, `SentryModule` comes from `@sentry/nestjs/setup`, and the problem+json filter is decorated with `@SentryExceptionCaptured()` so unexpected errors still reach Sentry.
 - Behind the hosting proxy, the throttler's `getTracker` reads the client IP from the trusted proxy header. Health endpoints use `@SkipThrottle()`.

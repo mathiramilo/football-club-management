@@ -80,7 +80,7 @@ export class RsvpController {
 }
 ```
 
-- `StandardSchemaValidationPipe`, registered in `configureApp`, validates every parameter that declares a `schema` (ADR-004). No DTO classes.
+- `RequestValidationPipe` (Nest's `StandardSchemaValidationPipe` with our `errors[]` shape, the global pipe in `ErrorsModule`) validates every parameter that declares a `schema` (ADR-004). No DTO classes.
 - The serializer shapes the response by role (e.g. reasons and notes only for staff and the invitee, BR-EVT-12).
 - Add `@RequiresIdempotencyKey()` for RSVP, bulk RSVP, roll call, wellness check-ins and routine logs, and for any other mutation the mobile app may queue offline.
 - Versioned documents (`events`, `session_plans`) read `If-Match` and return 409 with the current version on mismatch.

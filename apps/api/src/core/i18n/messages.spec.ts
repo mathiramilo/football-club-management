@@ -1,3 +1,4 @@
+import { authErrorCode, errorCode } from '@repo/contracts';
 import { describe, expect, it } from 'vitest';
 
 import { formatMessage } from './messages.js';
@@ -13,4 +14,11 @@ describe('formatMessage', () => {
   it('fails loudly on a message that is missing a value', () => {
     expect(() => formatMessage('email.signInCode.text')).toThrow();
   });
+
+  it.each([...errorCode.options, ...authErrorCode.options])(
+    'has Spanish copy for the error code %s',
+    (code) => {
+      expect(formatMessage(`errors.${code}`)).not.toBe('');
+    },
+  );
 });
