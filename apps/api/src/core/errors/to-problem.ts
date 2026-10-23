@@ -9,6 +9,7 @@ import {
 
 import { Prisma } from '../../generated/prisma/client.js';
 import { DomainError } from './domain-error.js';
+import { ReplayedProblem } from './replayed-problem.js';
 import { RequestValidationError } from './request-validation.pipe.js';
 
 export interface Problem {
@@ -62,6 +63,7 @@ function fromHttpException(exception: HttpException): Problem {
 }
 
 export function toProblem(exception: unknown): Problem {
+  if (exception instanceof ReplayedProblem) return exception.problem;
   if (exception instanceof DomainError)
     return problem(exception.code, { detail: exception.detail });
   if (exception instanceof RequestValidationError) {

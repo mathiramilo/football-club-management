@@ -13,6 +13,9 @@ export const errorCode = extensibleEnum([
   'RATE_LIMITED',
   'INTERNAL_ERROR',
   'SERVICE_UNAVAILABLE',
+  'IDEMPOTENCY_KEY_REQUIRED',
+  'IDEMPOTENCY_KEY_REUSED',
+  'IDEMPOTENCY_REQUEST_IN_PROGRESS',
 ]);
 
 export type ErrorCode = z.infer<typeof errorCode>;
@@ -33,6 +36,9 @@ export const errorCatalog: Record<ErrorCode, ErrorDefinition> = {
   RATE_LIMITED: { status: 429, title: 'Too many requests' },
   INTERNAL_ERROR: { status: 500, title: 'Internal error' },
   SERVICE_UNAVAILABLE: { status: 503, title: 'Service unavailable' },
+  IDEMPOTENCY_KEY_REQUIRED: { status: 400, title: 'Idempotency key required' },
+  IDEMPOTENCY_KEY_REUSED: { status: 422, title: 'Idempotency key reused' },
+  IDEMPOTENCY_REQUEST_IN_PROGRESS: { status: 409, title: 'Request in progress' },
 };
 
 // Better Auth answers /v1/auth/* with { code, message } instead of problem+json (ADR-007).

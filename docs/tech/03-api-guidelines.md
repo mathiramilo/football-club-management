@@ -12,7 +12,7 @@
 | Tenancy | Club-scoped resources live under `/v1/clubs/{clubId}/…`. The server always re-checks that the caller belongs to that club (never trust the path alone). |
 | Auth | `Authorization: Bearer <session token>` (mobile) or a secure httpOnly cookie (web), both issued by Better Auth (ADR-007). Public endpoints live under `/v1/public/…` and only return non-personal data. |
 | Client headers | `X-App-Version` (a semantic version, `1.3.0`), `X-Platform` (`ios`, `android`, `web`), `Accept-Language`. The generated client sends them on every request. The API keeps the first two in the request context and drops a value that doesn't parse rather than rejecting the request. Unsupported versions get `426` (TECH-14, see [Architecture § 6.11](01-architecture-overview.md#611-app-versions-and-configuration)). |
-| Idempotency | Every mutating request from mobile carries `Idempotency-Key` (UUID). The server stores results for 24 h and replays them on retries. **Required** for RSVP, roll call, wellness check-ins and routine logs. |
+| Idempotency | Every mutating request from mobile carries `Idempotency-Key` (UUID). The server stores results for 24 h and replays them on retries ([§ 1.3](#13-idempotency)). **Required** for RSVP, roll call, wellness check-ins and routine logs. |
 | Concurrency | Documents with a `version` (session plans, events) use `If-Match: <version>`; a mismatch returns `409 Conflict` with the current version. |
 | Time | ISO 8601 with offset for instants (`2026-10-14T20:00:00-03:00`); `YYYY-MM-DD` for local dates. Responses include the club `timezone` where relevant. |
 | Pagination | Cursor-based: `?limit=50&cursor=…` → `{ items, nextCursor }`. Default limit 50, maximum 200. |
@@ -42,6 +42,16 @@
 - **Security**: every operation accepts the bearer token or the session cookie, except `@Public()` ones, which declare no security.
 - **Errors**: every operation documents a `default` response, `application/problem+json` with the `ProblemDetails` schema.
 - **Breaking changes**: `pnpm contract:check` runs `oasdiff breaking` between the document on `main` and yours, and fails on any error-level change (NFR-MAINT-03). CI runs it on every pull request.
+
+### 1.3 Idempotency
+
+- It applies to `POST`, `PUT`, `PATCH` and `DELETE` from a signed-in user that carry `Idempotency-Key`. Keys belong to the user, so two users can send the same key. Routes that require a key (`@RequiresIdempotencyKey()`) answer `400` `IDEMPOTENCY_KEY_REQUIRED` without one, and any route does for a key that isn't a UUID.
+- The first request runs. Its response is stored when its status is below 500, which includes business errors such as `RSVP_LOCKED`. After a 5xx the key is released, so a retry runs again.
+- A retry with the same key and the same request (method, URL and body) gets the stored status and body, with `Idempotent-Replayed: true`.
+- The same key with a different request answers `422` `IDEMPOTENCY_KEY_REUSED`.
+- While the first request runs, a retry answers `409` `IDEMPOTENCY_REQUEST_IN_PROGRESS`, and the client tries again later. A request still unfinished after 60 s was cut off (a crash or a deploy), and the next retry runs it again.
+- A key lasts 24 hours from its request. After that it counts as new.
+- The handler's writes and the stored response are separate transactions, so a crash between them, or a retry that runs a cut-off request again, can run the handler twice. So a handler behind a required key must be safe to run twice: RSVP and roll call set a state, and a write that adds a row needs a unique constraint the second run hits.
 
 ## 2. Authorization model in the API
 

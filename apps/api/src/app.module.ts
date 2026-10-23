@@ -10,6 +10,7 @@ import { ContractModule } from './core/contract/contract.module.js';
 import { DatabaseModule } from './core/database/database.module.js';
 import { ErrorsModule } from './core/errors/errors.module.js';
 import { HealthModule } from './core/health/health.module.js';
+import { IdempotencyModule } from './core/idempotency/idempotency.module.js';
 import type { RequestContext } from './core/request-context.js';
 
 @Module({
@@ -26,6 +27,8 @@ import type { RequestContext } from './core/request-context.js';
     }),
     DatabaseModule,
     ErrorsModule,
+    // Its interceptor must wrap ContractModule's serializer, so it stores the response as sent.
+    IdempotencyModule,
     ContractModule,
     AuthModule,
     HealthModule,
