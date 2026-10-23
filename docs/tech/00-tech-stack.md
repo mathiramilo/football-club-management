@@ -140,8 +140,8 @@ flowchart LR
 | Language settings | TypeScript `strict` everywhere; shared `tsconfig` presets |
 | Lint and format | ESLint (flat config) + Prettier, shared from `packages/config` |
 | Commits | Conventional Commits enforced with **commitlint** |
-| CI | GitHub Actions: lint, typecheck, backend tests (Testcontainers Postgres), builds, OpenAPI breaking-change check, dependency scanning |
-| Dependency updates | **Renovate**, with exact version pinning; versions are chosen at R0 (latest stable of each) |
+| CI | GitHub Actions: lint, typecheck, backend tests (Testcontainers Postgres), builds, OpenAPI breaking-change check. Security (NFR-SEC-07): `pnpm audit` on every PR and daily, failing on critical vulnerabilities; CodeQL static analysis; actionlint and zizmor on the workflows. Actions are pinned to commit SHAs |
+| Dependency updates | **Dependabot** (`.github/dependabot.yml`), weekly, for npm, GitHub Actions and Docker Compose, with exact version pinning and a 7-day cooldown. Framework families (Nest, Prisma, Expo, Next) get one PR each; other minor and patch updates share one. The holds below and the Expo SDK's versions are ignore rules. GitHub's dependency graph can't read pnpm 12's lockfile yet ([dependabot-core #15904](https://github.com/dependabot/dependabot-core/issues/15904)), so Dependabot alerts stay empty and `pnpm audit` covers vulnerabilities |
 | Backend tests | Vitest + Supertest + Testcontainers (mandatory, NFR-MAINT-01) |
 | Frontend tests | **None at unit or component level** (team standard, NFR-MAINT-02) |
 | End-to-end (QA-owned, once QA is staffed) | **Playwright** (web) and **Maestro** (mobile) for critical flows: sign-in, RSVP from a link, roll call, check-in |
@@ -149,7 +149,7 @@ flowchart LR
 
 ### Versions held below latest
 
-Chosen at TECH-01 (2026-10-23). Lift a hold when its condition is met, in its own PR.
+Chosen at TECH-01 (2026-10-23). Lift a hold when its condition is met, in its own PR, and remove its ignore rule from `.github/dependabot.yml`.
 
 | Tool | Held at | Latest | Why | Lift when |
 |---|---|---|---|---|
