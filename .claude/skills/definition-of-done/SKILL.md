@@ -44,18 +44,6 @@ A table with one row per DoD item: ✅ met, ❌ not met (with file:line and the 
 
 ## 5. Draft the PR description
 
-```markdown
-## <STORY-ID> · <title>
-
-Spec: docs/features/<file>.md#<anchor>
-
-### What
-### Why
-### How to test
-### Screenshots (UI changes)
-### Notes
-- Docs updated: …
-- Requires 2 approvals (policy / health data / AI data): yes|no
-```
+Fill in `.github/pull_request_template.md`: drop its HTML comments, tick the Definition of Done items from the report in step 4, and start with the 2-approvals line when the Approvals row applies.
 
 Don't commit, push or open the PR unless asked.

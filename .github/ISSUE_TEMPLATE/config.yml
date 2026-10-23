@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/mathiramilo/football-club-management/security/advisories/new
+    about: Data leaks, permission bypasses and anything that exposes personal or health data. Report them privately, never in a public issue.
+  - name: Read the specs
+    url: https://github.com/mathiramilo/football-club-management/tree/main/docs
+    about: Behavior, business rules and decisions live in docs/. A change to behavior starts in its spec.

@@ -1,0 +1,95 @@
+name: Bug
+description: Something doesn't work as its spec says.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **This repository is public.** Use synthetic data only: no real names, emails, phone numbers, health data, absence reasons, sign-in codes, tokens or screenshots of real clubs.
+
+        A data leak, permission bypass or health-data exposure is a security issue. Don't file it here: [report it privately](https://github.com/mathiramilo/football-club-management/security/advisories/new).
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: docs/delivery/working-agreements.md § 6
+      options:
+        - P1 · Data loss, or RSVP, roll call or sign-in broken for many users
+        - P2 · A core flow degraded for some users, wrong metrics, or notifications not sent
+        - P3 · Minor functional issue with a workaround
+        - P4 · Cosmetic
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: Where
+      multiple: true
+      options:
+        - iOS app
+        - Android app
+        - Web (staff portal)
+        - Web (public link pages)
+        - Web (player fallback)
+        - API or background jobs
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - Local
+        - Preview
+        - Staging
+        - Production
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: App version or commit
+      placeholder: 1.4.0 (build 112), OTA channel staging, or a commit SHA
+
+  - type: input
+    id: story
+    attributes:
+      label: Related story
+      description: The story or rule whose behavior is wrong, if you know it.
+      placeholder: EVT-08, BR-EVT-09
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Sign in as a DT of the seeded club
+        2. Open a practice with a deadline in the past
+        3. Change a player's RSVP to "No voy"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or error IDs
+      description: Sentry event IDs are better than pasted logs. Redact anything personal first.
+      render: shell
