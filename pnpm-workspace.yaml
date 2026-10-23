@@ -16,6 +16,7 @@ minimumReleaseAge: 1440
 allowBuilds:
   '@prisma/engines': true
   cpu-features: false
+  esbuild: false
   prisma: true
   protobufjs: false
   ssh2: false
