@@ -41,7 +41,7 @@ If the scaffold (TECH-01) settles different names, follow the code and update th
 
 ## Request pipeline
 
-auth guard → club context (from `:clubId`, membership verified) → policy guard (the handler's declared action) → idempotency interceptor → Zod validation pipe (`nestjs-zod`) → handler → role-based serializer → problem+json exception filter. This is Nest's own order (guards, interceptors, pipes); the `nestjs` skill explains what it implies.
+auth guard → club context (from `:clubId`, membership verified) → policy guard (the handler's declared action) → idempotency interceptor → Zod validation (`StandardSchemaValidationPipe`) → handler → role-based serializer → problem+json exception filter. This is Nest's own order (guards, interceptors, pipes); the `nestjs` skill explains what it implies.
 
 - **Controllers are thin**: no Prisma, no business rules. Every handler declares its action, e.g. `events.rsvp.proxy`, evaluated by the central policy module against the permission matrix (BR-ROLE-07, NFR-SEC-02). See the `authorization-policy` skill.
 - **Permissions come from current memberships** loaded per request, never from token claims alone: role changes take effect immediately (BR-ROLE-08).

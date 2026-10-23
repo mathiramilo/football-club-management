@@ -30,7 +30,7 @@ Mandatory for new backend behavior (NFR-MAINT-01, NFR-SEC-03). Stack: **Vitest +
 - Control time through the injected clock. Never `sleep`.
 - Fake external providers (Expo Push, email, storage, video, Anthropic) at their client boundary. Never call real providers from tests.
 - Assert problem+json `code`, not message text.
-- NestJS DI needs decorator metadata, which Vitest's default transform doesn't emit: the Vitest config uses SWC (`unplugin-swc`). Don't remove it.
+- NestJS DI needs decorator metadata. Vitest 5 runs on Vite 8, whose Oxc transform emits it from `emitDecoratorMetadata` in `tsconfig.json`, so no SWC plugin is needed. If an injected dependency is `undefined` in a test, check that setting first.
 - Start the Testcontainers Postgres once in Vitest `globalSetup` and hand its URL to tests with `provide` / `inject`. Isolate data per test (each test creates its own club).
 - Build the test app with the same `configureApp(app)` as `main.ts`, so tests exercise the real pipes, filters and interceptors.
 - Close what you open: `app.close()`, Prisma `$disconnect()`, pg-boss `stop()`, container `stop()`. For a hanging run, isolate the file, then the test, and look for open handles (e.g. `why-is-node-running`).

@@ -63,7 +63,7 @@ Rows marked with an enabler ID don't run yet. They keep these names when that en
 | Lint and format check | `pnpm lint` · `pnpm format:check` (`pnpm format` fixes) | ✅ |
 | Typecheck | `pnpm typecheck` | ✅ |
 | Backend tests (Docker must be running for Testcontainers) | `pnpm test` | ✅ |
-| One workspace | `pnpm --filter ./apps/api test` | TECH-01 (`apps/api`) |
+| One workspace | `pnpm --filter ./apps/api test` | ✅ |
 | Build | `pnpm build` | ✅ |
 | Regenerate the OpenAPI document and `packages/api-client` | `pnpm codegen` | TECH-06 |
 | OpenAPI breaking-change check against `main` | `pnpm contract:check` | TECH-06 |

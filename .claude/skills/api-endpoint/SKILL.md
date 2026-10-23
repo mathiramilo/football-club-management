@@ -61,8 +61,6 @@ Name the action `<module>.<resource>.<verb>` (e.g. `events.rsvp.own`, `events.rs
 ## 5. Controller and serializer
 
 ```ts
-export class UpdateOwnRsvpDto extends createZodDto(updateOwnRsvpBody) {}
-
 @Controller('clubs/:clubId/events/:eventId')
 export class RsvpController {
   constructor(private readonly rsvps: RsvpService) {}
@@ -74,7 +72,7 @@ export class RsvpController {
     @Club() club: ClubContext,
     @CurrentActor() actor: Actor,
     @Param('eventId', ParseUUIDPipe) eventId: string,
-    @Body() body: UpdateOwnRsvpDto,
+    @Body({ schema: updateOwnRsvpBody }) body: UpdateOwnRsvpBody,
   ): Promise<RsvpResponse> {
     const invitee = await this.rsvps.updateOwn(club, actor, eventId, body);
     return serializeRsvp(invitee, actor);
@@ -82,6 +80,7 @@ export class RsvpController {
 }
 ```
 
+- `StandardSchemaValidationPipe`, registered in `configureApp`, validates every parameter that declares a `schema` (ADR-004). No DTO classes.
 - The serializer shapes the response by role (e.g. reasons and notes only for staff and the invitee, BR-EVT-12).
 - Add `@RequiresIdempotencyKey()` for RSVP, bulk RSVP, roll call, wellness check-ins and routine logs, and for any other mutation the mobile app may queue offline.
 - Versioned documents (`events`, `session_plans`) read `If-Match` and return 409 with the current version on mismatch.
