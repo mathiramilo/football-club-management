@@ -1,0 +1,82 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: America/Montevideo
+    # Keep at or above pnpm's minimumReleaseAge (pnpm-workspace.yaml), or the install rejects the new version.
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      nestjs:
+        patterns: ['@nestjs/*']
+      prisma:
+        patterns: ['prisma', '@prisma/*']
+      expo:
+        patterns: ['expo', 'expo-*', 'eslint-config-expo']
+      next:
+        patterns: ['next', 'eslint-config-next']
+      minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # Versions held below latest: docs/tech/00-tech-stack.md § 7. Remove an entry when its hold lifts.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
+      - dependency-name: '@eslint/js'
+        update-types: [version-update:semver-major]
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
+      # The Expo SDK pins these. Upgrade them with the SDK (expo-upgrade skill), never alone.
+      - dependency-name: expo
+        update-types: [version-update:semver-major]
+      - dependency-name: expo-*
+        update-types: [version-update:semver-major]
+      - dependency-name: eslint-config-expo
+        update-types: [version-update:semver-major]
+      - dependency-name: react-native
+      - dependency-name: react
+      - dependency-name: react-dom
+      - dependency-name: '@types/react'
+      - dependency-name: '@types/react-dom'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: America/Montevideo
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      actions:
+        patterns: ['*']
+
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: America/Montevideo
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: chore
+      include: scope
+    ignore:
+      # Local Postgres follows the production major (ADR-005).
+      - dependency-name: postgres
+        update-types: [version-update:semver-major]
