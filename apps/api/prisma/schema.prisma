@@ -32,6 +32,7 @@ model User {
   clubMemberships ClubMembership[]
   authIdentities  AuthIdentity[]
   authSessions    AuthSession[]
+  idempotencyKeys IdempotencyKey[]
 
   @@map("users")
 }
@@ -106,6 +107,23 @@ model EmailCodeRequest {
 
   @@index([emailHash, requestedAt])
   @@map("email_code_requests")
+}
+
+model IdempotencyKey {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  key            String   @db.Uuid
+  requestHash    String   @map("request_hash")
+  startedAt      DateTime @map("started_at") @db.Timestamptz(6)
+  responseStatus Int?     @map("response_status")
+  responseBody   Json?    @map("response_body")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+  @@map("idempotency_keys")
 }
 
 model Club {
