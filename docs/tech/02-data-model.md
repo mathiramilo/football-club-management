@@ -122,7 +122,7 @@ erDiagram
 | primary_position, secondary_positions (text[]), jersey_number, dominant_foot | AUTH-10. |
 | joined_at, removed_at | |
 
-**category_memberships**: `club_id`, `category_id`, `club_membership_id`, `staff_role` (`dt`, `coach`, null), `staff_title`, `is_player`, `starts_on`, `ends_on` (inclusive calendar dates in the club time zone; null = open; BR-CLUB-06). Check: `staff_role IS NOT NULL OR is_player`. At most one *open* membership per (`category_id`, `club_membership_id`). Index (`category_id`, `ends_on`).
+**category_memberships**: `club_id`, `category_id`, `club_membership_id`, `staff_role` (`dt`, `coach`, null), `staff_title`, `is_player`, `starts_on`, `ends_on` (inclusive calendar dates in the club time zone; null = open; BR-CLUB-06). Check: `staff_role IS NOT NULL OR is_player`. The memberships of one person in one category never overlap, so at most one is open; `ends_on` may be the day before `starts_on` (a move effective on the first day leaves an empty membership). Index (`category_id`, `ends_on`).
 
 **invite_links**: `club_id`, `category_id`, `role` (`player`, `coach`, `dt`), `token_hash`, `code` (unique, 6 characters), `requires_approval`, `expires_at`, `max_uses`, `uses_count`, `revoked_at`, `created_by`.
 
@@ -246,13 +246,14 @@ Indexes: (`club_membership_id`, `event_id`); (`event_id`, `rsvp_status`).
 |---|---|
 | One owner per club | Partial unique index on `club_memberships (club_id) WHERE is_owner`. |
 | A category membership is staff or player | Check constraint. |
-| One open membership per person and category | Partial unique index where `ends_on IS NULL`. |
+| Memberships of one person in one category never overlap, so at most one is open (BR-CLUB-06) | Exclusion constraint on (`category_id`, `club_membership_id`, inclusive date range), using `btree_gist`; check `ends_on ≥ starts_on − 1`. |
 | One invitee row per person and event | Unique (`event_id`, `club_membership_id`). |
 | `not_going` requires a reason | Check constraint. |
 | One wellness check-in per person per local day | Unique (`club_membership_id`, `local_date`). |
 | Content assignment targets exactly one of category or person | Check constraint (xor). |
 | Exactly one plan per event | Unique `session_plans.event_id`. |
 | Tenant consistency (child `club_id` = parent `club_id`) | Composite foreign keys `(parent_id, club_id) → parent (id, club_id)`, also on nullable parent columns. Service-layer checks plus tests only where a foreign key can't express it. |
+| A row never moves to another club | Trigger `forbid_club_id_change` on every club-owned table. |
 
 ## 5. Derived data and performance
 

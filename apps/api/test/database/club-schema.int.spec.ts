@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, inject, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
 
 import { PrismaService } from '../../src/core/database/prisma.service.js';
 import { expectViolation } from '../support/constraints.js';
@@ -78,39 +78,77 @@ describe('Club schema invariants (TECH-03, data model § 4)', () => {
     );
   });
 
-  it('allows one open membership per person and category (BR-CLUB-06)', async () => {
+  it("keeps one person's memberships in a category from overlapping (BR-CLUB-06)", async () => {
     const club = await createClub(db);
     const category = await createCategory(db, club);
     const member = await createMember(db, club);
+    const day = (isoDate: string) => new Date(isoDate);
     await createCategoryMembership(db, category, member, {
-      startsOn: new Date('2025-03-01'),
-      endsOn: new Date('2025-12-31'),
+      startsOn: day('2025-03-01'),
+      endsOn: day('2025-12-31'),
     });
-    await createCategoryMembership(db, category, member, { startsOn: new Date('2026-03-01') });
+    await createCategoryMembership(db, category, member, { startsOn: day('2026-01-01') });
+    await createCategoryMembership(db, category, member, {
+      startsOn: day('2024-05-10'),
+      endsOn: day('2024-05-09'),
+    });
 
     await expectViolation(
-      createCategoryMembership(db, category, member, { startsOn: new Date('2026-06-01') }),
-      'category_memberships_one_open_per_person',
+      createCategoryMembership(db, category, member, { startsOn: day('2026-06-01') }),
+      'category_memberships_no_overlap',
+    );
+    await expectViolation(
+      createCategoryMembership(db, category, member, {
+        startsOn: day('2025-06-01'),
+        endsOn: day('2025-08-31'),
+      }),
+      'category_memberships_no_overlap',
+    );
+    await expectViolation(
+      createCategoryMembership(db, category, await createMember(db, club), {
+        startsOn: day('2026-03-01'),
+        endsOn: day('2026-02-27'),
+      }),
+      'category_memberships_dates_check',
     );
   });
 
   it('keeps a category membership inside the club of its category and member', async () => {
     const club = await createClub(db);
-    const category = await createCategory(db, club);
-    const outsider = await createMember(db, await createClub(db));
-
-    await expectViolation(
+    const otherClub = await createClub(db);
+    const membership = (categoryId: string, clubMembershipId: string) =>
       db.categoryMembership.create({
         data: {
           clubId: club.id,
-          categoryId: category.id,
-          clubMembershipId: outsider.id,
+          categoryId,
+          clubMembershipId,
           isPlayer: true,
           startsOn: new Date('2026-03-01'),
         },
-      }),
+      });
+
+    await expectViolation(
+      membership((await createCategory(db, club)).id, (await createMember(db, otherClub)).id),
       'category_memberships_club_membership_id_club_id_fkey',
     );
+    await expectViolation(
+      membership((await createCategory(db, otherClub)).id, (await createMember(db, club)).id),
+      'category_memberships_category_id_club_id_fkey',
+    );
+  });
+
+  it('never moves a row to another club', async () => {
+    const club = await createClub(db);
+    const otherClub = await createClub(db);
+    const category = await createCategory(db, club);
+    const member = await createMember(db, club);
+
+    await expect(
+      db.category.update({ where: { id: category.id }, data: { clubId: otherClub.id } }),
+    ).rejects.toThrow('club_id cannot change on categories');
+    await expect(
+      db.clubMembership.update({ where: { id: member.id }, data: { clubId: otherClub.id } }),
+    ).rejects.toThrow('club_id cannot change on club_memberships');
   });
 
   it('limits player details to glossary positions and jersey numbers 1–99 (AUTH-10)', async () => {
@@ -132,6 +170,11 @@ describe('Club schema invariants (TECH-03, data model § 4)', () => {
     await expectViolation(
       createMember(db, club, { jerseyNumber: 0 }),
       'club_memberships_jersey_number_check',
+    );
+    const member = await createMember(db, club);
+    await expectViolation(
+      db.$executeRaw`UPDATE club_memberships SET secondary_positions = NULL WHERE id = ${member.id}::uuid`,
+      'club_memberships_secondary_positions_check',
     );
   });
 

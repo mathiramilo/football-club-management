@@ -1,3 +1,6 @@
+-- CreateExtension
+CREATE EXTENSION IF NOT EXISTS "btree_gist";
+
 -- CreateTable
 CREATE TABLE "users" (
     "id" UUID NOT NULL,
@@ -148,9 +151,6 @@ CREATE INDEX "category_memberships_club_membership_id_idx" ON "category_membersh
 CREATE INDEX "category_memberships_club_id_idx" ON "category_memberships"("club_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "category_memberships_one_open_per_person" ON "category_memberships"("category_id", "club_membership_id") WHERE ("ends_on" IS NULL);
-
--- CreateIndex
 CREATE INDEX "venues_club_id_idx" ON "venues"("club_id");
 
 -- CreateIndex
@@ -179,10 +179,44 @@ ALTER TABLE "venues" ADD CONSTRAINT "venues_club_id_fkey" FOREIGN KEY ("club_id"
 
 -- Hand-written: what schema.prisma can't express
 
--- unaccent() is only STABLE; pinning the dictionary makes it safe to use in an index.
-CREATE FUNCTION immutable_unaccent(text) RETURNS text
-  LANGUAGE sql IMMUTABLE PARALLEL SAFE STRICT
-  RETURN public.unaccent('public.unaccent'::regdictionary, $1);
+-- unaccent() is only STABLE; pinning the dictionary makes it safe to use in an index. Hosts install the
+-- extension in different schemas (public, extensions), so the function is built against wherever it lives.
+DO $$
+DECLARE
+  unaccent_schema text;
+BEGIN
+  SELECT n.nspname INTO STRICT unaccent_schema
+  FROM pg_extension e JOIN pg_namespace n ON n.oid = e.extnamespace
+  WHERE e.extname = 'unaccent';
+
+  EXECUTE format(
+    'CREATE FUNCTION immutable_unaccent(text) RETURNS text LANGUAGE sql IMMUTABLE PARALLEL SAFE STRICT '
+      'RETURN %I.unaccent(%L::regdictionary, $1)',
+    unaccent_schema,
+    unaccent_schema || '.unaccent'
+  );
+END
+$$;
+
+-- A row never moves to another club. Composite (parent_id, club_id) foreign keys cascade updates, and Prisma's
+-- relation connect writes club_id, so the guard lives in the database.
+CREATE FUNCTION forbid_club_id_change() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.club_id IS DISTINCT FROM OLD.club_id THEN
+    RAISE EXCEPTION 'club_id cannot change on %', TG_TABLE_NAME USING ERRCODE = 'check_violation';
+  END IF;
+  RETURN NEW;
+END
+$$;
+
+CREATE TRIGGER categories_club_id_immutable BEFORE UPDATE OF club_id ON "categories"
+  FOR EACH ROW EXECUTE FUNCTION forbid_club_id_change();
+CREATE TRIGGER club_memberships_club_id_immutable BEFORE UPDATE OF club_id ON "club_memberships"
+  FOR EACH ROW EXECUTE FUNCTION forbid_club_id_change();
+CREATE TRIGGER category_memberships_club_id_immutable BEFORE UPDATE OF club_id ON "category_memberships"
+  FOR EACH ROW EXECUTE FUNCTION forbid_club_id_change();
+CREATE TRIGGER venues_club_id_immutable BEFORE UPDATE OF club_id ON "venues"
+  FOR EACH ROW EXECUTE FUNCTION forbid_club_id_change();
 
 -- BR-CLUB-02: category names are unique per club, ignoring case and accents, among non-archived categories.
 CREATE UNIQUE INDEX "categories_club_id_name_active_key"
@@ -200,11 +234,20 @@ ALTER TABLE "club_memberships"
   ADD CONSTRAINT "club_memberships_primary_position_check" CHECK ("primary_position" IN (
     'gk', 'cb', 'rb', 'lb', 'rwb', 'lwb', 'dm', 'cm', 'am', 'rm', 'lm', 'rw', 'lw', 'st', 'fx', 'ala', 'piv')),
   ADD CONSTRAINT "club_memberships_secondary_positions_check" CHECK (
-    cardinality("secondary_positions") <= 2
+    "secondary_positions" IS NOT NULL
+    AND cardinality("secondary_positions") <= 2
     AND "secondary_positions" <@ ARRAY[
       'gk', 'cb', 'rb', 'lb', 'rwb', 'lwb', 'dm', 'cm', 'am', 'rm', 'lm', 'rw', 'lw', 'st', 'fx', 'ala', 'piv']),
   ADD CONSTRAINT "club_memberships_jersey_number_check" CHECK ("jersey_number" BETWEEN 1 AND 99);
 
+-- BR-CLUB-06: membership dates are inclusive days. A move effective on a membership's first day ends it the day
+-- before, which leaves an empty range; anything earlier is a mistake.
 ALTER TABLE "category_memberships"
   ADD CONSTRAINT "category_memberships_staff_role_check" CHECK ("staff_role" IN ('dt', 'coach')),
-  ADD CONSTRAINT "category_memberships_staff_or_player_check" CHECK ("staff_role" IS NOT NULL OR "is_player");
+  ADD CONSTRAINT "category_memberships_staff_or_player_check" CHECK ("staff_role" IS NOT NULL OR "is_player"),
+  ADD CONSTRAINT "category_memberships_dates_check" CHECK ("ends_on" IS NULL OR "ends_on" >= "starts_on" - 1),
+  ADD CONSTRAINT "category_memberships_no_overlap" EXCLUDE USING gist (
+    "category_id" WITH =,
+    "club_membership_id" WITH =,
+    daterange("starts_on", "ends_on" + 1, '[)') WITH &&
+  );
