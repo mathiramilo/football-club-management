@@ -166,10 +166,20 @@ ALTER TABLE "rsvp_changes" ADD CONSTRAINT "rsvp_changes_event_invitee_id_club_id
 
 -- Hand-written: what schema.prisma can't express
 
+CREATE TRIGGER events_club_id_immutable BEFORE UPDATE OF club_id ON "events"
+  FOR EACH ROW EXECUTE FUNCTION forbid_club_id_change();
+CREATE TRIGGER event_categories_club_id_immutable BEFORE UPDATE OF club_id ON "event_categories"
+  FOR EACH ROW EXECUTE FUNCTION forbid_club_id_change();
+CREATE TRIGGER event_invitees_club_id_immutable BEFORE UPDATE OF club_id ON "event_invitees"
+  FOR EACH ROW EXECUTE FUNCTION forbid_club_id_change();
+CREATE TRIGGER rsvp_changes_club_id_immutable BEFORE UPDATE OF club_id ON "rsvp_changes"
+  FOR EACH ROW EXECUTE FUNCTION forbid_club_id_change();
+
 ALTER TABLE "events"
   ADD CONSTRAINT "events_type_check" CHECK ("type" IN ('practice', 'match', 'other')),
   ADD CONSTRAINT "events_home_away_check" CHECK ("home_away" IN ('home', 'away', 'neutral')),
   ADD CONSTRAINT "events_ends_after_start_check" CHECK ("ends_at" > "starts_at"),
+  ADD CONSTRAINT "events_overridden_fields_check" CHECK ("overridden_fields" IS NOT NULL),
   ADD CONSTRAINT "events_match_fields_check"
     CHECK ("type" = 'match' OR ("opponent" IS NULL AND "home_away" IS NULL AND "competition" IS NULL));
 
