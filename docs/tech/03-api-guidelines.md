@@ -33,6 +33,16 @@
 - Validation failures answer `400` `VALIDATION_FAILED`, with one `errors[]` item per problem: `in` (`body`, `query` or `path`), `pointer` (a JSON Pointer into that part, `""` for a whole path or query value), `code` and an English `detail`. `code` is the schema's own code when a refinement names one (`REASON_REQUIRED`), otherwise Zod's issue code (`invalid_type`, `too_small`…).
 - Errors without a code of their own get a generic one by status: `BAD_REQUEST` (also for malformed JSON), `UNAUTHENTICATED`, `FORBIDDEN`, `NOT_FOUND` (also for unknown routes and records), `CONFLICT` (also for unique violations), `PAYLOAD_TOO_LARGE`, `RATE_LIMITED`, `SERVICE_UNAVAILABLE` and `INTERNAL_ERROR`. An unexpected error answers `500` `INTERNAL_ERROR`, and the log keeps only its name and stack frames.
 
+### 1.2 OpenAPI document
+
+- The API builds the document from the same Zod schemas it validates with (`@nestjs/swagger`, ADR-004). `pnpm codegen` writes it to `packages/api-client/openapi.json` without a database and regenerates the client from it. Both are committed, and CI fails when either is stale.
+- **Operation IDs** are `<controller><Method>` (`EventsController.list` → `eventsList`). They name the generated functions and hooks, so renaming a controller method renames them. Each module's controllers share one `@ApiTags`, which becomes a folder of the client.
+- **Schemas**: request and response schemas that clients name get `.meta({ id: 'PascalCaseName' })`, which makes them components. A handler declares its response with `@ResponseSchema(schema, { status })`: the same schema documents the response and strips undeclared fields before it is sent. Query parameters are one object schema (`@Query({ schema })`); a single `@Query('name', { schema })` is always documented as required.
+- **Growing enums**: a response enum that will gain values is an `extensibleEnum([...])` from `packages/contracts`. The document lists its values under `x-extensible-enum` instead of `enum`, so adding one isn't breaking and generated clients type it as a string. Error `code` is one.
+- **Security**: every operation accepts the bearer token or the session cookie, except `@Public()` ones, which declare no security.
+- **Errors**: every operation documents a `default` response, `application/problem+json` with the `ProblemDetails` schema.
+- **Breaking changes**: `pnpm contract:check` runs `oasdiff breaking` between the document on `main` and yours, and fails on any error-level change (NFR-MAINT-03). CI runs it on every pull request.
+
 ## 2. Authorization model in the API
 
 - Each handler declares the action it performs (e.g. `events.rsvp.proxy`). The policy module evaluates it against the [permission matrix](../product/02-personas-and-roles.md#4-permission-matrix).
@@ -46,7 +56,7 @@ Release tags indicate when each endpoint is first needed.
 
 ### Auth and me (R1)
 
-Better Auth serves the `/v1/auth/*` routes with its own paths and error shape, `{ code, message }` (ADR-007). They aren't problem+json and aren't in the OpenAPI document. Its `openAPI` plugin can generate an OpenAPI 3.1 document for them; TECH-06 decides whether to merge it into ours for Orval.
+Better Auth serves the `/v1/auth/*` routes with its own paths and error shape, `{ code, message }` (ADR-007). They aren't problem+json and aren't in the OpenAPI document: clients call them through the Better Auth client, and the generated client covers everything else (TECH-06). The error codes clients localize from these routes are listed in `packages/contracts` (`authErrorCode`).
 
 Code requests answer `429` in two cases (BR-AUTH-03, NFR-SEC-05):
 - the per-email limit (60 s between codes, 5 an hour) returns `code` `CODE_RESEND_TOO_SOON` or `CODE_RATE_LIMITED`, with `Retry-After`;

@@ -113,7 +113,7 @@
     - revoking every session first in a database incident ([Privacy § 11](../product/06-privacy-and-compliance.md#11-security-incidents)).
 
     Revisit if Better Auth adds hashed tokens or rotation.
-  - **Contract pipeline**: `/v1/auth/*` sits outside it. Those routes use Better Auth's error shape, not problem+json, and aren't in the OpenAPI document. Clients sign in through the Better Auth client and use the Orval client for everything else. TECH-04 checks whether its `openAPI` plugin can feed our document, and maps its error codes to `packages/i18n` messages.
+  - **Contract pipeline**: `/v1/auth/*` sits outside it. Those routes use Better Auth's error shape, not problem+json, and aren't in the OpenAPI document. Clients sign in through the Better Auth client and use the Orval client for everything else. TECH-04 mapped its error codes to `packages/i18n` messages; TECH-06 kept its `openAPI` plugin out of our document, so its routes and error shape never reach Orval or the breaking-change check.
   - **Watch on every upgrade**:
     - It refuses to boot when a core column is missing (`users.image` is required although unused).
     - Under a test runner it skips its CSRF origin check unless `advanced.disableOriginCheck: false`, so the test harness must set it.

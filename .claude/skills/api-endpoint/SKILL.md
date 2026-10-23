@@ -34,20 +34,26 @@ export const updateOwnRsvpBody = z
     message: 'REASON_REQUIRED',
   });
 
-export const rsvpResponse = z.object({
-  eventId: z.string().uuid(),
-  status: rsvpStatus,
-  reason: absenceReason.nullable(),
-  arrivingLate: z.boolean(),
-  isLateChange: z.boolean(),
-  respondedAt: z.string().datetime({ offset: true }),
-});
+export const rsvpResponse = z
+  .object({
+    eventId: z.string().uuid(),
+    status: rsvpStatus,
+    reason: absenceReason.nullable(),
+    arrivingLate: z.boolean(),
+    isLateChange: z.boolean(),
+    respondedAt: z.string().datetime({ offset: true }),
+  })
+  .meta({ id: 'RsvpResponse' });
 
 export type UpdateOwnRsvpBody = z.infer<typeof updateOwnRsvpBody>;
 export type RsvpResponse = z.infer<typeof rsvpResponse>;
 ```
 
-Add any new error code to the catalog in `packages/contracts` with its HTTP status, and its Spanish message in `packages/i18n` (`errors.<CODE>`).
+- Give request and response schemas that clients name a component id with `.meta({ id: 'PascalCaseName' })`.
+- Query parameters are one object schema, used as `@Query({ schema })`. A single `@Query('name', { schema })` is always documented as required.
+- A response enum that will gain values (statuses, notification types) is `extensibleEnum([...])` from `packages/contracts`. A plain `z.enum` in a response can never gain a value in `v1`.
+
+Add any new error code to the catalog in `packages/contracts` (`errorCode` and `errorCatalog`, with its HTTP status and English title), and its Spanish message in `packages/i18n` (`errors.<CODE>`). The i18n tests fail until it has one.
 
 ## 3. Repository and service
 
@@ -61,6 +67,7 @@ Name the action `<module>.<resource>.<verb>` (e.g. `events.rsvp.own`, `events.rs
 ## 5. Controller and serializer
 
 ```ts
+@ApiTags('events')
 @Controller('clubs/:clubId/events/:eventId')
 export class RsvpController {
   constructor(private readonly rsvps: RsvpService) {}
@@ -68,6 +75,7 @@ export class RsvpController {
   @Put('rsvp')
   @Can('events.rsvp.own')
   @RequiresIdempotencyKey()
+  @ResponseSchema(rsvpResponse)
   async updateOwn(
     @Club() club: ClubContext,
     @CurrentActor() actor: Actor,
@@ -81,6 +89,8 @@ export class RsvpController {
 ```
 
 - `RequestValidationPipe` (Nest's `StandardSchemaValidationPipe` with our `errors[]` shape, the global pipe in `ErrorsModule`) validates every parameter that declares a `schema` (ADR-004). No DTO classes.
+- `@ResponseSchema(schema, { status })` documents the response and strips any field the schema doesn't declare before it is sent. Pass `{ status: HttpStatus.CREATED }` for a `POST` that creates.
+- The operation ID, and so the generated hook name, is `<controller><Method>` (`rsvpUpdateOwn`). Renaming the method renames the hook.
 - The serializer shapes the response by role (e.g. reasons and notes only for staff and the invitee, BR-EVT-12).
 - Add `@RequiresIdempotencyKey()` for RSVP, bulk RSVP, roll call, wellness check-ins and routine logs, and for any other mutation the mobile app may queue offline.
 - Versioned documents (`events`, `session_plans`) read `If-Match` and return 409 with the current version on mismatch.
@@ -106,6 +116,6 @@ Add one test per acceptance criterion and per business rule the endpoint enforce
 
 ## 7. Regenerate and verify
 
-1. Regenerate the OpenAPI document and the Orval client (`packages/api-client`). Never edit generated files.
-2. Run the OpenAPI breaking-change check, lint, typecheck and the API tests.
+1. `pnpm codegen` regenerates `packages/api-client/openapi.json` and the Orval client. Commit both, and never edit them by hand.
+2. Run `pnpm contract:check` (needs Docker), lint, typecheck and the API tests.
 3. Update `docs/tech/03-api-guidelines.md` § 3 if the endpoint is new or its shape changed.

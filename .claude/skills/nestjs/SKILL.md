@@ -91,10 +91,11 @@ One global `@Catch()` filter, decorated with `@SentryExceptionCaptured()`, repli
 ## 7. OpenAPI
 
 - The document comes from the same Zod schemas as validation, through `@nestjs/swagger`, which converts Zod 4.2+ schemas itself (`~standard.jsonSchema`, `openapi-3.0` target). Follow the installed version's docs.
-- Set `operationIdFactory` so IDs are unique and stable across the API (`eventsListInvitees`, not `list`): they become Orval hook names, and renaming one breaks clients (`orval` skill).
+- `core/contract/create-openapi-document.ts` builds it. Its `operationIdFactory` makes IDs `<controller><Method>` (`eventsListInvitees`): they become Orval hook names, and renaming one breaks clients (`orval` skill).
 - One `@ApiTags` per module; it becomes an Orval `tags-split` folder.
-- Document problem+json errors once, in a shared decorator.
-- `pnpm codegen` must build the document without a database or other network services.
+- problem+json errors are documented once, as a global `default` response. `@Public()` also marks the operation so the document gives it `security: []`. `extensibleEnum` values move from `enum` to `x-extensible-enum`.
+- `src/write-openapi.ts` writes the document from `NestFactory.create(AppModule, { preview: true })`: preview mode resolves the module graph without running any provider factory, so no database or secret is needed. It calls `applyGlobalPrefix`, not `configureApp`, because mounting Better Auth needs a real instance.
+- `@nestjs/swagger` documents a single `@Query('name', { schema })` as required even when the schema is optional. Use one object schema for the query.
 
 ## 8. Routing
 

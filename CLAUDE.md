@@ -66,8 +66,8 @@ Rows marked with an enabler ID don't run yet. They keep these names when that en
 | Backend tests (Docker must be running for Testcontainers) | `pnpm test` | ✅ |
 | One workspace (builds the packages it depends on first) | `pnpm turbo run test --filter=@repo/api` | ✅ |
 | Build | `pnpm build` | ✅ |
-| Regenerate the OpenAPI document and `packages/api-client` | `pnpm codegen` | TECH-06 |
-| OpenAPI breaking-change check against `main` | `pnpm contract:check` | TECH-06 |
+| Regenerate the OpenAPI document and `packages/api-client` (commit the result; CI fails when they're stale) | `pnpm codegen` | ✅ |
+| OpenAPI breaking-change check against `main` (oasdiff in Docker; `CONTRACT_BASE_REF` picks another base) | `pnpm contract:check` | ✅ |
 | Regenerate the Prisma client | `pnpm --filter ./apps/api db:generate` (turbo runs it before lint, typecheck, test, build and dev) | ✅ |
 | Create a migration without applying it | `pnpm --filter ./apps/api exec prisma migrate dev --create-only --name <verb_noun>` | ✅ |
 | Apply migrations (local; also regenerates the client) | `pnpm --filter ./apps/api db:migrate` | ✅ |

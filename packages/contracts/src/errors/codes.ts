@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
-export const errorCode = z.enum([
+import { extensibleEnum } from '../extensible-enum.js';
+
+export const errorCode = extensibleEnum([
   'BAD_REQUEST',
   'VALIDATION_FAILED',
   'UNAUTHENTICATED',

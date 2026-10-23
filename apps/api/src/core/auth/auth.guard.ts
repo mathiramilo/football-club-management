@@ -13,7 +13,7 @@ import { ClsService } from 'nestjs-cls';
 import type { RequestContext } from './actor.js';
 import { AUTH } from './auth.tokens.js';
 import type { Auth } from './create-auth.js';
-import { Public } from './public.decorator.js';
+import { PublicRoute } from './public.decorator.js';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -24,7 +24,7 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isPublic = this.reflector.getAllAndOverride<true | undefined>(Public.KEY, [
+    const isPublic = this.reflector.getAllAndOverride<true | undefined>(PublicRoute.KEY, [
       context.getHandler(),
       context.getClass(),
     ]);

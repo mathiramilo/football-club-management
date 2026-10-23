@@ -1,0 +1,25 @@
+{
+  "name": "@repo/api-client",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "codegen": "orval",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.104.0"
+  },
+  "devDependencies": {
+    "@repo/config": "workspace:*",
+    "@tanstack/react-query": "5.104.5",
+    "eslint": "catalog:",
+    "orval": "8.44.0",
+    "prettier": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -8,6 +8,8 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
+    "codegen": "turbo run codegen",
+    "contract:check": "turbo run openapi --output-logs=errors-only && node scripts/contract-check.js",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"
