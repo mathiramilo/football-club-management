@@ -1,6 +1,6 @@
 # UX: Information Architecture, Navigation & Key Flows
 
-> Status: **Draft v0.1** · Owner: Product + Design · Last updated: 2026-10-22
+> Status: **Draft v0.1** · Owner: Product + Design · Last updated: 2026-10-23
 > Related: [Product principles](../product/01-vision-and-strategy.md#5-product-principles) · [Glossary](../product/03-glossary.md) · [NFR: accessibility, localization](../tech/05-non-functional-requirements.md)
 
 ## 1. UX principles
@@ -182,6 +182,18 @@ Avoid English loanwords where a common Spanish term exists ("práctica", not "tr
 - **Field mode / high contrast** for roll call and plan field mode.
 - **Charts**: simple and labelled, always with numerator and denominator (BR-ANL-04).
 
+### 7.1 Visual direction: Camiseta
+
+Chosen on 2026-10-23 from three explored directions. These values seed `packages/ui-tokens` (TECH-15). Once the tokens exist, they are the source and the designs follow them.
+
+- **Club header**: the club's primary color fills the top of the screen with a faint vertical stripe, like a kit, plus the crest and the club and category switch. Text on it is white. Tab roots show a wide title; the player home shows the player's name and shirt number.
+- **Type**: Archivo. Screen titles at 125% width and weight 900, card titles at 112% and 800, body 15–16 px, tabular figures for compared numbers. 12 px only for tab labels.
+- **Surfaces**: white background, hero cards overlapping the header (radius 28), list tiles on `#F4F4F6` (radius 22).
+- **Buttons**: pills. 64 px for Voy / No voy, 56 px for screen actions, 44 px for row actions.
+- **Status colors**, each with a tint and a darker text shade, always with an icon and a word: Voy / Presente `#157F3B`, No voy / Ausente `#B42318`, Tarde and warnings `#B54708`, Sin responder `#63636E`. The club color never marks status.
+- **Before joining a club** (sign-in, email code) the app's neutral `#1B1B1F` replaces the club color. Invite, claim and event links use the inviting club's color and crest.
+- **Field mode** (PLAN-09) uses a dark background with white text. Dark mode for the rest of the app is not designed yet.
+
 ## 8. Design deliverables before R1 development
 
 1. Clickable prototype of Flows A, B, C, D and E (mobile) plus the event link landing (web), tested with at least 5 players and 3 DTs.
@@ -189,3 +201,53 @@ Avoid English loanwords where a common Spanish term exists ("práctica", not "tr
 3. High-fidelity designs for screens S-01 to S-20 and S-34.
 4. Push notification and email templates (es) for N-01 to N-10 and N-18 to N-21.
 5. Store assets plan (icon, screenshots, descriptions) for the pilot builds (TestFlight / internal testing).
+
+Status on 2026-10-23: (1) the flows are clickable on the design canvas (§ 9); testing with players and DTs has not started. (2) Mobile foundations are drawn on the canvas; web is not; the tokens land in TECH-15. (3) First full pass done for the mobile screens; S-18 is web-only and not designed. (4) and (5) not started.
+
+## 9. Designs
+
+The [design canvas](https://claude.ai/artifact/ECyWZ11AxR27YMNSHanDNX) is the single source of truth for screen designs. The repo holds this map, the decisions in § 7 and, after TECH-15, the tokens. Don't copy design files into the repo. The canvas is private to its owner: ask for access.
+
+- Pages group the screens by area. Each board title starts with its screen or story ID (`S-04 · Inicio`, `EVT-13 · Recordar`).
+- In Play, tab bars, back buttons and each flow's next step link between boards.
+- Label the canvas version at each milestone ("R1 designs v1"). A design change that alters behavior updates the spec in the same PR (NFR-MAINT-06).
+- Data on the boards is synthetic.
+
+| Screen | Canvas page | Boards |
+|---|---|---|
+| S-01 | 1 · Ingreso | S-01 · Ingresar · S-01 · Código por email |
+| S-02 | 1 · Ingreso | S-02 · Completá tu perfil · S-02 · Tu posición |
+| S-03 | 1 · Ingreso | S-03 · Invitación (web /j) · S-03 · Esperando aprobación · S-03 · Reclamar perfil (web /c) |
+| S-04 | 2 · Jugador | S-04 · Inicio · EVT-09 · No voy: motivo |
+| S-05 | 3 · Staff: actividades | S-05 · Inicio (staff) |
+| S-06 | 2 · Jugador · 3 · Staff | S-06 · Agenda · S-06 · Agenda (staff) |
+| S-07 | 2 · Jugador | S-07 · Tu semana · S-07 · Semana confirmada |
+| S-08 | 2 · Jugador · 3 · Staff | S-08 · Actividad · S-08 · Disponibilidad · EVT-13 · Recordar · EVT-06 · Invitar de otra categoría · EVT-04 · Cancelar actividad |
+| S-09 | 3 · Staff: actividades | S-09 · Nueva práctica · S-09 · Nuevo partido (edit is not drawn separately) |
+| S-10 | 3 · Staff: actividades | S-10 · Pasar lista |
+| S-11 | 4 · Club y plantel | S-11 · Crear club · CLUB-15 · Primeros pasos |
+| S-12 | 4 · Club y plantel | S-12 · Categorías · S-12 · Ajustes de categoría |
+| S-13 | 4 · Club y plantel · 2 · Jugador | S-13 · Plantel · S-13 · Integrante · Equipo (player view) |
+| S-14 | 4 · Club y plantel | S-14 · Links de invitación · S-14 · Solicitudes |
+| S-15 | 4 · Club y plantel | S-15 · Club, admins y canchas |
+| S-16 | 2 · Jugador | S-16 · Mis estadísticas |
+| S-17 | 5 · Asistencia | S-17 · Asistencia de la categoría · S-17 · Asistencia por jugador |
+| S-18 | — | Not designed (web only) |
+| S-19 | 2 · Jugador | S-19 · Avisos |
+| S-20 | 2 · Jugador | S-20 · Notificaciones y privacidad · Perfil |
+| S-21 | 7 · Entrenamiento (R2) | S-21 · Biblioteca |
+| S-22 | 7 · Entrenamiento (R2) | S-22 · Ejercicio (staff view; the player view is not designed) |
+| S-23 | 7 · Entrenamiento (R2) | S-23 · Captura rápida (the full editor is not designed) |
+| S-24 | 7 · Entrenamiento (R2) | S-24 · Plan de práctica · PLAN-09 · Modo cancha (R3) |
+| S-25 | 7 · Entrenamiento (R2) | S-25 · Plan (jugador) |
+| S-26 | 8 · Estado físico (R2) · 6 · Links públicos | S-26 · Consentimiento · WELL-02 · Consentimiento del adulto |
+| S-27 | 8 · Estado físico (R2) | S-27 · Check-in: carga · S-27 · Check-in: dolor · S-27 · Check-in enviado |
+| S-28 | 8 · Estado físico (R2) | S-28 · Tablero · S-28 · Historial del jugador |
+| S-29 | 9 · Rutinas, nutrición e IA (R3) | S-29 · Asignar contenido (the authoring editor is not designed) |
+| S-30 | 9 · Rutinas, nutrición e IA (R3) | S-30 · Mis rutinas · S-30 · Rutina · S-30 · Nutrición |
+| S-31 | 9 · Rutinas, nutrición e IA (R3) | S-31 · Planificar con IA · S-31 · Borrador del plan |
+| S-32 | 9 · Rutinas, nutrición e IA (R3) | S-32 · Asistente |
+| S-33 | — | Not designed (web only) |
+| S-34 | 10 · Estados del sistema | S-34 · Actualización obligatoria · S-34 · Mantenimiento |
+
+Also on the canvas: the tab roots (Más, Entrenar, Entrenamiento), the event link pages (EVT-07, EVT-10), the offline, empty and loading states, and the design-system board on "Sistema y dirección". The desktop staff portal is not designed yet.
