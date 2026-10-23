@@ -1,6 +1,6 @@
 # Glossary (Ubiquitous Language)
 
-> Status: **Draft v0.1** · Owner: Product · Last updated: 2026-10-22
+> Status: **Draft v0.1** · Owner: Product · Last updated: 2026-10-23
 
 Use these terms **exactly** in specs, code (entity, table and type names), API resources and UI copy. The "UI (es)" column is the default Spanish label (Río de la Plata variant, *voseo*). If a term changes, update it here first.
 
@@ -77,7 +77,7 @@ Futsal positions (code · UI es → line): `gk` · Arquero/a → `gk` · `fx` ·
 | **Published plan** | Plan publicado | A plan made visible to invitees. Plans are hidden from players until published. |
 | **Routine** (`routine`) | Rutina | A training program done outside club sessions (gym, mobility, prevention, recovery), structured and/or as files. |
 | **Nutrition plan** (`nutrition_plan`) | Plan de nutrición | Nutrition guidance as rich text and/or files. |
-| **Assignment** (`content_assignment`) | Asignación | Links a routine or nutrition plan to categories or to individual players, with optional validity dates. |
+| **Assignment** (`content_assignment`) | Asignación | Links a routine or nutrition plan to one target, a category or an individual player, with optional validity dates. One "Asignar" action can create several assignments. |
 
 ## 5. Wellness
 

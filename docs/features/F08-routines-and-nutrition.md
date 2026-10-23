@@ -1,6 +1,6 @@
 # F08 — Routines & Nutrition Plans
 
-> Status: **Draft v0.1** · Release: **R3** · Owner: Product · Last updated: 2026-10-22
+> Status: **Draft v0.1** · Release: **R3** · Owner: Product · Last updated: 2026-10-23
 > Source: Notion "Rutinas y nutrición" · Related: [F05](F05-exercise-library.md) · [Privacy](../product/06-privacy-and-compliance.md)
 
 ## 1. Goal
@@ -40,7 +40,7 @@ Refinements made in this document:
 | BR-CONT-01 | A **routine** has a title, goal type (`strength`, `mobility`, `conditioning`, `injury_prevention`, `recovery`, `return_to_play`, `individual_technique`, `other`), description, estimated duration, suggested weekly frequency, an ordered list of items and up to 5 attachments. An item is a library exercise or an ad-hoc item, with sets, reps **or** time, load (free text such as "60% 1RM", "RPE 7" or "peso corporal"), rest and notes. A routine needs at least one item **or** one attachment. |
 | BR-CONT-02 | A **nutrition plan** has a title, a short summary, rich-text content (headings, lists, bold, links) and up to 5 attachments. It can show an optional author credential (e.g. "Lic. en Nutrición Ana Pérez"). |
 | BR-CONT-03 | Attachments: PDF, JPG, PNG or WEBP, each ≤ 20 MB, scanned by the upload pipeline before they are served ([NFR](../tech/05-non-functional-requirements.md)). |
-| BR-CONT-04 | An **assignment** links one content item to one or more categories and/or individual players, with optional start and end dates. The same content can have several assignments. Content is assigned by reference: players always see the latest version. |
+| BR-CONT-04 | An **assignment** links one content item to exactly one target, a category **or** an individual player ([data model](../tech/02-data-model.md): xor), with optional start and end dates. One "Asignar" action can pick several categories and players and creates one assignment per target. The same content can have several assignments. Content is assigned by reference: players always see the latest version. |
 | BR-CONT-05 | **Visibility**: content assigned to a category is visible to its current players while the assignment is active. Content assigned to an individual is visible **only to that player and to staff of the player's categories**. Unassigned content is visible to staff only. |
 | BR-CONT-06 | Creating an assignment sends N-15 to the players concerned. Editing assigned content sends nothing unless staff tick "Avisar cambios importantes". |
 | BR-CONT-07 | Nutrition plans always display: "Contenido orientativo preparado por el cuerpo técnico del club. No reemplaza la consulta con un/a profesional de la salud." Individual nutrition plans and `return_to_play` routines are **excluded from the AI assistant's context** ([F09](F09-ai-coaching-assistant.md)). |
