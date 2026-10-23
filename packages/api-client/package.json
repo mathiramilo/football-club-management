@@ -11,6 +11,9 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "@repo/contracts": "workspace:*"
+  },
   "peerDependencies": {
     "@tanstack/react-query": "^5.104.0"
   },

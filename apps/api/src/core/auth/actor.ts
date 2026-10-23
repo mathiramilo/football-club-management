@@ -1,13 +1,11 @@
 import { createParamDecorator, UnauthorizedException } from '@nestjs/common';
-import { type ClsStore, ClsServiceManager } from 'nestjs-cls';
+import { ClsServiceManager } from 'nestjs-cls';
+
+import type { RequestContext } from '../request-context.js';
 
 export interface Actor {
   userId: string;
   sessionId: string;
-}
-
-export interface RequestContext extends ClsStore {
-  actor?: Actor;
 }
 
 export const CurrentActor = createParamDecorator((): Actor => {

@@ -10,7 +10,7 @@ import { fromNodeHeaders } from 'better-auth/node';
 import type { Request, Response } from 'express';
 import { ClsService } from 'nestjs-cls';
 
-import type { RequestContext } from './actor.js';
+import type { RequestContext } from '../request-context.js';
 import { AUTH } from './auth.tokens.js';
 import type { Auth } from './create-auth.js';
 import { PublicRoute } from './public.decorator.js';

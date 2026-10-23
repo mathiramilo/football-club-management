@@ -11,7 +11,7 @@
 | Base path | `/v1`. Breaking changes require `/v2` or additive evolution. Old mobile app versions stay in the wild for months, so **only additive changes** are allowed in `v1`. |
 | Tenancy | Club-scoped resources live under `/v1/clubs/{clubId}/…`. The server always re-checks that the caller belongs to that club (never trust the path alone). |
 | Auth | `Authorization: Bearer <session token>` (mobile) or a secure httpOnly cookie (web), both issued by Better Auth (ADR-007). Public endpoints live under `/v1/public/…` and only return non-personal data. |
-| Client headers | `X-App-Version`, `X-Platform` (`ios`, `android`, `web`), `Accept-Language`. Unsupported versions get `426` (see [Architecture § 6.11](01-architecture-overview.md#611-app-versions-and-configuration)). |
+| Client headers | `X-App-Version` (a semantic version, `1.3.0`), `X-Platform` (`ios`, `android`, `web`), `Accept-Language`. The generated client sends them on every request. The API keeps the first two in the request context and drops a value that doesn't parse rather than rejecting the request. Unsupported versions get `426` (TECH-14, see [Architecture § 6.11](01-architecture-overview.md#611-app-versions-and-configuration)). |
 | Idempotency | Every mutating request from mobile carries `Idempotency-Key` (UUID). The server stores results for 24 h and replays them on retries. **Required** for RSVP, roll call, wellness check-ins and routine logs. |
 | Concurrency | Documents with a `version` (session plans, events) use `If-Match: <version>`; a mismatch returns `409 Conflict` with the current version. |
 | Time | ISO 8601 with offset for instants (`2026-10-14T20:00:00-03:00`); `YYYY-MM-DD` for local dates. Responses include the club `timezone` where relevant. |
