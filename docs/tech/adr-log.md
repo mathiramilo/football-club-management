@@ -45,12 +45,12 @@
 
 ## ADR-004 · Backend: NestJS modular monolith, REST + OpenAPI from Zod
 - **Context**: many cross-cutting rules (authorization, tenancy, scheduling); two clients, with old mobile versions in the wild.
-- **Decision**: a single **NestJS** deployable with one Nest module per bounded context ([Architecture § 4](01-architecture-overview.md#4-backend-modules-bounded-contexts)):
+- **Decision**: a single **NestJS 12** deployable (ESM), with one Nest module per bounded context ([Architecture § 4](01-architecture-overview.md#4-backend-modules-bounded-contexts)):
   - NestJS guards backed by a central policy module for authorization,
   - interceptors for idempotency,
-  - `nestjs-zod` for validation and OpenAPI generation, from schemas in `packages/contracts`.
+  - Nest's native Standard Schema support for request validation (`StandardSchemaValidationPipe`, `@Body({ schema })`), response serialization and OpenAPI generation, all from the Zod schemas in `packages/contracts`. Zod 4.2+ exposes its JSON Schema, so no converter is needed.
   The worker runs from the same codebase as a separate process.
-- **Alternatives**: Fastify (lighter, but the structure must be built by hand); tRPC (tight coupling to TS clients, weaker for versioned mobile contracts); GraphQL (more power than needed, harder caching and authorization); microservices (operational overhead).
+- **Alternatives**: Fastify (lighter, but the structure must be built by hand); tRPC (tight coupling to TS clients, weaker for versioned mobile contracts); GraphQL (more power than needed, harder caching and authorization); microservices (operational overhead). `nestjs-zod` on NestJS 11, named in the first draft of this ADR: its 5.x line supports Nest 10–11 only (checked 2026-10-23), and Nest 12 now does the same work natively. Changed at TECH-01.
 - **Consequences**: a clear path to extract modules later if ever needed. The team must keep modules from reaching into each other's tables.
 
 ## ADR-005 · PostgreSQL, shared-schema multi-tenancy

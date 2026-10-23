@@ -12,7 +12,7 @@ Spec: `docs/tech/03-api-guidelines.md`. An endpoint change starts in `packages/c
 ## Flow
 
 1. Zod schemas, enums and error codes in `packages/contracts/src/<context>/`.
-2. The API validates with the same schemas (`createZodDto` from `nestjs-zod`) and generates the OpenAPI document.
+2. The API validates with the same schemas (`@Body({ schema })` and NestJS 12's `StandardSchemaValidationPipe`) and generates the OpenAPI document from them.
 3. Orval generates `packages/api-client` (typed fetch + TanStack Query hooks). A thin hand-written wrapper adds auth, `X-App-Version`, `X-Platform`, `Idempotency-Key` and problem+json mapping. See the `orval` skill.
 4. CI fails on breaking changes to `v1` (NFR-MAINT-03).
 

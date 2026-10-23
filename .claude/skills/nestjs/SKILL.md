@@ -1,6 +1,6 @@
 ---
 name: nestjs
-description: NestJS framework reference for apps/api - the real request lifecycle and enhancer order, custom decorators and metadata, providers and injection tokens, dynamic modules, the problem+json exception filter, lifecycle hooks and shutdown, the worker application context, OpenAPI generation, Express 5 routing, testing modules with Vitest and SWC, and NestJS 11 vs 12 differences. Use when writing or debugging NestJS plumbing (guards, interceptors, pipes, filters, modules, providers, decorators, bootstrap, the test harness) or when Nest behaves unexpectedly. For a whole endpoint use api-endpoint; for permissions use authorization-policy; for jobs use background-job.
+description: NestJS framework reference for apps/api - the real request lifecycle and enhancer order, custom decorators and metadata, providers and injection tokens, dynamic modules, the problem+json exception filter, lifecycle hooks and shutdown, the worker application context, OpenAPI generation, Express 5 routing, testing modules with Vitest, and NestJS 11 vs 12 differences. Use when writing or debugging NestJS plumbing (guards, interceptors, pipes, filters, modules, providers, decorators, bootstrap, the test harness) or when Nest behaves unexpectedly. For a whole endpoint use api-endpoint; for permissions use authorization-policy; for jobs use background-job.
 ---
 
 # NestJS
@@ -11,7 +11,7 @@ Written for this project from the NestJS docs (MIT) and ideas from amirtaherkhan
 
 - Read the `@nestjs/core` major in `apps/api/package.json`, then the docs for it: `https://docs.nestjs.com/llms.txt` lists every chapter, and each one is available as `.md`. The installed version wins over memory.
 - **NestJS 12** (August 2026): core packages are ESM-only (a CommonJS app still works through `require(esm)` on Node ≥ 20.19 or ≥ 22.12; the CLI needs Node ≥ 22.22.3); `nest new` offers ESM with Vitest; native Standard Schema validation (`@Body({ schema })` + `StandardSchemaValidationPipe`) and serialization (`StandardSchemaSerializerInterceptor`); `errorCode` on `HttpException`; lifecycle hooks ordered by module hierarchy; `@Optional()` no longer inherited; opt-in route conflict checks.
-- **Open decision:** the stack names `nestjs-zod` (ADR-004), but `nestjs-zod` 5.x declares peers on Nest 10–11 only. Until an ADR settles "Nest 11 + `nestjs-zod`" or "Nest 12 + native Standard Schema", follow what `package.json` has and never mix the two.
+- **Decided (ADR-004, 2026-10-23):** NestJS 12 as ESM, with native Standard Schema for validation, serialization and OpenAPI. Never add `nestjs-zod`: its 5.x line supports Nest 10–11 only.
 - Ignore the docs' pointers to `@nestjs/observe`: Sentry and Pino cover observability here.
 
 ## 1. The request lifecycle
@@ -90,7 +90,7 @@ One global `@Catch()` filter, decorated with `@SentryExceptionCaptured()`, repli
 
 ## 7. OpenAPI
 
-- The document comes from the same Zod schemas as validation, through `@nestjs/swagger` and whichever schema integration the ADR picks. Follow the installed version's docs.
+- The document comes from the same Zod schemas as validation, through `@nestjs/swagger`, which converts Zod 4.2+ schemas itself (`~standard.jsonSchema`, `openapi-3.0` target). Follow the installed version's docs.
 - Set `operationIdFactory` so IDs are unique and stable across the API (`eventsListInvitees`, not `list`): they become Orval hook names, and renaming one breaks clients (`orval` skill).
 - One `@ApiTags` per module; it becomes an Orval `tags-split` folder.
 - Document problem+json errors once, in a shared decorator.
@@ -108,14 +108,17 @@ One global `@Catch()` filter, decorated with `@SentryExceptionCaptured()`, repli
 Rules in `backend-testing`. The Nest-specific parts:
 
 ```ts
-import swc from 'unplugin-swc';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  plugins: [swc.vite({ module: { type: 'es6' } })],
-  test: { globalSetup: './test/global-setup.ts' },
+  test: {
+    include: ['src/**/*.spec.ts', 'test/**/*.spec.ts'],
+    globalSetup: './test/global-setup.ts',
+  },
 });
 ```
+
+No SWC plugin: Vite 8's Oxc transform emits decorator metadata from `tsconfig.json`.
 
 ```ts
 const moduleRef = await Test.createTestingModule({ imports: [AppModule] })

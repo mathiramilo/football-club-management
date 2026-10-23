@@ -1,6 +1,6 @@
 # API Guidelines & Endpoint Inventory
 
-> Status: **Proposed v0.1** · Last updated: 2026-10-22
+> Status: **Proposed v0.1** · Last updated: 2026-10-23
 > Contract-first: request and response schemas live in `packages/contracts` (Zod) and generate the OpenAPI document and the typed client used by web and mobile.
 
 ## 1. Conventions
@@ -23,6 +23,7 @@
 | Streaming | AI chat and generation progress use **Server-Sent Events**. |
 | Realtime | None in R1. Clients refetch on focus, on pull-to-refresh and on relevant push receipt. |
 | Webhooks (inbound) | `/v1/webhooks/{provider}` with signature verification (video provider, email provider). |
+| Health | `GET /health` answers `{ "status": "ok" }` while the process is up (NFR-OBS-04). It sits outside `/v1` and outside the OpenAPI document, because it isn't part of the client contract. A readiness check that includes the database arrives with TECH-03. |
 
 ## 2. Authorization model in the API
 
