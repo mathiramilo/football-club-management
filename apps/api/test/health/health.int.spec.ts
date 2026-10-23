@@ -1,10 +1,10 @@
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { PrismaService } from '../../src/core/database/prisma.service.js';
-import { HealthController } from '../../src/core/health/health.controller.js';
+import { SHUTDOWN_DRAIN_MS } from '../../src/core/health/readiness.service.js';
 import { createTestApp } from '../support/create-test-app.js';
 
 describe('GET /health (NFR-OBS-04)', () => {
@@ -30,34 +30,38 @@ describe('GET /health (NFR-OBS-04)', () => {
 });
 
 describe('GET /health/ready (TECH-03)', () => {
-  let app: INestApplication<App>;
-
-  afterEach(async () => {
-    await app.close();
-  });
-
   it('reports ready when the database answers', async () => {
-    app = await createTestApp();
+    const app = await createTestApp();
+    try {
+      const response = await request(app.getHttpServer()).get('/health/ready').expect(200);
 
-    const response = await request(app.getHttpServer()).get('/health/ready').expect(200);
-
-    expect(response.body).toEqual({ status: 'ok' });
+      expect(response.body).toEqual({ status: 'ok' });
+    } finally {
+      await app.close();
+    }
   });
 
   it('reports not ready when the database is unreachable', async () => {
     const unreachable = new PrismaService('postgresql://postgres:postgres@127.0.0.1:1/unreachable');
-    app = await createTestApp((builder) =>
+    const app = await createTestApp((builder) =>
       builder.overrideProvider(PrismaService).useValue(unreachable),
     );
-
-    await request(app.getHttpServer()).get('/health/ready').expect(503);
+    try {
+      await request(app.getHttpServer()).get('/health/ready').expect(503);
+    } finally {
+      await app.close();
+    }
   });
 
-  it('reports not ready once the app starts shutting down', async () => {
-    app = await createTestApp();
+  it('reports not ready while the app drains before closing', async () => {
+    const app = await createTestApp((builder) =>
+      builder.overrideProvider(SHUTDOWN_DRAIN_MS).useValue(1_000),
+    );
+    const server = app.getHttpServer();
 
-    app.get(HealthController).beforeApplicationShutdown();
-
-    await request(app.getHttpServer()).get('/health/ready').expect(503);
+    const closing = app.close();
+    await request(server).get('/health/ready').expect(503);
+    await request(server).get('/health').expect(200);
+    await closing;
   });
 });

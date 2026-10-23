@@ -1,13 +1,10 @@
-import type { BeforeApplicationShutdown } from '@nestjs/common';
 import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
 
-import { PrismaService } from '../database/prisma.service.js';
+import { ReadinessService } from './readiness.service.js';
 
 @Controller('health')
-export class HealthController implements BeforeApplicationShutdown {
-  private draining = false;
-
-  constructor(private readonly prisma: PrismaService) {}
+export class HealthController {
+  constructor(private readonly readiness: ReadinessService) {}
 
   @Get()
   check() {
@@ -16,13 +13,9 @@ export class HealthController implements BeforeApplicationShutdown {
 
   @Get('ready')
   async ready() {
-    if (this.draining || !(await this.prisma.isReachable())) {
+    if (!(await this.readiness.isReady())) {
       throw new ServiceUnavailableException();
     }
     return { status: 'ok' };
-  }
-
-  beforeApplicationShutdown(): void {
-    this.draining = true;
   }
 }

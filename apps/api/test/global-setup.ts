@@ -17,6 +17,7 @@ export async function setup(project: TestProject): Promise<void> {
 
   const migration = runPrisma(['migrate', 'deploy'], databaseUrl);
   if (migration.status !== 0) {
+    await container.stop();
     throw new Error(`prisma migrate deploy failed:\n${migration.output}`);
   }
 
