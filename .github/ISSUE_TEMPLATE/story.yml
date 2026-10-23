@@ -1,0 +1,47 @@
+name: Story or enabler
+description: Track delivery of one story, enabler or per-platform slice from the backlog.
+title: '[ID] '
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The spec is the source of truth: this issue tracks delivery only. A new story or rule gets its ID in `docs/features` first, then an issue here. Title it `[EVT-08] RSVP in the app` (docs/delivery/backlog.md § 1).
+
+  - type: input
+    id: id
+    attributes:
+      label: ID
+      description: Story or enabler ID, with a platform suffix for a slice.
+      placeholder: EVT-08, EVT-08-api, TECH-07
+    validations:
+      required: true
+
+  - type: input
+    id: spec
+    attributes:
+      label: Spec
+      placeholder: docs/features/F03-events-and-attendance.md#evt-08--rsvp-in-the-app
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Delivery notes
+      description: "What the spec doesn't say: the split into PRs, dependencies, open questions (OQ-xx) and defaults taken."
+
+  - type: checkboxes
+    id: ready
+    attributes:
+      label: Definition of Ready
+      description: docs/delivery/working-agreements.md § 2
+      options:
+        - label: Testable acceptance criteria in the spec
+        - label: Business rules written and open questions answered or defaulted
+        - label: Permissions covered by the permission matrix
+        - label: Designs available, or an explicit "reuse pattern X"
+        - label: Spanish copy available for new strings, notifications and emails
+        - label: API and data-model impact identified
+        - label: Size L or smaller
+        - label: Telemetry events listed
