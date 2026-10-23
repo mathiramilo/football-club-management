@@ -13,9 +13,9 @@ All business logic, data access and authorization stay in the NestJS API. The we
 
 ## Next.js knowledge
 
-Next.js 16.3+ ships version-matched docs in `node_modules/next/dist/docs`, and with `agentRules` on (the default) `next dev` writes `apps/web/AGENTS.md` pointing at them. Read those docs before writing Next.js code: the installed version wins over memory. When TECH-09 scaffolds `apps/web`, add `apps/web/CLAUDE.md` containing `@AGENTS.md` so Claude Code loads them.
+Next.js 16.3+ ships version-matched docs in `node_modules/next/dist/docs`, and with `agentRules` on (the default) `next dev` writes `apps/web/AGENTS.md` pointing at them. Read those docs before writing Next.js code: the installed version wins over memory. `apps/web/CLAUDE.md` imports `AGENTS.md`, so Claude Code loads them. Commit `AGENTS.md` when `next dev` changes it.
 
-`create-next-app` also turns on `experimental.agentFeedback`, which needs Next.js telemetry, has the agent run `next internal agent-feedback-instructions` and opens issue-report forms in the browser. Set it to `false` at TECH-09, and decide whether to keep `experimental.agentUpgrade`, whose reminders stop `next dev` and `next build` when an agent runs them.
+`apps/web` was created with `--no-agent-feedback`: `experimental.agentFeedback` needs Next.js telemetry, has the agent run `next internal agent-feedback-instructions` and opens issue-report forms in the browser. Keep it off. Leave `experimental.agentUpgrade` off too: its reminders stop `next dev` and `next build` when an agent runs them.
 
 Task skills: `next-bundle-optimizer` (bundle audits against the public-page budget), `react-best-practices` (performance rules), `web-page`, `shadcn`, `orval` (the generated client).
 

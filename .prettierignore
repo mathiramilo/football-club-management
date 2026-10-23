@@ -1,3 +1,7 @@
 *.md
 .claude/
 pnpm-lock.yaml
+.next/
+next-env.d.ts
+.expo/
+expo-env.d.ts
