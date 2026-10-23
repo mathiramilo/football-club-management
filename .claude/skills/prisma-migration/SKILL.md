@@ -25,50 +25,53 @@ Specs: `docs/tech/02-data-model.md` (entities, conventions, invariants), ADR-005
 ## 2. Edit the schema
 
 ```prisma
-model EventInvitee {
+model CategoryMembership {
   id               String    @id @default(uuid(7)) @db.Uuid
   clubId           String    @map("club_id") @db.Uuid
-  eventId          String    @map("event_id") @db.Uuid
+  categoryId       String    @map("category_id") @db.Uuid
   clubMembershipId String    @map("club_membership_id") @db.Uuid
-  rsvpStatus       String    @default("pending") @map("rsvp_status")
-  rsvpReason       String?   @map("rsvp_reason")
-  removedAt        DateTime? @map("removed_at") @db.Timestamptz(6)
+  staffRole        String?   @map("staff_role")
+  isPlayer         Boolean   @default(false) @map("is_player")
+  startsOn         DateTime  @map("starts_on") @db.Date
+  endsOn           DateTime? @map("ends_on") @db.Date
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   club           Club           @relation(fields: [clubId], references: [id])
-  event          Event          @relation(fields: [eventId], references: [id])
-  clubMembership ClubMembership @relation(fields: [clubMembershipId], references: [id])
+  category       Category       @relation(fields: [categoryId, clubId], references: [id, clubId])
+  clubMembership ClubMembership @relation(fields: [clubMembershipId, clubId], references: [id, clubId])
 
-  @@unique([eventId, clubMembershipId])
-  @@index([clubMembershipId, eventId])
-  @@index([eventId, rsvpStatus])
-  @@map("event_invitees")
+  @@unique([categoryId, clubMembershipId], map: "category_memberships_one_open_per_person", where: { endsOn: null })
+  @@index([categoryId, endsOn])
+  @@index([clubMembershipId])
+  @@index([clubId])
+  @@map("category_memberships")
 }
 ```
 
-Checklist: `club_id` on tenant tables · UUID v7 id · `timestamptz` timestamps · `@map` / `@@map` snake_case · enum as `String` · indexes for the queries the story needs · hashed tokens · `version` on collaboratively edited documents.
+Checklist: `club_id` on tenant tables · UUID v7 id · `timestamptz` timestamps · `@default(now()) @updatedAt` so raw SQL inserts work · `@map` / `@@map` snake_case · enum as `String` · indexes for the queries the story needs · hashed tokens · `version` on collaboratively edited documents.
+
+- **Tenant consistency**: a club-owned parent declares `@@unique([id, clubId])`, and each child references it with `@relation(fields: [parentId, clubId], references: [id, clubId])`, so a child can't point at another club's row. This works for nullable parent columns too.
+- **Partial indexes** live in the schema (`where:` on `@@unique` / `@@index`, `partialIndexes` preview feature), so drift checks see them.
 
 ## 3. Generate, then add what Prisma can't express
 
 1. Create the migration without applying it: `prisma migrate dev --create-only --name <verb_noun>` (e.g. `add_event_invitees`), run in `apps/api`.
-2. Append the SQL the schema can't express:
+2. Append the SQL the schema can't express, under a `-- Hand-written` heading:
 
 ```sql
 ALTER TABLE event_invitees
   ADD CONSTRAINT event_invitees_rsvp_status_check
-  CHECK (rsvp_status IN ('pending', 'going', 'not_going'));
+    CHECK (rsvp_status IN ('pending', 'going', 'not_going')),
+  ADD CONSTRAINT event_invitees_not_going_requires_reason_check
+    CHECK (rsvp_status <> 'not_going' OR rsvp_reason IS NOT NULL);
 
-ALTER TABLE event_invitees
-  ADD CONSTRAINT event_invitees_not_going_requires_reason
-  CHECK (rsvp_status <> 'not_going' OR rsvp_reason IS NOT NULL);
-
-CREATE UNIQUE INDEX category_memberships_one_open_per_person
-  ON category_memberships (category_id, club_membership_id)
-  WHERE ends_on IS NULL;
+CREATE UNIQUE INDEX categories_club_id_name_active_key
+  ON categories (club_id, lower(immutable_unaccent(name)))
+  WHERE archived_at IS NULL;
 ```
 
-   Also: generated `tsvector` columns (Spanish config + `unaccent`), extensions, composite FKs for tenant consistency.
+   Prisma's drift check ignores CHECK constraints and expression indexes, so they stay. `unaccent()` isn't immutable: use the `immutable_unaccent()` wrapper in indexes and generated columns. Also: generated `tsvector` columns (Spanish config + `unaccent`) and extensions.
 3. Apply it with `pnpm --filter ./apps/api db:migrate` (Prisma 7's `migrate dev` no longer regenerates the client; the script does), then run it again and confirm it reports **no drift**. The `Prisma migrations` integration test repeats this check in CI. If Prisma tries to drop a hand-written object, the pinned Prisma version can express it in the schema: use the schema instead.
 
 ## 4. Review the SQL

@@ -19,7 +19,7 @@ Specs: `docs/tech/02-data-model.md`, ADR-005, ADR-013. See the `prisma-migration
 - `created_by` / `updated_by` on mutable business tables. A `version` integer on collaboratively edited documents (`events`, `session_plans`).
 - Access-granting tokens are stored as hashes (`token_hash`), never in plain text.
 - Extensions in use: `citext`, `unaccent`, `pg_trgm`.
-- Enforce invariants in the database where possible (data model § 4): partial unique indexes, check constraints, composite FKs for tenant consistency. Write what the Prisma schema can't express in the migration SQL.
+- Enforce invariants in the database where possible (data model § 4): partial unique indexes, check constraints, composite FKs for tenant consistency. Partial indexes and composite FKs go in the schema (`partialIndexes` preview; parent `@@unique([id, clubId])`, child `references: [id, clubId]`); CHECK constraints and expression indexes go in the migration SQL.
 
 ## Migrations
 
@@ -32,7 +32,7 @@ Specs: `docs/tech/02-data-model.md`, ADR-005, ADR-013. See the `prisma-migration
 - Repositories are the only code that uses the Prisma client, and every method takes the club context first.
 - Look up tenant rows with the club in the filter: `findFirst` / `findFirstOrThrow({ where: { id, clubId } })` or a compound unique that includes `club_id`. Never `findUnique({ where: { id } })` on a tenant table.
 - Interactive transactions use only `tx`, stay short, and contain no provider calls. The outbox row is written with the same `tx`.
-- Map `P2002` (unique), `P2003` (foreign key) and `P2025` (not found) to problem+json codes at the service boundary.
+- Map `P2002` (unique), `P2003` (foreign key), `P2039` (check) and `P2025` (not found) to problem+json codes at the service boundary. A Prisma error's `meta` carries Postgres's `detail`, which for a CHECK violation is the whole failing row: never log, report or return `meta`.
 - `updateMany` doesn't set `@updatedAt`: set `updatedAt` explicitly. Use `createManyAndReturn` / `updateManyAndReturn` when you need the rows.
 - Index every foreign key. In composite indexes put `club_id` first, then equality columns, then range or sort columns; use partial indexes for status and soft-delete filters. Check new heavy queries with `EXPLAIN (ANALYZE, BUFFERS)` on realistic seed data.
 - Reference skills: `prisma-client-api` (client API) and `postgres-best-practices` (indexes, locking, query design).
