@@ -3,7 +3,7 @@ generator client {
   output              = "../src/generated/prisma"
   moduleFormat        = "esm"
   importFileExtension = "js"
-  previewFeatures     = ["partialIndexes", "postgresqlExtensions"]
+  previewFeatures     = ["partialIndexes", "postgresqlExtensions", "typedSql"]
 }
 
 datasource db {
