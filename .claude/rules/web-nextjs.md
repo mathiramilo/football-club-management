@@ -39,7 +39,7 @@ Use route groups to keep the surfaces apart, e.g. `app/(public)/…`, `app/(port
 
 ## Session and auth
 
-- Session in httpOnly, Secure, SameSite cookies on the shared parent domain (`app.` / `api.`). **Never put tokens in `localStorage`, `sessionStorage` or JS-readable cookies.** Final shape comes from the auth spike (ADR-007, TECH-04).
+- The session is Better Auth's httpOnly, Secure, SameSite cookie on the shared parent domain (`app.` / `api.`) (ADR-007). **Never put tokens in `localStorage`, `sessionStorage` or JS-readable cookies.** TECH-09 settles how server-rendered pages forward it to the API.
 - Pages opened inside WhatsApp, Instagram or Facebook in-app browsers must work. Detect embedded webviews that block Google OAuth and offer email codes plus an "open in browser" hint (NFR-COMP-04).
 - Serve `/.well-known/apple-app-site-association` and `/.well-known/assetlinks.json` as JSON for universal links and App Links (NFR-COMP-03).
 

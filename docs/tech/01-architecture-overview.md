@@ -1,6 +1,6 @@
 # Architecture Overview
 
-> Status: **Proposed v0.1**. Every technology choice here is a recommendation to be confirmed in the [ADR log](adr-log.md) during R0. · Last updated: 2026-10-22
+> Status: **Proposed v0.1**. Every technology choice here is a recommendation to be confirmed in the [ADR log](adr-log.md) during R0. · Last updated: 2026-10-23
 > Related: [Tech stack](00-tech-stack.md) (libraries and tools per app) · [Data model](02-data-model.md) · [API guidelines](03-api-guidelines.md) · [AI architecture](04-ai-architecture.md) · [NFRs](05-non-functional-requirements.md)
 
 ## 1. Drivers and constraints
@@ -113,9 +113,9 @@ flowchart LR
 ## 6. Cross-cutting concerns
 
 ### 6.1 Authentication
-- Sign-in with Google, Apple and email one-time codes (F01). Short-lived access tokens (JWT, about 15 min) and rotating refresh tokens stored hashed (BR-AUTH-04).
-- The mobile app stores tokens in the secure keychain/keystore. The web app uses httpOnly, secure, SameSite cookies.
-- Library or provider choice: ADR-007 (spike in R0).
+- Sign-in with Google, Apple and email one-time codes (F01), through **Better Auth** running inside the API (ADR-007). On mobile, Google and Apple sign-in is native: the app sends the provider's ID token and the API verifies it.
+- Sessions live in the database and are looked up on every request, so signing out of all devices takes effect on the next call. A session expires after 90 days without use (BR-AUTH-04). There are no refresh tokens to rotate.
+- The mobile app keeps the session token in the Keychain / Keystore and sends it as a bearer token. The web app uses httpOnly, Secure, SameSite cookies, and Better Auth rejects cookie requests from untrusted origins.
 
 ### 6.2 Authorization
 - A single policy module answers `can(actor, action, resource)` from the actor's current club and category memberships. It implements the [permission matrix](../product/02-personas-and-roles.md#4-permission-matrix).

@@ -23,7 +23,7 @@ Tokens, sign-in codes, health data, absence reasons and notes, AI message conten
 - Health data is visible only to the player and the staff of their **current** categories (BR-ROLE-10). A Club Admin role alone grants nothing.
 - Every individual health-data read goes through a dedicated, access-logged method that writes `data_access_log` (BR-WELL-16). Never read `wellness_*` tables any other way.
 - Wellness data is collected only with consent in force (BR-WELL-12). For players aged 16–17, a guardian gives consent (BR-WELL-13). Minimum account age is 16 (BR-AUTH-05).
-- Access-granting tokens (invite, claim, guardian consent, refresh) are stored **hashed**.
+- Access-granting tokens (invite, claim, guardian consent, email codes) are stored **hashed**. The one exception is Better Auth's session tokens, stored in plain text as an accepted risk (ADR-007).
 
 ## Data in the repo
 

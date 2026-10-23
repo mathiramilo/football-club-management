@@ -58,6 +58,7 @@ Decisions D-01 to D-16 resolve contradictions found in the docs consistency revi
 | D-14 | Seasons, match results, the admin audit-log viewer and configurable at-risk and wellness-flag thresholds are **Later**, not R3 (OQ-16, OQ-19). | 2026-10-22 | Product (docs review) |
 | D-15 | CLUB-17 (delete the club) moves to R1-β, because account deletion (AUTH-13, β) requires Owners to delete or transfer their club. | 2026-10-22 | Product (docs review) |
 | D-16 | Consent records survive account deletion for 5 years as evidence, minimized (BR-AUTH-12, Privacy § 6). Club Admins see individual routines and nutrition plans only if they are also staff of the player's category (Roles § 4.4). | 2026-10-22 | Product (docs review) |
+| D-17 | Sessions expire after 90 days without use on every device (was 90 on mobile and 30 on web), and are revocable server-side sessions without refresh rotation, following the auth spike (BR-AUTH-04, ADR-007). | 2026-10-23 | Product (TECH-04 spike) |
 
 ## 4. Naming shortlist (OQ-03)
 

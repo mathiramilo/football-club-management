@@ -36,7 +36,7 @@ Shared across all three: `packages/contracts` (Zod), `packages/domain` (pure bus
 | ORM | **Prisma 7** with the `pg` driver adapter (ADR-013, confirmed by the TECH-03 spike) | Mature migrations and good developer experience. Analytics queries that need hand-written SQL use `$queryRaw` tagged templates; at Year-1 volume the 12-month category attendance query runs in about 7 ms. |
 | Background jobs | **pg-boss** (a queue that lives in Postgres) | Reminders, weekly digests, wellness cycles, roll-call nudges and scheduled plan publishing all need reliable scheduling. `startAfter` covers scheduled sends and `singletonKey` covers de-duplication (BR-NOTIF-03). No Redis in the MVP; move to BullMQ + Redis only if volume demands it. |
 | Reliability pattern | **Transactional outbox + idempotent jobs** | Side effects are recorded in the same transaction as the change that causes them. That keeps them crash-safe, and no notification is sent twice. |
-| Auth | **Self-hosted auth library** (e.g. Better Auth) **vs. a managed service** (e.g. Clerk), decided by a short spike (ADR-007) | Sign-in with Google, Apple and email codes. Per-user pricing from a managed provider hurts when most users are low-value player accounts. |
+| Auth | **Better Auth** (self-hosted library inside the API; ADR-007, accepted after the TECH-04 spike) | Sign-in with Google and Apple ID tokens and email codes, with sessions in our database and no per-user cost. Managed providers cost little at 25k MAU, but each missed a requirement: data region, httpOnly cookies or native sign-in. |
 | Authorization | NestJS **guards** + a central **policy module** (`can(actor, action, resource)`) + tenant-scoped repositories | Implements the [permission matrix](../product/02-personas-and-roles.md#4-permission-matrix) in one place (NFR-SEC-02/03). |
 | Idempotency and rate limiting | Idempotency interceptor (keys stored in Postgres, 24 h) · `@nestjs/throttler` with a **Postgres-backed store** (or edge rate limiting) | Required for offline retries (NFR-OFF-01). Avoids adding Redis just for counters. |
 | Push | **Expo Push Service** (`expo-server-sdk`) | Cheap and simple; wraps APNs and FCM, with receipts for token cleanup. |
@@ -75,8 +75,8 @@ Shared across all three: `packages/contracts` (Zod), `packages/domain` (pure bus
 | Styling | **NativeWind** + own component primitives | The same Tailwind mental model as web. Tokens come from a shared Tailwind preset in `packages/ui-tokens`. Supports dark mode and high-contrast field screens (NFR-A11Y-04). |
 | Server state and offline | **TanStack Query** + a persisted cache on **react-native-mmkv** · **paused mutations** persisted and resumed on reconnect, each carrying an `Idempotency-Key` | Offline reads (NFR-OFF-02) and the offline write queue for RSVP, roll call, check-ins and routine logs (NFR-OFF-01), without a custom sync engine. |
 | Local UI state | **Zustand** | Selected club and category, UI preferences. |
-| Secure storage | **expo-secure-store** | Refresh tokens in the Keychain / Keystore (NFR-SEC-11). |
-| Sign-in | `@react-native-google-signin/google-signin` · `expo-apple-authentication` · email-code screens | Final integration depends on ADR-007. |
+| Secure storage | **expo-secure-store** | The session token in the Keychain / Keystore, kept there by `@better-auth/expo` (NFR-SEC-11). |
+| Sign-in | `@react-native-google-signin/google-signin` · `expo-apple-authentication` · `@better-auth/expo` · email-code screens | The native SDKs return an ID token, which Better Auth verifies in the API (ADR-007). |
 | Push | **expo-notifications** with notification **categories and actions** (Voy / No voy) | Background handling of the "Voy" action must be validated on iOS and Android in R0 (spike, § 8). |
 | Lists | **@shopify/flash-list** | Roll call, member directory, agenda. |
 | Gestures, animation, sheets | **react-native-reanimated**, **react-native-gesture-handler**, **@gorhom/bottom-sheet** | Reason picker, filters, drag handles in the plan builder. |
@@ -161,7 +161,7 @@ Chosen at TECH-01 (2026-10-23). Lift a hold when its condition is met, in its ow
 
 | Spike | Question | Outcome feeds |
 |---|---|---|
-| Auth | Does a self-hosted library (e.g. Better Auth) cover native Google and Apple sign-in on Expo, email codes, refresh rotation, and cookie sessions for Next.js against a NestJS API? What would a managed provider cost at 25k MAU? | ADR-007, TECH-04 |
+| Auth | Does a self-hosted library (e.g. Better Auth) cover native Google and Apple sign-in on Expo, email codes, refresh rotation, and cookie sessions for Next.js against a NestJS API? What would a managed provider cost at 25k MAU? | ADR-007, TECH-04 · **Done** (2026-10-23): Better Auth, with revocable sessions instead of refresh rotation |
 | Actionable push | Can "Voy" from a notification submit in the background (app killed or backgrounded) on iOS and Android with expo-notifications? | EVT-09, NOTIF-05 |
 | In-app browsers | Does WhatsApp open links in an in-app browser that blocks Google OAuth, on each OS? | NFR-COMP-04, AUTH-01 |
 | Offline queue | Do TanStack Query paused mutations, persisted with MMKV, survive app restarts and replay idempotently? | NFR-OFF-01, EVT-15 |

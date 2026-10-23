@@ -1,6 +1,6 @@
 # F01 — Accounts, Sign-in & Onboarding
 
-> Status: **Draft v0.1** · Release: **R1** · Owner: Product · Last updated: 2026-10-22
+> Status: **Draft v0.1** · Release: **R1** · Owner: Product · Last updated: 2026-10-23
 > Related: [Roles](../product/02-personas-and-roles.md) · [F02 Clubs & membership](F02-clubs-categories-and-membership.md) · [Privacy](../product/06-privacy-and-compliance.md) · OQ-05, OQ-06, OQ-07, OQ-08
 
 ## 1. Goal
@@ -28,7 +28,7 @@ This feature is not in the Notion brief. It is a prerequisite for every other fe
 | BR-AUTH-01 | An account is identified by a **verified email**. Signing in with Google or Apple using a verified email that already belongs to an account signs into that account. Unverified provider emails are never auto-linked. |
 | BR-AUTH-02 | Apple "Hide My Email" relay addresses are accepted. They create separate accounts unless the user signs in with the same Apple ID again. |
 | BR-AUTH-03 | Email one-time codes: 6 digits, valid 10 minutes, single use, at most 5 attempts per code, resend allowed after 60 s, and rate limited per email and per IP (see [NFR](../tech/05-non-functional-requirements.md)). |
-| BR-AUTH-04 | Sessions use short-lived access tokens and rotating refresh tokens. Refresh tokens expire after 90 days of inactivity on mobile and 30 days on web. A user can sign out of all devices. |
+| BR-AUTH-04 | Sessions are kept on the server and expire after 90 days without use, on every device (D-17, ADR-007). A user can sign out of all devices. |
 | BR-AUTH-05 | **Minimum age is 16** (OQ-05). Birthdate is required. Under 16, sign-up is blocked with a friendly explanation. Users aged 16–17 are flagged as **minors**: wellness check-ins stay disabled until a guardian consents ([F07](F07-player-wellness.md)). |
 | BR-AUTH-06 | Required personal fields: first name, last name, birthdate. Optional: nickname (*apodo*), photo, phone number. |
 | BR-AUTH-07 | **Display name**: the nickname if set, otherwise first name plus last-name initial ("Nicolás P."). Staff always see full names as well. |
@@ -162,7 +162,7 @@ As a user, I want to sign out of this device or of all devices so that I stay in
 
 **Acceptance criteria**
 - "Cerrar sesión" signs out the current device and unregisters its push token.
-- "Cerrar sesión en todos los dispositivos" revokes all refresh tokens; other devices are signed out on their next API call.
+- "Cerrar sesión en todos los dispositivos" revokes all sessions; other devices are signed out on their next API call.
 
 ### AUTH-13 · Delete my account
 **Release:** R1 · **Priority:** Must · **Size:** M · **Platforms:** Mobile, Web
