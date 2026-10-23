@@ -55,7 +55,7 @@
 
 ## ADR-005 · PostgreSQL, shared-schema multi-tenancy (Accepted)
 - **Context**: thousands of small tenants (clubs), relational data, analytics queries, full-text search.
-- **Decision**: managed **PostgreSQL 18**, the same major in local Docker Compose and in CI's Testcontainers. `club_id` on every tenant table, enforced by the repository layer and tests (NFR-SEC-03), and by the database: a child of a club-owned row references it through a composite `(parent_id, club_id)` foreign key, so it can't point into another club. Extensions: `unaccent`, `pg_trgm`, `citext`. Row-Level Security is Later, as defense in depth for wellness tables.
+- **Decision**: managed **PostgreSQL 18**, the same major in local Docker Compose and in CI's Testcontainers. `club_id` on every tenant table, enforced by the repository layer and tests (NFR-SEC-03), and by the database: a child of a club-owned row references it through a composite `(parent_id, club_id)` foreign key, so it can't point into another club, and a trigger keeps `club_id` from ever changing. Extensions: `unaccent`, `pg_trgm`, `citext`, and `btree_gist` for exclusion constraints such as non-overlapping category memberships. Row-Level Security is Later, as defense in depth for wellness tables.
 - **Accepted** 2026-10-23 with TECH-03, which built the club and event tables this way (#9, #10).
 - **Alternatives**: schema-per-tenant (migration overhead with many small clubs); document databases (relational integrity matters here).
 - **Consequences**: simple operations and cross-club platform features (starter library). Isolation must be tested rigorously.
