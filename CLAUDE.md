@@ -58,7 +58,7 @@ Rows marked with an enabler ID don't run yet. They keep these names when that en
 | Task | Command | Available |
 |---|---|---|
 | Install | `pnpm install` | ✅ |
-| Local Postgres | `docker compose up -d postgres` | TECH-03 |
+| Local Postgres | `docker compose up -d postgres`, then copy `apps/api/.env.example` to `apps/api/.env` (if 5432 is taken, set `POSTGRES_PORT` in a root `.env` and match it in `DATABASE_URL`) | ✅ |
 | Run everything in dev | `pnpm dev` | ✅ |
 | Lint and format check | `pnpm lint` · `pnpm format:check` (`pnpm format` fixes) | ✅ |
 | Typecheck | `pnpm typecheck` | ✅ |
@@ -67,8 +67,10 @@ Rows marked with an enabler ID don't run yet. They keep these names when that en
 | Build | `pnpm build` | ✅ |
 | Regenerate the OpenAPI document and `packages/api-client` | `pnpm codegen` | TECH-06 |
 | OpenAPI breaking-change check against `main` | `pnpm contract:check` | TECH-06 |
-| Create a migration without applying it | `pnpm --filter ./apps/api exec prisma migrate dev --create-only --name <verb_noun>` | TECH-03 |
-| Apply migrations and seed (local) | `pnpm --filter ./apps/api db:migrate` · `pnpm --filter ./apps/api db:seed` | TECH-03 |
+| Regenerate the Prisma client | `pnpm --filter ./apps/api db:generate` (turbo runs it before lint, typecheck, test, build and dev) | ✅ |
+| Create a migration without applying it | `pnpm --filter ./apps/api exec prisma migrate dev --create-only --name <verb_noun>` | ✅ |
+| Apply migrations (local; also regenerates the client) | `pnpm --filter ./apps/api db:migrate` | ✅ |
+| Seed synthetic data (local) | `pnpm --filter ./apps/api db:seed` | TECH-03 |
 | Mobile dev client | `pnpm --filter ./apps/mobile start` | ✅ Metro only; the development build arrives with TECH-08 |
 
 Keep this table in sync with the root `package.json`.

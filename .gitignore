@@ -36,3 +36,5 @@ coverage/
 
 # taste-skill working files
 .taste-skill/
+
+apps/api/src/generated/

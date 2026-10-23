@@ -1,5 +1,5 @@
 import type { INestApplication } from '@nestjs/common';
 
 export function configureApp(app: INestApplication): void {
-  app.setGlobalPrefix('v1', { exclude: ['health'] });
+  app.setGlobalPrefix('v1', { exclude: ['health', 'health/ready'] });
 }

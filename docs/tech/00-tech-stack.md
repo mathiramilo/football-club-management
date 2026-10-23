@@ -32,7 +32,7 @@ Shared across all three: `packages/contracts` (Zod), `packages/domain` (pure bus
 | Language / runtime | **TypeScript on Node.js (Active LTS)** | One language with the Expo and Next.js apps. Validation schemas, types and business rules (attendance %, wellness flags, RSVP deadlines) are written once and shared through the monorepo. |
 | Framework | **NestJS 12** (ESM) | Clear modules, so clubs, events, wellness and AI stay separate ([Architecture § 4](01-architecture-overview.md#4-backend-modules-bounded-contexts)). Guards fit the role and category permission checks. Dependency injection makes business rules easy to test. Fastify is a lighter alternative but needs more structure built by hand. |
 | API style | **REST + OpenAPI**, with schemas defined in **Zod**, validated and turned into OpenAPI by NestJS 12's native Standard Schema support | Old mobile app versions stay in use for months, and an explicit, versioned contract handles that better than tRPC or GraphQL. A typed API client is generated for both web and mobile (§ 5). |
-| Database | **PostgreSQL** (managed, with point-in-time recovery) | The data is relational: clubs → categories → memberships → events → RSVPs. Built-in full-text search with Spanish support (`unaccent`, `pg_trgm`) covers the exercise library. `pgvector` is available later if needed. |
+| Database | **PostgreSQL 18** (managed, with point-in-time recovery; local Docker Compose and CI's Testcontainers run the same major) | The data is relational: clubs → categories → memberships → events → RSVPs. Built-in full-text search with Spanish support (`unaccent`, `pg_trgm`) covers the exercise library. `pgvector` is available later if needed. |
 | ORM | **Prisma** (Drizzle if the team prefers SQL-first) | Mature migrations and good developer experience. Analytics queries that need hand-written SQL use Prisma's typed raw queries. |
 | Background jobs | **pg-boss** (a queue that lives in Postgres) | Reminders, weekly digests, wellness cycles, roll-call nudges and scheduled plan publishing all need reliable scheduling. `startAfter` covers scheduled sends and `singletonKey` covers de-duplication (BR-NOTIF-03). No Redis in the MVP; move to BullMQ + Redis only if volume demands it. |
 | Reliability pattern | **Transactional outbox + idempotent jobs** | Side effects are recorded in the same transaction as the change that causes them. That keeps them crash-safe, and no notification is sent twice. |
@@ -121,7 +121,7 @@ flowchart LR
 |---|---|---|
 | Web hosting | Vercel | R0 |
 | API + worker hosting | Container platform with a São Paulo region (e.g. Fly.io, AWS ECS/Fargate, Google Cloud Run) | R0 |
-| Database | Managed PostgreSQL in São Paulo (e.g. Neon, Supabase, RDS) with PITR | R0 |
+| Database | Managed PostgreSQL 18 in São Paulo (e.g. Neon, Supabase, RDS) with PITR | R0 |
 | Object storage | Cloudflare R2 (S3-compatible) | R1 |
 | Push | Expo Push Service → APNs / FCM | R1 |
 | Email | Postmark or Resend | R1 |

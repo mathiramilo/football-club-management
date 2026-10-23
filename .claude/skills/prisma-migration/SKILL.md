@@ -69,7 +69,7 @@ CREATE UNIQUE INDEX category_memberships_one_open_per_person
 ```
 
    Also: generated `tsvector` columns (Spanish config + `unaccent`), extensions, composite FKs for tenant consistency.
-3. Apply it with `prisma migrate dev`, then run it again and confirm it reports **no drift**. If Prisma tries to drop a hand-written object, the pinned Prisma version can express it in the schema: use the schema instead.
+3. Apply it with `pnpm --filter ./apps/api db:migrate` (Prisma 7's `migrate dev` no longer regenerates the client; the script does), then run it again and confirm it reports **no drift**. The `Prisma migrations` integration test repeats this check in CI. If Prisma tries to drop a hand-written object, the pinned Prisma version can express it in the schema: use the schema instead.
 
 ## 4. Review the SQL
 

@@ -23,7 +23,7 @@
 | Streaming | AI chat and generation progress use **Server-Sent Events**. |
 | Realtime | None in R1. Clients refetch on focus, on pull-to-refresh and on relevant push receipt. |
 | Webhooks (inbound) | `/v1/webhooks/{provider}` with signature verification (video provider, email provider). |
-| Health | `GET /health` answers `{ "status": "ok" }` while the process is up (NFR-OBS-04). It sits outside `/v1` and outside the OpenAPI document, because it isn't part of the client contract. A readiness check that includes the database arrives with TECH-03. |
+| Health | `GET /health` answers `{ "status": "ok" }` while the process is up (NFR-OBS-04). `GET /health/ready` answers the same when the database responds, and 503 when it doesn't or once the process starts shutting down, so the host stops routing traffic to it. Both sit outside `/v1` and outside the OpenAPI document, because they aren't part of the client contract. |
 
 ## 2. Authorization model in the API
 
