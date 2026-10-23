@@ -5,9 +5,12 @@
   "type": "module",
   "exports": {
     "./eslint/base": "./eslint/base.js",
+    "./eslint/expo": "./eslint/expo.js",
+    "./eslint/next": "./eslint/next.js",
     "./eslint/node": "./eslint/node.js",
     "./prettier": "./prettier.js",
     "./tsconfig/base.json": "./tsconfig/base.json",
+    "./tsconfig/nextjs.json": "./tsconfig/nextjs.json",
     "./tsconfig/node.json": "./tsconfig/node.json"
   },
   "scripts": {
@@ -15,6 +18,8 @@
   },
   "dependencies": {
     "@eslint/js": "9.39.5",
+    "eslint-config-expo": "58.0.4",
+    "eslint-config-next": "16.4.2",
     "eslint-config-prettier": "10.1.8",
     "globals": "17.13.0",
     "typescript-eslint": "8.72.0"

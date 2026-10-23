@@ -2,7 +2,7 @@
 
 Mobile app (Expo), web app (Next.js) and API (NestJS) for amateur and semi-professional football clubs in Uruguay and Argentina. The specs live in `docs/`; start with `docs/README.md`.
 
-**Status:** R0 in progress. The workspace, shared config and CI exist (TECH-01). Next: the apps, then the spikes in `docs/tech/00-tech-stack.md` § 8.
+**Status:** R0 in progress. The monorepo is scaffolded (TECH-01): minimal API, web and mobile apps with shared config and CI. Next: the spikes in `docs/tech/00-tech-stack.md` § 8 and the other R0 enablers.
 
 ## How Claude is set up here
 
@@ -69,6 +69,6 @@ Rows marked with an enabler ID don't run yet. They keep these names when that en
 | OpenAPI breaking-change check against `main` | `pnpm contract:check` | TECH-06 |
 | Create a migration without applying it | `pnpm --filter ./apps/api exec prisma migrate dev --create-only --name <verb_noun>` | TECH-03 |
 | Apply migrations and seed (local) | `pnpm --filter ./apps/api db:migrate` · `pnpm --filter ./apps/api db:seed` | TECH-03 |
-| Mobile dev client | `pnpm --filter ./apps/mobile start` | TECH-01 (`apps/mobile`) |
+| Mobile dev client | `pnpm --filter ./apps/mobile start` | ✅ Metro only; the development build arrives with TECH-08 |
 
 Keep this table in sync with the root `package.json`.

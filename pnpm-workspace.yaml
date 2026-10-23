@@ -3,9 +3,15 @@ packages:
   - packages/*
 
 catalog:
+  '@types/react': 19.3.0
   eslint: 9.39.5
   prettier: 3.9.10
+  react: 19.3.0
+  react-dom: 19.3.0
   typescript: 6.0.3
 
 savePrefix: ''
 minimumReleaseAge: 1440
+
+allowBuilds:
+  unrs-resolver: false
