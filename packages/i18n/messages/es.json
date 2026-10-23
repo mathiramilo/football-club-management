@@ -1,0 +1,8 @@
+{
+  "email": {
+    "signInCode": {
+      "subject": "Tu código para entrar",
+      "text": "¡Hola! Tu código para entrar es {code}. Vence en {minutes} minutos.\n\nSi no lo pediste, ignorá este correo: sin el código nadie puede entrar a tu cuenta."
+    }
+  }
+}

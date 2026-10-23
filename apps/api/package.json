@@ -22,6 +22,8 @@
     "@nestjs/platform-express": "12.2.0",
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
+    "@repo/i18n": "workspace:*",
+    "intl-messageformat": "12.1.4",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2",
     "zod": "4.6.7"
