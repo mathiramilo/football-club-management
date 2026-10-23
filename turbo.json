@@ -3,16 +3,26 @@
   "ui": "tui",
   "globalPassThroughEnv": ["NEXT_TELEMETRY_DISABLED", "EXPO_NO_TELEMETRY"],
   "tasks": {
+    "db:generate": {
+      "inputs": ["prisma/schema.prisma", "prisma.config.ts"],
+      "outputs": ["src/generated/**"]
+    },
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "db:generate"],
       "outputs": ["dist/**"]
     },
-    "lint": {},
-    "typecheck": {},
+    "lint": {
+      "dependsOn": ["db:generate"]
+    },
+    "typecheck": {
+      "dependsOn": ["db:generate"]
+    },
     "test": {
+      "dependsOn": ["db:generate"],
       "outputs": []
     },
     "dev": {
+      "dependsOn": ["db:generate"],
       "cache": false,
       "persistent": true
     }
