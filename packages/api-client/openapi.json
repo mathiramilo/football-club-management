@@ -51,7 +51,10 @@
               "PAYLOAD_TOO_LARGE",
               "RATE_LIMITED",
               "INTERNAL_ERROR",
-              "SERVICE_UNAVAILABLE"
+              "SERVICE_UNAVAILABLE",
+              "IDEMPOTENCY_KEY_REQUIRED",
+              "IDEMPOTENCY_KEY_REUSED",
+              "IDEMPOTENCY_REQUEST_IN_PROGRESS"
             ]
           },
           "detail": {
