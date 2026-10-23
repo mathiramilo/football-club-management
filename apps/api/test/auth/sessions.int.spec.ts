@@ -3,6 +3,7 @@ import request from 'supertest';
 import type { App } from 'supertest/types.js';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { Clock } from '../../src/core/clock/clock.js';
 import { PrismaService } from '../../src/core/database/prisma.service.js';
 import { EmailSender } from '../../src/core/email/email-sender.js';
 import {
@@ -13,11 +14,13 @@ import {
   WhoAmIModule,
 } from '../support/auth-fixtures.js';
 import { createTestApp } from '../support/create-test-app.js';
+import { FakeClock } from '../support/fake-clock.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 describe('Sessions and the auth guard (BR-AUTH-04, NFR-SEC-11, AUTH-12)', () => {
   const email = new FakeEmailSender();
+  const clock = new FakeClock(new Date());
   let app: INestApplication<App>;
   let db: PrismaService;
 
@@ -27,7 +30,12 @@ describe('Sessions and the auth guard (BR-AUTH-04, NFR-SEC-11, AUTH-12)', () => 
 
   beforeAll(async () => {
     app = await createTestApp(
-      (builder) => builder.overrideProvider(EmailSender).useValue(email),
+      (builder) =>
+        builder
+          .overrideProvider(EmailSender)
+          .useValue(email)
+          .overrideProvider(Clock)
+          .useValue(clock),
       [WhoAmIModule],
     );
     db = app.get(PrismaService);
@@ -103,6 +111,7 @@ describe('Sessions and the auth guard (BR-AUTH-04, NFR-SEC-11, AUTH-12)', () => 
   it('signs out this device only (AUTH-12)', async () => {
     const address = uniqueEmail('salir');
     const phone = await signInWithEmailCode(app, email, address);
+    clock.advance(61_000);
     const tablet = await signInWithEmailCode(app, email, address);
 
     await http()
@@ -117,6 +126,7 @@ describe('Sessions and the auth guard (BR-AUTH-04, NFR-SEC-11, AUTH-12)', () => 
   it('signs out every device on their next request (AUTH-12)', async () => {
     const address = uniqueEmail('todos');
     const phone = await signInWithEmailCode(app, email, address);
+    clock.advance(61_000);
     const tablet = await signInWithEmailCode(app, email, address);
 
     await http()

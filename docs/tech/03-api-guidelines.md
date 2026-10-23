@@ -38,7 +38,11 @@ Release tags indicate when each endpoint is first needed.
 
 ### Auth and me (R1)
 
-Better Auth serves the `/v1/auth/*` routes with its own paths and error shape (ADR-007). They aren't problem+json and aren't in the OpenAPI document; TECH-04 checks whether its OpenAPI plugin can add them.
+Better Auth serves the `/v1/auth/*` routes with its own paths and error shape, `{ code, message }` (ADR-007). They aren't problem+json and aren't in the OpenAPI document. Its `openAPI` plugin can generate an OpenAPI 3.1 document for them; TECH-06 decides whether to merge it into ours for Orval.
+
+Code requests answer `429` in two cases (BR-AUTH-03, NFR-SEC-05):
+- the per-email limit (60 s between codes, 5 an hour) returns `code` `CODE_RESEND_TOO_SOON` or `CODE_RATE_LIMITED`, with `Retry-After`;
+- Better Auth's per-IP limit (30 an hour) returns no `code`, and its wait in `X-Retry-After`.
 
 | Method | Path | Purpose |
 |---|---|---|

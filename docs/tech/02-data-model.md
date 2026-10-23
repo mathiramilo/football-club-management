@@ -81,6 +81,8 @@ Auth tables are Better Auth's models mapped to our names (ADR-007). It refuses t
 
 **auth_rate_limits** (Better Auth `rateLimit`): `key` (unique), `count`, `last_request` (epoch milliseconds). Its per-IP counters (NFR-SEC-05).
 
+**email_code_requests**: `email_hash` (HMAC of the email, never the address), `requested_at`. One row per code sent, for the per-email limits of BR-AUTH-03; rows older than an hour are pruned when the same email asks again, and a purge job removes the rest (TECH-13).
+
 **devices**: `user_id`, `platform` (`ios`, `android`, `web`), `push_token` (unique when not null), `app_version`, `locale`, `last_seen_at`, `disabled_at`.
 
 **legal_acceptances**: `user_id`, `document` (`terms`, `privacy`), `version`, `accepted_at`, `platform`.
