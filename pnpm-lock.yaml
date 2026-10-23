@@ -412,6 +412,10 @@ importers:
         version: 6.0.3
 
   packages/api-client:
+    dependencies:
+      '@repo/contracts':
+        specifier: workspace:*
+        version: link:../contracts
     devDependencies:
       '@repo/config':
         specifier: workspace:*

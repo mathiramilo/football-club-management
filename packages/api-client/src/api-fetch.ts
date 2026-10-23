@@ -1,6 +1,6 @@
-import type { ProblemDetails } from './generated/model';
+import { APP_VERSION_HEADER, PLATFORM_HEADER, type Platform } from '@repo/contracts';
 
-export type Platform = 'ios' | 'android' | 'web';
+import type { ProblemDetails } from './generated/model';
 
 export interface ApiClientConfig {
   baseUrl: string;
@@ -46,8 +46,8 @@ export async function apiFetch<T>(url: string, init: RequestInit = {}): Promise<
   const { baseUrl, appVersion, platform, locale, credentials, getAuthHeaders } = clientConfig;
 
   const headers = new Headers(init.headers);
-  headers.set('X-App-Version', appVersion);
-  headers.set('X-Platform', platform);
+  headers.set(APP_VERSION_HEADER, appVersion);
+  headers.set(PLATFORM_HEADER, platform);
   if (locale) headers.set('Accept-Language', locale);
   for (const [name, value] of Object.entries((await getAuthHeaders?.()) ?? {})) {
     headers.set(name, value);
