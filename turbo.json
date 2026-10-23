@@ -36,7 +36,9 @@
         "BETTER_AUTH_SECRET",
         "WEB_ORIGINS",
         "GOOGLE_CLIENT_IDS",
-        "APPLE_CLIENT_IDS"
+        "APPLE_CLIENT_IDS",
+        "AUTH_RATE_LIMIT_ENABLED",
+        "AUTH_TRUSTED_PROXIES"
       ]
     }
   }

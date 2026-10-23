@@ -21,6 +21,8 @@ export const envSchema = z.object({
   WEB_ORIGINS: commaSeparated.pipe(z.array(z.url())),
   GOOGLE_CLIENT_IDS: commaSeparated,
   APPLE_CLIENT_IDS: commaSeparated,
+  AUTH_RATE_LIMIT_ENABLED: z.stringbool().default(true),
+  AUTH_TRUSTED_PROXIES: commaSeparated,
 });
 
 export type Env = z.infer<typeof envSchema>;

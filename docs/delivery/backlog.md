@@ -16,7 +16,7 @@
 | ID | Enabler | Release | Priority | Size | Notes |
 |---|---|---|---|---|---|
 | TECH-01 | Monorepo (pnpm + Turborepo), TypeScript strict, lint and format, CI (lint, typecheck, backend tests, builds) | R0 | Must | M | ADR-001; root scripts named as in `CLAUDE.md` § Commands. `codegen` and `contract:check` land with TECH-06, the database scripts with TECH-03 |
-| TECH-02 | Environments (dev/preview, staging, production), hosting setup, secrets management, deploy pipelines | R0 | Must | M | ADR-011 |
+| TECH-02 | Environments (dev/preview, staging, production), hosting setup, secrets management, deploy pipelines | R0 | Must | M | ADR-011; sets `SHUTDOWN_DRAIN_MS` and `AUTH_TRUSTED_PROXIES` for the host, and the production email provider (ADR-017) |
 | TECH-03 | PostgreSQL setup, Prisma schema and migrations workflow, seed data generator (synthetic clubs), ORM spike confirmation | R0 | Must | M | ADR-005, ADR-013 (both accepted after the ORM spike); adds `docker compose`, `db:migrate` and `db:seed`. Creates the core club and event tables; the rest arrive with their stories |
 | TECH-04 | Authentication foundation: spike, then Better Auth in the API with sessions, Google and Apple ID-token sign-in and email codes | R0 | Must | L | ADR-007 (accepted after the spike); unblocks AUTH-01–03 |
 | TECH-05 | Authorization policy module, tenant-scoped data access, cross-tenant and role test harness | R0 | Must | L | NFR-SEC-02, NFR-SEC-03 |

@@ -1,12 +1,17 @@
+import { createHmac } from 'node:crypto';
+
 import type { LoggerService } from '@nestjs/common';
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { bearer } from 'better-auth/plugins/bearer';
 import { emailOTP } from 'better-auth/plugins/email-otp';
 
+import type { Clock } from '../clock/clock.js';
 import type { PrismaService } from '../database/prisma.service.js';
 import type { EmailSender } from '../email/email-sender.js';
 import { formatMessage } from '../i18n/messages.js';
+import type { EmailCodeRequestsRepository } from './email-code-requests.repository.js';
 
 export const AUTH_BASE_PATH = '/v1/auth';
 
@@ -16,6 +21,9 @@ const SESSION_IDLE_DAYS = 90;
 // BR-AUTH-03: 6 digits, valid 10 minutes, at most 5 attempts.
 const SIGN_IN_CODE_TTL_MINUTES = 10;
 const SIGN_IN_CODE_ATTEMPTS = 5;
+const SEND_CODE_PATH = '/email-otp/send-verification-otp';
+// NFR-SEC-05: at most 30 code requests per IP per hour.
+const CODE_REQUESTS_PER_IP_PER_HOUR = 30;
 
 const UNUSED_PATHS = [
   '/account-info',
@@ -52,11 +60,15 @@ export interface AuthOptions {
   webOrigins: string[];
   googleClientIds: string[];
   appleClientIds: string[];
+  rateLimitEnabled: boolean;
+  trustedProxies: string[];
 }
 
 export interface AuthDependencies {
   prisma: PrismaService;
   emailSender: EmailSender;
+  emailCodeRequests: EmailCodeRequestsRepository;
+  clock: Clock;
   logger: LoggerService;
 }
 
@@ -65,11 +77,18 @@ const withoutProviderSecrets = <T extends object>(account: T) =>
     data: { ...account, accessToken: null, refreshToken: null, idToken: null, password: null },
   });
 
+const emailOf = (body: unknown) =>
+  typeof body === 'object' && body !== null && 'email' in body && typeof body.email === 'string'
+    ? body.email.trim().toLowerCase()
+    : undefined;
+
 export function createAuth(
   options: AuthOptions,
-  { prisma, emailSender, logger }: AuthDependencies,
+  { prisma, emailSender, emailCodeRequests, clock, logger }: AuthDependencies,
 ) {
   const [appleClientId] = options.appleClientIds;
+  const hashEmail = (email: string) =>
+    createHmac('sha256', options.secret).update(`email-code:${email}`).digest('base64url');
 
   return betterAuth({
     appName: 'Football Club Management',
@@ -117,6 +136,26 @@ export function createAuth(
       }),
     ],
     disabledPaths: UNUSED_PATHS,
+    hooks: {
+      before: createAuthMiddleware(async (ctx) => {
+        const email = ctx.path === SEND_CODE_PATH ? emailOf(ctx.body) : undefined;
+        if (!email) return;
+        const decision = await emailCodeRequests.reserve(hashEmail(email), clock.now());
+        if (!decision.allowed) {
+          throw new APIError(
+            'TOO_MANY_REQUESTS',
+            { code: decision.code, message: 'Too many sign-in codes requested for this email' },
+            { 'Retry-After': String(decision.retryAfterSeconds) },
+          );
+        }
+      }),
+    },
+    rateLimit: {
+      enabled: options.rateLimitEnabled,
+      storage: 'database',
+      modelName: 'authRateLimit',
+      customRules: { [SEND_CODE_PATH]: { window: 3600, max: CODE_REQUESTS_PER_IP_PER_HOUR } },
+    },
     databaseHooks: {
       account: {
         create: { before: withoutProviderSecrets },
@@ -124,7 +163,12 @@ export function createAuth(
       },
     },
     // Better Auth skips its CSRF origin check under a test runner unless this is set explicitly.
-    advanced: { database: { generateId: false }, disableOriginCheck: false },
+    advanced: {
+      database: { generateId: false },
+      disableOriginCheck: false,
+      // Without a resolvable client IP, Better Auth puts every caller in one shared rate-limit bucket.
+      ipAddress: { trustedProxies: options.trustedProxies },
+    },
     telemetry: { enabled: false },
     // Its log arguments can carry request data such as emails; only the message is kept.
     logger: {
