@@ -74,3 +74,38 @@ export function createCategoryMembership(
     },
   });
 }
+
+export function createEvent(
+  db: PrismaService,
+  club: ClubRef,
+  data: Partial<Prisma.EventUncheckedCreateInput> = {},
+) {
+  return db.event.create({
+    data: {
+      clubId: club.id,
+      type: 'practice',
+      startsAt: new Date('2026-11-02T22:00:00Z'),
+      endsAt: new Date('2026-11-02T23:30:00Z'),
+      rsvpDeadlineAt: new Date('2026-11-02T20:00:00Z'),
+      shareToken: randomUUID(),
+      ...data,
+    },
+  });
+}
+
+export function createInvitee(
+  db: PrismaService,
+  event: ClubScopedRef,
+  member: ClubRef,
+  data: Partial<Prisma.EventInviteeUncheckedCreateInput> = {},
+) {
+  return db.eventInvitee.create({
+    data: {
+      clubId: event.clubId,
+      eventId: event.id,
+      clubMembershipId: member.id,
+      source: 'category',
+      ...data,
+    },
+  });
+}
