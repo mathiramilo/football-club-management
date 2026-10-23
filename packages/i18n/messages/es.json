@@ -4,5 +4,12 @@
       "subject": "Tu código para entrar",
       "text": "¡Hola! Tu código para entrar es {code}. Vence en {minutes} minutos.\n\nSi no lo pediste, ignorá este correo: sin el código nadie puede entrar a tu cuenta."
     }
+  },
+  "errors": {
+    "CODE_RATE_LIMITED": "Pediste muchos códigos seguidos. Probá de nuevo en un rato.",
+    "CODE_RESEND_TOO_SOON": "Esperá un minuto y pedí un código nuevo.",
+    "INVALID_OTP": "El código es incorrecto. Revisalo y probá de nuevo.",
+    "OTP_EXPIRED": "El código venció. Pedí uno nuevo.",
+    "TOO_MANY_ATTEMPTS": "Ese código ya no sirve. Pedí uno nuevo."
   }
 }
