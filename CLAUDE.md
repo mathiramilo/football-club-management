@@ -2,7 +2,7 @@
 
 Mobile app (Expo), web app (Next.js) and API (NestJS) for amateur and semi-professional football clubs in Uruguay and Argentina. The specs live in `docs/`; start with `docs/README.md`.
 
-**Status:** specs only (v0.1). Next is R0: scaffold the monorepo (TECH-01) and run the spikes in `docs/tech/00-tech-stack.md` § 8.
+**Status:** R0 in progress. The workspace, shared config and CI exist (TECH-01). Next: the apps, then the spikes in `docs/tech/00-tech-stack.md` § 8.
 
 ## How Claude is set up here
 
@@ -51,22 +51,24 @@ Third-party references, vendored and pinned (sources and changes in `.claude/ski
 
 ## Commands
 
-These are the **planned** root scripts. TECH-01 must implement them with exactly these names. Until the monorepo exists, none of them run.
+pnpm reads the Node version from `devEngines` in the root `package.json` and downloads Node 24 when the active one doesn't match. `npm` and `npx` refuse to run in the repo on another Node: switch first with `nvm use` (`.nvmrc`).
 
-| Task | Command |
-|---|---|
-| Install | `pnpm install` |
-| Local Postgres | `docker compose up -d postgres` |
-| Run everything in dev | `pnpm dev` |
-| Lint and format check | `pnpm lint` · `pnpm format:check` |
-| Typecheck | `pnpm typecheck` |
-| Backend tests (Docker must be running for Testcontainers) | `pnpm test` |
-| One workspace | `pnpm --filter ./apps/api test` |
-| Build | `pnpm build` |
-| Regenerate the OpenAPI document and `packages/api-client` | `pnpm codegen` |
-| OpenAPI breaking-change check against `main` | `pnpm contract:check` |
-| Create a migration without applying it | `pnpm --filter ./apps/api exec prisma migrate dev --create-only --name <verb_noun>` |
-| Apply migrations and seed (local) | `pnpm --filter ./apps/api db:migrate` · `pnpm --filter ./apps/api db:seed` |
-| Mobile dev client | `pnpm --filter ./apps/mobile start` |
+Rows marked with an enabler ID don't run yet. They keep these names when that enabler lands.
 
-When the scaffold lands, replace "planned" with the real state and keep this table in sync with the root `package.json`.
+| Task | Command | Available |
+|---|---|---|
+| Install | `pnpm install` | ✅ |
+| Local Postgres | `docker compose up -d postgres` | TECH-03 |
+| Run everything in dev | `pnpm dev` | ✅ |
+| Lint and format check | `pnpm lint` · `pnpm format:check` (`pnpm format` fixes) | ✅ |
+| Typecheck | `pnpm typecheck` | ✅ |
+| Backend tests (Docker must be running for Testcontainers) | `pnpm test` | ✅ |
+| One workspace | `pnpm --filter ./apps/api test` | TECH-01 (`apps/api`) |
+| Build | `pnpm build` | ✅ |
+| Regenerate the OpenAPI document and `packages/api-client` | `pnpm codegen` | TECH-06 |
+| OpenAPI breaking-change check against `main` | `pnpm contract:check` | TECH-06 |
+| Create a migration without applying it | `pnpm --filter ./apps/api exec prisma migrate dev --create-only --name <verb_noun>` | TECH-03 |
+| Apply migrations and seed (local) | `pnpm --filter ./apps/api db:migrate` · `pnpm --filter ./apps/api db:seed` | TECH-03 |
+| Mobile dev client | `pnpm --filter ./apps/mobile start` | TECH-01 (`apps/mobile`) |
+
+Keep this table in sync with the root `package.json`.
