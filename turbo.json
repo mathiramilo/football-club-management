@@ -26,7 +26,7 @@
       "dependsOn": ["db:generate"],
       "cache": false,
       "persistent": true,
-      "passThroughEnv": ["DATABASE_URL", "PORT", "SHUTDOWN_DRAIN_MS"]
+      "passThroughEnv": ["DATABASE_URL", "PORT", "SHUTDOWN_DRAIN_MS", "MAILPIT_URL", "EMAIL_FROM"]
     }
   }
 }
