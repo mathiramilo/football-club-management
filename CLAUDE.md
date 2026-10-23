@@ -70,7 +70,7 @@ Rows marked with an enabler ID don't run yet. They keep these names when that en
 | Regenerate the Prisma client | `pnpm --filter ./apps/api db:generate` (turbo runs it before lint, typecheck, test, build and dev) | ✅ |
 | Create a migration without applying it | `pnpm --filter ./apps/api exec prisma migrate dev --create-only --name <verb_noun>` | ✅ |
 | Apply migrations (local; also regenerates the client) | `pnpm --filter ./apps/api db:migrate` | ✅ |
-| Seed synthetic data (local) | `pnpm --filter ./apps/api db:seed` | TECH-03 |
+| Seed synthetic data (local; needs a database with no clubs) | `pnpm --filter ./apps/api db:seed` (`--clubs 5 --months 12 --seed 1 --today YYYY-MM-DD` are the defaults, with today taken from the current date) | ✅ |
 | Mobile dev client | `pnpm --filter ./apps/mobile start` | ✅ Metro only; the development build arrives with TECH-08 |
 
 Keep this table in sync with the root `package.json`.
