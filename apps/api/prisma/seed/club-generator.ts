@@ -1,3 +1,5 @@
+import { randomBytes } from 'node:crypto';
+
 import { TZDate } from '@date-fns/tz';
 import { fakerES as faker } from '@faker-js/faker';
 import { v7 as uuidv7 } from 'uuid';
@@ -150,6 +152,12 @@ function addDays(isoDate: string, days: number): string {
   return date.toISOString().slice(0, 10);
 }
 
+function addYears(isoDate: string, years: number): string {
+  const date = new Date(`${isoDate}T00:00:00Z`);
+  date.setUTCFullYear(date.getUTCFullYear() + years);
+  return date.toISOString().slice(0, 10);
+}
+
 const weekday = (isoDate: string) => new Date(`${isoDate}T00:00:00Z`).getUTCDay();
 const calendarDay = (isoDate: string) => new Date(`${isoDate}T00:00:00Z`);
 
@@ -207,9 +215,8 @@ export function generateClub(today: string, months: number): ClubRows {
   ): Person {
     const firstName = faker.person.firstName(sex);
     const lastName = faker.person.lastName();
-    const birthdate = calendarDay(
-      addDays(today, -faker.number.int({ min: minAge * 365, max: maxAge * 365 + 364 })),
-    );
+    const age = faker.number.int({ min: minAge, max: maxAge });
+    const birthdate = calendarDay(addDays(addYears(today, -age), -faker.number.int(364)));
     const userId = withAccount ? uuidv7() : null;
     if (userId) {
       rows.users.push({
@@ -322,7 +329,7 @@ export function generateClub(today: string, months: number): ClubRows {
       youth.players.filter((p) => !p.endsOn),
       2,
     )) {
-      const startsOn = addDays(periodStart, faker.number.int({ min: 30, max: months * 15 }));
+      const startsOn = addDays(periodStart, faker.number.int({ min: 0, max: months * 15 }));
       joinCategory(primera.id, player.membershipId, { startsOn });
       primera.players.push({ ...player, startsOn, endsOn: null });
     }
@@ -416,9 +423,10 @@ export function generateClub(today: string, months: number): ClubRows {
     rows.rsvpChanges.push(...changes);
   }
 
+  const periodEnd = addDays(today, 21);
   for (const category of categories) {
     const squad = SQUADS[category.template.format];
-    for (let day = periodStart; day <= addDays(today, 21); day = addDays(day, 1)) {
+    for (let day = periodStart; day <= periodEnd; day = addDays(day, 1)) {
       const types = [
         ...(squad.practiceDays.includes(weekday(day)) ? (['practice'] as const) : []),
         ...(weekday(day) === squad.matchDay && faker.datatype.boolean(0.85)
@@ -451,7 +459,7 @@ export function generateClub(today: string, months: number): ClubRows {
               ? 'Torneo Apertura'
               : 'Torneo Clausura'
             : null,
-          shareToken: faker.string.alphanumeric(16),
+          shareToken: randomBytes(12).toString('base64url'),
           cancelledAt: cancelled ? new Date(startsAt.getTime() - DAY) : null,
           cancelledBy: cancelled ? category.dt.userId : null,
           rollCallCompletedAt: rollCall ? new Date(endsAt.getTime() + 30 * MINUTE) : null,
@@ -465,11 +473,16 @@ export function generateClub(today: string, months: number): ClubRows {
         }
         if (isMatch && category === primera && faker.datatype.boolean(0.3)) {
           const invited = new Set(category.players.map((p) => p.membershipId));
-          const candidates = categories
-            .flatMap((c) => c.players)
-            .filter((p) => !invited.has(p.membershipId) && isActive(p, day));
-          for (const player of faker.helpers.arrayElements(candidates, { min: 1, max: 2 })) {
-            invited.add(player.membershipId);
+          const candidates = new Map(
+            categories
+              .flatMap((c) => c.players)
+              .filter((p) => !invited.has(p.membershipId) && isActive(p, day))
+              .map((p) => [p.membershipId, p]),
+          );
+          for (const player of faker.helpers.arrayElements([...candidates.values()], {
+            min: 1,
+            max: 2,
+          })) {
             addInvitee(event, category, player, 'call_up');
           }
         }

@@ -1,6 +1,6 @@
 import { fakerES as faker } from '@faker-js/faker';
 
-import type { PrismaClient } from '../../src/generated/prisma/client.js';
+import type { Prisma, PrismaClient } from '../../src/generated/prisma/client.js';
 import { type ClubRows, generateClub } from './club-generator.js';
 
 export interface SeedOptions {
@@ -20,7 +20,7 @@ async function inBatches<T>(rows: T[], write: (batch: T[]) => Promise<unknown>):
   }
 }
 
-async function insertClub(db: PrismaClient, rows: ClubRows): Promise<void> {
+async function insertClub(db: Prisma.TransactionClient, rows: ClubRows): Promise<void> {
   await inBatches(rows.users, (data) => db.user.createMany({ data }));
   await db.club.create({ data: rows.club });
   await db.venue.createMany({ data: rows.venues });
@@ -55,7 +55,7 @@ export async function seedDatabase(
 
   for (let clubIndex = 0; clubIndex < options.clubs; clubIndex++) {
     const rows = generateClub(options.today, options.months);
-    await insertClub(db, rows);
+    await db.$transaction((tx) => insertClub(tx, rows), { maxWait: 10_000, timeout: 300_000 });
     clubIds.push(rows.club.id ?? '');
     counts.clubs++;
     for (const table of Object.keys(counts) as (keyof SeedCounts)[]) {

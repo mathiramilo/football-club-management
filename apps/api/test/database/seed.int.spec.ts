@@ -40,4 +40,18 @@ describe('Synthetic seed generator (TECH-03)', () => {
       }),
     ).toBe(0);
   });
+
+  it('seeds a one-month period with only account holders aged 16 or more (BR-AUTH-05)', async () => {
+    const today = '2026-10-23';
+    const { clubIds } = await seedDatabase(db, { clubs: 1, months: 1, seed: 7, today });
+
+    expect(
+      await db.user.count({
+        where: {
+          clubMemberships: { some: { clubId: clubIds[0] ?? '' } },
+          birthdate: { gt: new Date('2010-10-23') },
+        },
+      }),
+    ).toBe(0);
+  });
 });
