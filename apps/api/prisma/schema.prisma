@@ -54,6 +54,10 @@ model Club {
   clubMemberships     ClubMembership[]
   categoryMemberships CategoryMembership[]
   venues              Venue[]
+  events              Event[]
+  eventCategories     EventCategory[]
+  eventInvitees       EventInvitee[]
+  rsvpChanges         RsvpChange[]
 
   @@map("clubs")
 }
@@ -74,6 +78,7 @@ model Category {
 
   club                Club                 @relation(fields: [clubId], references: [id])
   categoryMemberships CategoryMembership[]
+  eventCategories     EventCategory[]
 
   @@unique([id, clubId])
   @@index([clubId])
@@ -105,6 +110,8 @@ model ClubMembership {
   club                Club                 @relation(fields: [clubId], references: [id])
   user                User?                @relation(fields: [userId], references: [id], onDelete: Restrict)
   categoryMemberships CategoryMembership[]
+  eventInvitees       EventInvitee[]       @relation("InviteeMembership")
+  proxyRsvps          EventInvitee[]       @relation("RsvpSetBy")
 
   @@unique([id, clubId])
   @@unique([clubId, userId])
@@ -149,9 +156,130 @@ model Venue {
   createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  club Club @relation(fields: [clubId], references: [id])
+  club   Club    @relation(fields: [clubId], references: [id])
+  events Event[]
 
   @@unique([id, clubId])
   @@index([clubId])
   @@map("venues")
+}
+
+model Event {
+  id                  String    @id @default(uuid(7)) @db.Uuid
+  clubId              String    @map("club_id") @db.Uuid
+  // TODO(EVT-02): add series_id together with the event_series table.
+  type                String
+  title               String?
+  notes               String?
+  startsAt            DateTime  @map("starts_at") @db.Timestamptz(6)
+  endsAt              DateTime  @map("ends_at") @db.Timestamptz(6)
+  meetAt              DateTime? @map("meet_at") @db.Timestamptz(6)
+  venueId             String?   @map("venue_id") @db.Uuid
+  locationText        String?   @map("location_text")
+  opponent            String?
+  homeAway            String?   @map("home_away")
+  competition         String?
+  rsvpDeadlineAt      DateTime  @map("rsvp_deadline_at") @db.Timestamptz(6)
+  rsvpLocked          Boolean   @default(false) @map("rsvp_locked")
+  remindersEnabled    Boolean   @default(true) @map("reminders_enabled")
+  shareToken          String    @unique @map("share_token")
+  cancelledAt         DateTime? @map("cancelled_at") @db.Timestamptz(6)
+  cancelledBy         String?   @map("cancelled_by") @db.Uuid
+  cancelMessage       String?   @map("cancel_message")
+  isBackfill          Boolean   @default(false) @map("is_backfill")
+  rollCallCompletedAt DateTime? @map("roll_call_completed_at") @db.Timestamptz(6)
+  rollCallCompletedBy String?   @map("roll_call_completed_by") @db.Uuid
+  overriddenFields    String[]  @default([]) @map("overridden_fields")
+  version             Int       @default(1)
+  createdBy           String?   @map("created_by") @db.Uuid
+  updatedBy           String?   @map("updated_by") @db.Uuid
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  club            Club            @relation(fields: [clubId], references: [id])
+  venue           Venue?          @relation(fields: [venueId, clubId], references: [id, clubId])
+  eventCategories EventCategory[]
+  invitees        EventInvitee[]
+
+  @@unique([id, clubId])
+  @@index([clubId, startsAt])
+  @@index([venueId])
+  @@map("events")
+}
+
+model EventCategory {
+  eventId    String   @map("event_id") @db.Uuid
+  categoryId String   @map("category_id") @db.Uuid
+  clubId     String   @map("club_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  club     Club     @relation(fields: [clubId], references: [id])
+  event    Event    @relation(fields: [eventId, clubId], references: [id, clubId])
+  category Category @relation(fields: [categoryId, clubId], references: [id, clubId])
+
+  @@id([eventId, categoryId])
+  @@index([categoryId, eventId])
+  @@index([clubId])
+  @@map("event_categories")
+}
+
+model EventInvitee {
+  id                   String    @id @default(uuid(7)) @db.Uuid
+  eventId              String    @map("event_id") @db.Uuid
+  clubId               String    @map("club_id") @db.Uuid
+  clubMembershipId     String    @map("club_membership_id") @db.Uuid
+  source               String
+  rsvpStatus           String    @default("pending") @map("rsvp_status")
+  rsvpReason           String?   @map("rsvp_reason")
+  rsvpNote             String?   @map("rsvp_note")
+  arrivingLate         Boolean   @default(false) @map("arriving_late")
+  firstRespondedAt     DateTime? @map("first_responded_at") @db.Timestamptz(6)
+  respondedAt          DateTime? @map("responded_at") @db.Timestamptz(6)
+  rsvpIsLate           Boolean   @default(false) @map("rsvp_is_late")
+  rsvpSetBy            String?   @map("rsvp_set_by") @db.Uuid
+  attendanceStatus     String?   @map("attendance_status")
+  absenceJustified     Boolean?  @map("absence_justified")
+  attendanceRecordedBy String?   @map("attendance_recorded_by") @db.Uuid
+  attendanceRecordedAt DateTime? @map("attendance_recorded_at") @db.Timestamptz(6)
+  removedAt            DateTime? @map("removed_at") @db.Timestamptz(6)
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  club                Club            @relation(fields: [clubId], references: [id])
+  event               Event           @relation(fields: [eventId, clubId], references: [id, clubId])
+  clubMembership      ClubMembership  @relation("InviteeMembership", fields: [clubMembershipId, clubId], references: [id, clubId])
+  rsvpSetByMembership ClubMembership? @relation("RsvpSetBy", fields: [rsvpSetBy, clubId], references: [id, clubId])
+  rsvpChanges         RsvpChange[]
+
+  @@unique([id, clubId])
+  @@unique([eventId, clubMembershipId])
+  @@index([clubMembershipId, eventId])
+  @@index([eventId, rsvpStatus])
+  @@index([rsvpSetBy], where: raw("rsvp_set_by IS NOT NULL"))
+  @@index([clubId])
+  @@map("event_invitees")
+}
+
+model RsvpChange {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  eventInviteeId String   @map("event_invitee_id") @db.Uuid
+  clubId         String   @map("club_id") @db.Uuid
+  fromStatus     String   @map("from_status")
+  toStatus       String   @map("to_status")
+  reason         String?
+  arrivingLate   Boolean  @default(false) @map("arriving_late")
+  source         String
+  changedBy      String?  @map("changed_by") @db.Uuid
+  changedAt      DateTime @default(now()) @map("changed_at") @db.Timestamptz(6)
+  afterDeadline  Boolean  @default(false) @map("after_deadline")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  club         Club         @relation(fields: [clubId], references: [id])
+  eventInvitee EventInvitee @relation(fields: [eventInviteeId, clubId], references: [id, clubId])
+
+  @@index([eventInviteeId, changedAt])
+  @@index([clubId])
+  @@map("rsvp_changes")
 }
