@@ -1,10 +1,12 @@
 import { createHash, randomUUID } from 'node:crypto';
 
+import { Controller, Get, Module } from '@nestjs/common';
 import { exportJWK, generateKeyPair, type JWK, type JWTPayload, SignJWT } from 'jose';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
 import { vi } from 'vitest';
 
+import { type Actor, CurrentActor } from '../../src/core/auth/actor.js';
 import { EmailSender, type EmailMessage } from '../../src/core/email/email-sender.js';
 
 export const TEST_WEB_ORIGIN = 'http://localhost:3000';
@@ -80,6 +82,17 @@ export async function fakeGoogleAndApple(): Promise<{
   });
   return { google: google.provider, apple: apple.provider };
 }
+
+@Controller('test/whoami')
+class WhoAmIController {
+  @Get()
+  whoAmI(@CurrentActor() actor: Actor) {
+    return actor;
+  }
+}
+
+@Module({ controllers: [WhoAmIController] })
+export class WhoAmIModule {}
 
 export interface SignedIn {
   token: string;

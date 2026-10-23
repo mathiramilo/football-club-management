@@ -1,10 +1,12 @@
 import { Logger, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 
 import type { Env } from '../config/env.js';
 import { PrismaService } from '../database/prisma.service.js';
 import { EmailModule } from '../email/email.module.js';
 import { EmailSender } from '../email/email-sender.js';
+import { AuthGuard } from './auth.guard.js';
 import { AUTH } from './auth.tokens.js';
 import { type Auth, createAuth } from './create-auth.js';
 
@@ -30,6 +32,7 @@ import { type Auth, createAuth } from './create-auth.js';
           { prisma, emailSender, logger: new Logger('BetterAuth') },
         ),
     },
+    { provide: APP_GUARD, useClass: AuthGuard },
   ],
   exports: [AUTH],
 })
