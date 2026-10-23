@@ -9,7 +9,7 @@
 | ADR-002 | Mobile: React Native with Expo | Proposed | R0 week 1 |
 | ADR-003 | Web: Next.js (App Router) | Proposed | R0 week 1 |
 | ADR-004 | Backend: NestJS modular monolith, REST + OpenAPI from Zod | Proposed | R0 week 1 |
-| ADR-005 | PostgreSQL, shared-schema multi-tenancy by `club_id` | Proposed | R0 week 1 |
+| ADR-005 | PostgreSQL, shared-schema multi-tenancy by `club_id` | Accepted (2026-10-23) | R0 week 1 |
 | ADR-006 | pg-boss job queue plus transactional outbox | Proposed | R0 week 2 |
 | ADR-007 | Authentication approach | Open (spike) | R0 week 2 |
 | ADR-008 | Push via Expo Push Service | Proposed | R0 week 2 |
@@ -17,7 +17,7 @@
 | ADR-010 | LLM provider: Anthropic Claude (Opus 5.5 default) | Proposed | Start of R3 |
 | ADR-011 | Primary hosting region: São Paulo | Proposed | R0 week 2 |
 | ADR-012 | Observability and product analytics: Sentry and PostHog | Proposed | R0 week 2 |
-| ADR-013 | ORM: Prisma (Drizzle as alternative) | Proposed (confirm with spike) | R0 week 1 |
+| ADR-013 | ORM: Prisma | Accepted (2026-10-23, after the TECH-03 spike) | R0 week 1 |
 | ADR-014 | Web UI: Tailwind CSS + shadcn/ui with shared design tokens | Proposed | R0 week 2 |
 | ADR-015 | Mobile UI: NativeWind with shared tokens; core native libraries | Proposed | R0 week 2 |
 | ADR-016 | Client data layer: generated client (Orval) + TanStack Query + offline persistence | Proposed | R0 week 2 |
@@ -53,9 +53,10 @@
 - **Alternatives**: Fastify (lighter, but the structure must be built by hand); tRPC (tight coupling to TS clients, weaker for versioned mobile contracts); GraphQL (more power than needed, harder caching and authorization); microservices (operational overhead). `nestjs-zod` on NestJS 11, named in the first draft of this ADR: its 5.x line supports Nest 10–11 only (checked 2026-10-23), and Nest 12 now does the same work natively. Changed at TECH-01.
 - **Consequences**: a clear path to extract modules later if ever needed. The team must keep modules from reaching into each other's tables.
 
-## ADR-005 · PostgreSQL, shared-schema multi-tenancy
+## ADR-005 · PostgreSQL, shared-schema multi-tenancy (Accepted)
 - **Context**: thousands of small tenants (clubs), relational data, analytics queries, full-text search.
-- **Decision**: managed PostgreSQL 16+, with `club_id` on every tenant table, enforced by the repository layer and tests (NFR-SEC-03). Extensions: `unaccent`, `pg_trgm`, `citext`. Row-Level Security is Later, as defense in depth for wellness tables.
+- **Decision**: managed **PostgreSQL 18**, the same major in local Docker Compose and in CI's Testcontainers. `club_id` on every tenant table, enforced by the repository layer and tests (NFR-SEC-03), and by the database: a child of a club-owned row references it through a composite `(parent_id, club_id)` foreign key, so it can't point into another club. Extensions: `unaccent`, `pg_trgm`, `citext`. Row-Level Security is Later, as defense in depth for wellness tables.
+- **Accepted** 2026-10-23 with TECH-03, which built the club and event tables this way (#9, #10).
 - **Alternatives**: schema-per-tenant (migration overhead with many small clubs); document databases (relational integrity matters here).
 - **Consequences**: simple operations and cross-club platform features (starter library). Isolation must be tested rigorously.
 
@@ -104,10 +105,18 @@
 - **Decision**: Sentry for errors and performance in all apps (`@sentry/react-native`, `@sentry/nextjs`, `@sentry/nestjs`), Pino structured logs with redaction, and PostHog for product analytics and feature flags.
 - **Constraints**: no health data, no free text and no tokens are sent to any of them (NFR-OBS-02, NFR-OBS-05).
 
-## ADR-013 · ORM: Prisma (Drizzle as alternative)
-- **Decision**: **Prisma** (mature migrations, strong developer experience), using typed raw SQL for heavy analytics queries.
-- **Alternative**: Drizzle (SQL-first, lighter runtime), if the team prefers writing SQL.
-- **Confirmation**: build the RSVP + roll call slice and one analytics query with Prisma in the R0 spike; switch only if the spike shows a real problem.
+## ADR-013 · ORM: Prisma (Accepted)
+- **Context**: the first draft chose Prisma for its migrations and developer experience, to be confirmed by an R0 spike on the RSVP and roll call slice plus one analytics query; switch only on a real problem. The spike (branch `spike/TECH-03-orm`, 2026-10-23) ran Prisma 7.10.1 with `@prisma/adapter-pg` against PostgreSQL 18.6 at Year-1 volume from the seed generator (NFR-SCALE-02: 200 clubs, 799 categories, 161,649 events, 3.3 M invitees, 2.6 M RSVP changes), on a laptop with a warm cache:
+  - ANL-03 per-player attendance for the busiest category over 12 months: p95 6.5 ms with TypedSQL, 6.3 ms with a `$queryRaw` tagged template, 18.5 ms with the query API plus TypeScript filtering, 48.6 ms at 10 concurrent (target p95 ≤ 1.5 s, NFR-PERF-01). Index scans only; all three return the same rows.
+  - EVT-08 RSVP write (interactive transaction: read, update the invitee, append history): p95 3.9 ms sequential, 12.4 ms at 20 concurrent (target p95 ≤ 500 ms).
+  - EVT-15 roll call of about 25 invitees: p95 16.5 ms with one update per invitee, 6.8 ms with `updateMany` per status, 6.1 ms with one `UPDATE … FROM (VALUES …)`.
+  - TypedSQL is still a preview feature, `prisma generate --sql` needs a migrated database (turbo's `db:generate`, lint and typecheck run without one), and it types every `count(*)` as nullable.
+- **Decision**: **Prisma 7** with the `pg` driver adapter.
+  - Heavy analytics queries use the `$queryRaw` tagged template with a declared row type. TypedSQL waits until it leaves preview and can generate without a database.
+  - Writes that set a few distinct values across many rows (roll call) use `updateMany` grouped by value in one transaction.
+  - Partial indexes and composite tenant foreign keys live in the schema (`partialIndexes` preview); CHECK constraints and expression indexes go in the migration SQL, which drift checks leave alone.
+- **Alternatives**: Drizzle (SQL-first, lighter runtime). The spike found no problem it would solve, and switching would cost the migrations workflow and the generated client already in place.
+- **Consequences**: two preview features in use (`partialIndexes`, `postgresqlExtensions`): check them on every Prisma upgrade. Raw SQL row types are hand-declared, so each analytics query needs an integration test that checks its rows. The membership-on-date check is the largest share of the attendance query; add a `(club_membership_id, category_id)` index if F04 needs it. Watch: `pg` waits forever for a connection unless `connectionTimeoutMillis` is set, and a Prisma error's `meta` carries the failing row (database rule).
 
 ## ADR-014 · Web UI: Tailwind CSS + shadcn/ui with shared design tokens
 - **Context**: a data-heavy staff portal (tables, dashboards, editors) and fast public pages; accessibility target WCAG 2.2 AA.

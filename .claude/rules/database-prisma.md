@@ -38,7 +38,8 @@ Specs: `docs/tech/02-data-model.md`, ADR-005, ADR-013. See the `prisma-migration
 - `updateMany` doesn't set `@updatedAt`: set `updatedAt` explicitly. Use `createManyAndReturn` / `updateManyAndReturn` when you need the rows.
 - Index every foreign key. In composite indexes put `club_id` first, then equality columns, then range or sort columns; use partial indexes for status and soft-delete filters. Check new heavy queries with `EXPLAIN (ANALYZE, BUFFERS)` on realistic seed data.
 - Reference skills: `prisma-client-api` (client API) and `postgres-best-practices` (indexes, locking, query design).
-- Heavy analytics queries use typed raw SQL (TypedSQL or the `$queryRaw` tagged template, which parameterizes). Never `$queryRawUnsafe` or `$executeRawUnsafe` with interpolated input.
+- Heavy analytics queries use the `$queryRaw` tagged template (it parameterizes) with a declared row type, and an integration test that checks the rows (ADR-013). TypedSQL waits until it leaves preview and can generate without a database. Never `$queryRawUnsafe` or `$executeRawUnsafe` with interpolated input.
+- Writes that set a few distinct values across many rows (roll call) use `updateMany` grouped by value inside one transaction, not one update per row (ADR-013).
 - Select only the columns the caller needs; never return `[H]` columns to code paths that don't need them.
 - Attendance metrics are computed on read in R1 (BR-ANL-05). Add pre-aggregation (TECH-20) only if NFR-PERF-01 is missed.
 - Health-data tables (`wellness_*`) are read only through the access-logged methods of the `wellness` module.

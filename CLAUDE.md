@@ -2,7 +2,7 @@
 
 Mobile app (Expo), web app (Next.js) and API (NestJS) for amateur and semi-professional football clubs in Uruguay and Argentina. The specs live in `docs/`; start with `docs/README.md`.
 
-**Status:** R0 in progress. The monorepo is scaffolded (TECH-01): minimal API, web and mobile apps with shared config and CI. Next: the spikes in `docs/tech/00-tech-stack.md` § 8 and the other R0 enablers.
+**Status:** R0 in progress. Done: the monorepo scaffold (TECH-01) and the database (TECH-03): PostgreSQL 18 and Prisma 7, the core club and event tables, and a synthetic seed generator; ADR-005 and ADR-013 are accepted. Next: the remaining spikes in `docs/tech/00-tech-stack.md` § 8 (auth first) and the other R0 enablers.
 
 ## How Claude is set up here
 

@@ -17,7 +17,7 @@
 |---|---|---|---|---|---|
 | TECH-01 | Monorepo (pnpm + Turborepo), TypeScript strict, lint and format, CI (lint, typecheck, backend tests, builds) | R0 | Must | M | ADR-001; root scripts named as in `CLAUDE.md` § Commands. `codegen` and `contract:check` land with TECH-06, the database scripts with TECH-03 |
 | TECH-02 | Environments (dev/preview, staging, production), hosting setup, secrets management, deploy pipelines | R0 | Must | M | ADR-011 |
-| TECH-03 | PostgreSQL setup, Prisma schema and migrations workflow, seed data generator (synthetic clubs), ORM spike confirmation | R0 | Must | M | ADR-005, ADR-013; adds `docker compose`, `db:migrate` and `db:seed` |
+| TECH-03 | PostgreSQL setup, Prisma schema and migrations workflow, seed data generator (synthetic clubs), ORM spike confirmation | R0 | Must | M | ADR-005, ADR-013 (both accepted after the ORM spike); adds `docker compose`, `db:migrate` and `db:seed`. Creates the core club and event tables; the rest arrive with their stories |
 | TECH-04 | Authentication foundation: spike, then implementation of tokens, refresh rotation and provider integration | R0 | Must | L | ADR-007; unblocks AUTH-01–03 |
 | TECH-05 | Authorization policy module, tenant-scoped data access, cross-tenant and role test harness | R0 | Must | L | NFR-SEC-02, NFR-SEC-03 |
 | TECH-06 | Contracts package → OpenAPI → typed client; problem+json errors; idempotency middleware; app-version headers | R0 | Must | M | [API guidelines](../tech/03-api-guidelines.md); adds `pnpm codegen` and `pnpm contract:check` |
