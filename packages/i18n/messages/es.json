@@ -6,10 +6,20 @@
     }
   },
   "errors": {
+    "BAD_REQUEST": "No pudimos procesar el pedido. Probá de nuevo.",
     "CODE_RATE_LIMITED": "Pediste muchos códigos seguidos. Probá de nuevo en un rato.",
     "CODE_RESEND_TOO_SOON": "Esperá un minuto y pedí un código nuevo.",
+    "CONFLICT": "Alguien hizo un cambio al mismo tiempo. Actualizá y probá de nuevo.",
+    "FORBIDDEN": "No tenés permiso para hacer esto.",
+    "INTERNAL_ERROR": "Algo falló de nuestro lado. Probá de nuevo en un rato.",
     "INVALID_OTP": "El código es incorrecto. Revisalo y probá de nuevo.",
+    "NOT_FOUND": "No encontramos lo que buscás.",
     "OTP_EXPIRED": "El código venció. Pedí uno nuevo.",
-    "TOO_MANY_ATTEMPTS": "Ese código ya no sirve. Pedí uno nuevo."
+    "PAYLOAD_TOO_LARGE": "Es demasiado grande para enviarlo. Achicalo y probá de nuevo.",
+    "RATE_LIMITED": "Hiciste muchos intentos seguidos. Esperá un momento y probá de nuevo.",
+    "SERVICE_UNAVAILABLE": "El servicio no está disponible en este momento. Probá de nuevo en un rato.",
+    "TOO_MANY_ATTEMPTS": "Ese código ya no sirve. Pedí uno nuevo.",
+    "UNAUTHENTICATED": "Tu sesión se cerró. Entrá de nuevo.",
+    "VALIDATION_FAILED": "Revisá los datos y probá de nuevo."
   }
 }

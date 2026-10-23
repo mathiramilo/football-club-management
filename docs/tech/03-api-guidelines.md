@@ -17,13 +17,21 @@
 | Time | ISO 8601 with offset for instants (`2026-10-14T20:00:00-03:00`); `YYYY-MM-DD` for local dates. Responses include the club `timezone` where relevant. |
 | Pagination | Cursor-based: `?limit=50&cursor=…` → `{ items, nextCursor }`. Default limit 50, maximum 200. |
 | Filtering and sorting | Explicit query parameters (`?categoryId=…&from=…&to=…&sort=-startsAt`). No generic query language. |
-| Errors | `application/problem+json` (RFC 9457) with `type`, `title`, `status`, `detail`, `code` (stable, machine-readable, e.g. `RSVP_LOCKED`) and `errors[]` for validation. Clients map `code` to localized messages. |
+| Errors | `application/problem+json` (RFC 9457) with `type`, `title`, `status`, `detail`, `code` (stable, machine-readable, e.g. `RSVP_LOCKED`) and `errors[]` for validation. Clients map `code` to localized messages. Details in [§ 1.1](#11-errors). |
 | Rate limits | Per user and IP; `429` with `Retry-After`. Stricter limits on auth, invites, nudges and AI ([NFR-SEC-05](05-non-functional-requirements.md)). |
 | Uploads | Never through the API. `POST …/uploads` returns a presigned URL and constraints; the client uploads directly and then confirms. |
 | Streaming | AI chat and generation progress use **Server-Sent Events**. |
 | Realtime | None in R1. Clients refetch on focus, on pull-to-refresh and on relevant push receipt. |
 | Webhooks (inbound) | `/v1/webhooks/{provider}` with signature verification (video provider, email provider). |
 | Health | `GET /health` answers `{ "status": "ok" }` while the process is up (NFR-OBS-04). `GET /health/ready` answers the same when the database responds within 2 s, and 503 when it doesn't (the cause is logged) or while the process drains: after SIGTERM the API keeps serving for `SHUTDOWN_DRAIN_MS` with readiness at 503, so the host stops routing traffic before the server closes. TECH-02 sets the drain to match the host's probe interval. Both sit outside `/v1` and outside the OpenAPI document, because they aren't part of the client contract. |
+
+### 1.1 Errors
+
+- Every code is listed once, with its HTTP status and an English `title`, in the catalog in `packages/contracts`, and has Spanish copy at `errors.<CODE>` in `packages/i18n`.
+- `type` is the code as a relative URI, `/problems/<code-in-kebab-case>` (`/problems/rsvp-locked`). It becomes absolute once the product domain is chosen (OQ-03). Clients key on `code`, never on `type` or `title`.
+- `detail` appears only when the code that raised the error wrote one for this case. It never echoes request data or internal messages.
+- Validation failures answer `400` `VALIDATION_FAILED`, with one `errors[]` item per problem: `in` (`body`, `query` or `path`), `pointer` (a JSON Pointer into that part, `""` for a whole path or query value), `code` and an English `detail`. `code` is the schema's own code when a refinement names one (`REASON_REQUIRED`), otherwise Zod's issue code (`invalid_type`, `too_small`…).
+- Errors without a code of their own get a generic one by status: `BAD_REQUEST` (also for malformed JSON), `UNAUTHENTICATED`, `FORBIDDEN`, `NOT_FOUND` (also for unknown routes and records), `CONFLICT` (also for unique violations), `PAYLOAD_TOO_LARGE`, `RATE_LIMITED`, `SERVICE_UNAVAILABLE` and `INTERNAL_ERROR`. An unexpected error answers `500` `INTERNAL_ERROR`, and the log keeps only its name and stack frames.
 
 ## 2. Authorization model in the API
 
@@ -202,6 +210,6 @@ Error example (event locked):
 409 Conflict
 Content-Type: application/problem+json
 
-{ "type": "https://errors.<domain>/rsvp-locked", "title": "RSVP closed", "status": 409,
+{ "type": "/problems/rsvp-locked", "title": "RSVP closed", "status": 409,
   "code": "RSVP_LOCKED", "detail": "Confirmations closed at 2026-10-14T18:00:00-03:00" }
 ```
