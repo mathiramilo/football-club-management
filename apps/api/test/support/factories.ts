@@ -75,6 +75,14 @@ export function createCategoryMembership(
   });
 }
 
+export function createVenue(
+  db: PrismaService,
+  club: ClubRef,
+  data: Partial<Prisma.VenueUncheckedCreateInput> = {},
+) {
+  return db.venue.create({ data: { clubId: club.id, name: `Cancha ${uniqueSuffix()}`, ...data } });
+}
+
 export function createEvent(
   db: PrismaService,
   club: ClubRef,

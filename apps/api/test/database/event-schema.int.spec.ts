@@ -8,6 +8,7 @@ import {
   createEvent,
   createInvitee,
   createMember,
+  createVenue,
 } from '../support/factories.js';
 
 describe('Event schema invariants (TECH-03, data model § 4)', () => {
@@ -47,11 +48,13 @@ describe('Event schema invariants (TECH-03, data model § 4)', () => {
     );
   });
 
-  it('keeps invitees, proxies and linked categories inside the club of the event', async () => {
+  it('keeps every reference from an event and its invitees inside the club', async () => {
     const club = await createClub(db);
     const otherClub = await createClub(db);
     const event = await createEvent(db, club);
+    const otherEvent = await createEvent(db, otherClub);
     const outsider = await createMember(db, otherClub);
+    const invitee = await createInvitee(db, event, await createMember(db, club));
 
     await expectViolation(
       db.eventInvitee.create({
@@ -78,6 +81,45 @@ describe('Event schema invariants (TECH-03, data model § 4)', () => {
       }),
       'event_categories_category_id_club_id_fkey',
     );
+    await expectViolation(
+      db.eventCategory.create({
+        data: {
+          clubId: club.id,
+          eventId: otherEvent.id,
+          categoryId: (await createCategory(db, club)).id,
+        },
+      }),
+      'event_categories_event_id_club_id_fkey',
+    );
+    await expectViolation(
+      createEvent(db, club, { venueId: (await createVenue(db, otherClub)).id }),
+      'events_venue_id_club_id_fkey',
+    );
+    await expectViolation(
+      db.rsvpChange.create({
+        data: {
+          clubId: otherClub.id,
+          eventInviteeId: invitee.id,
+          fromStatus: 'pending',
+          toStatus: 'going',
+          source: 'app',
+        },
+      }),
+      'rsvp_changes_event_invitee_id_club_id_fkey',
+    );
+  });
+
+  it('rejects a relation connect that would move an event to another club', async () => {
+    const club = await createClub(db);
+    const event = await createEvent(db, club);
+    const foreignVenue = await createVenue(db, await createClub(db));
+
+    await expect(
+      db.event.update({
+        where: { id: event.id },
+        data: { venue: { connect: { id: foreignVenue.id } } },
+      }),
+    ).rejects.toThrow('club_id cannot change on events');
   });
 
   it('keeps match details on matches and the end after the start', async () => {
