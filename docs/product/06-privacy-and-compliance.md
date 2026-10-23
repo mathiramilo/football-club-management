@@ -1,6 +1,6 @@
 # Privacy, Safety & Compliance
 
-> Status: **Draft v0.1, pending legal review** · Owner: Product · Last updated: 2026-10-22
+> Status: **Draft v0.1, pending legal review** · Owner: Product · Last updated: 2026-10-23
 > This document is the product's position and requirements, **not legal advice**. Every item marked ⚖️ must be validated with counsel in the launch jurisdictions (Uruguay and Argentina first; any EU users bring the GDPR into scope).
 
 ## 1. Principles
@@ -26,6 +26,7 @@
 | Training content | Exercises, plans, media | Club content (may show people in videos) | `exercises`, storage | Club staff; players per BR-EXR-06 |
 | AI conversations | Staff questions, model outputs | Personal (staff), may reference players | `ai_*` | The staff member only |
 | Device and technical | Push tokens, app version, IP (logs) | Personal [P] | `devices`, logs | Platform |
+| Sessions | Session token, IP, browser or app | Personal [P] | `auth_sessions` | Platform |
 | Analytics events | Usage events (no free text, no health data) | Pseudonymous | Analytics provider | Platform |
 
 ## 3. Health-related data (wellness)
@@ -130,6 +131,7 @@ Recommendation: decide with counsel before the pilot. Whichever model is chosen,
 - An incident response runbook is ready before the pilot: detection, containment, assessment, notification, post-mortem.
 - ⚖️ Breach-notification obligations and timelines to authorities and affected users, per jurisdiction.
 - Health-data incidents are treated as high severity by default.
+- Session tokens are stored in plain text (ADR-007), so a database or backup leak exposes live sessions. Containment starts by revoking every session, which signs everyone out.
 
 ## 12. Content and conduct
 

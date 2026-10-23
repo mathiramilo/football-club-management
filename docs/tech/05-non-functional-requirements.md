@@ -1,6 +1,6 @@
 # Non-Functional Requirements
 
-> Status: **Draft v0.1** · Last updated: 2026-10-22
+> Status: **Draft v0.1** · Last updated: 2026-10-23
 > Targets apply from R1 unless noted. Each requirement has an ID so stories and tests can reference it. Privacy requirements are in [Privacy & compliance](../product/06-privacy-and-compliance.md).
 
 ## 1. Performance
@@ -47,7 +47,7 @@
 | NFR-SEC-08 | Uploads: type and size validated server-side, images re-encoded, documents malware-scanned before they are served, and media served only through signed URLs with short TTLs. |
 | NFR-SEC-09 | Audit log for administrative and roster actions; access log for health data (BR-WELL-16). Both are append-only and retained 24 months. |
 | NFR-SEC-10 | The back-office requires SSO with MFA, operates under least privilege, and audits every action. Production database access is break-glass only. |
-| NFR-SEC-11 | Session tokens are stored in the iOS Keychain or Android Keystore on mobile, and in httpOnly, Secure, SameSite cookies on web. Refresh token rotation includes reuse detection. |
+| NFR-SEC-11 | Session tokens are stored in the iOS Keychain or Android Keystore on mobile, and in httpOnly, Secure, SameSite cookies on web. Sessions are server-side and revocable: signing out of all devices takes effect on the next request. There is no refresh rotation or reuse detection, and the database stores session tokens in plain text, an accepted risk (ADR-007). |
 | NFR-SEC-12 | An external penetration test (or at least a structured security review) happens before public launch (end of R1 pilot → GA). |
 
 ## 5. Offline and connectivity

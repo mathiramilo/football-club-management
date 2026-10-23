@@ -11,7 +11,7 @@
 | ADR-004 | Backend: NestJS modular monolith, REST + OpenAPI from Zod | Proposed | R0 week 1 |
 | ADR-005 | PostgreSQL, shared-schema multi-tenancy by `club_id` | Accepted (2026-10-23) | R0 week 1 |
 | ADR-006 | pg-boss job queue plus transactional outbox | Proposed | R0 week 2 |
-| ADR-007 | Authentication approach | Open (spike) | R0 week 2 |
+| ADR-007 | Authentication: Better Auth | Accepted (2026-10-23, after the TECH-04 spike) | R0 week 2 |
 | ADR-008 | Push via Expo Push Service | Proposed | R0 week 2 |
 | ADR-009 | Video hosting provider | Open | Start of R2 |
 | ADR-010 | LLM provider: Anthropic Claude (Opus 5.5 default) | Proposed | Start of R3 |
@@ -66,18 +66,61 @@
 - **Alternatives**: BullMQ + Redis (one more piece of infrastructure, but higher throughput; revisit if needed); Graphile Worker (a similar Postgres-based option); cloud schedulers (vendor lock-in, harder local development).
 - **Consequences**: one datastore to operate, and transactional enqueueing. Throughput is sufficient for Year 1 (NFR-SCALE-02).
 
-## ADR-007 · Authentication approach (Open, spike in R0)
-- **Requirements**:
+## ADR-007 · Authentication: Better Auth (Accepted)
+- **Context**: the first draft set these requirements:
   - Google, Apple and email one-time codes.
-  - Works with Expo (native sign-in) and Next.js (cookie sessions) and is verified by the NestJS API.
+  - Works with Expo (native sign-in) and Next.js (cookie sessions), and is verified by the NestJS API.
   - Refresh rotation with reuse detection.
-  - **No per-user pricing that scales with players** (many low-revenue users).
+  - No per-user pricing that scales with players.
   - User data in our database.
-- **Options**:
-  - (a) A self-hosted TypeScript auth library (e.g. Better Auth): no per-MAU cost, data in our database, more integration work.
-  - (b) A managed provider (e.g. Clerk, Auth0, Supabase Auth): fastest start, per-MAU pricing and a vendor dependency.
-  - (c) Custom implementation on top of OAuth/OIDC libraries: maximum control, highest security responsibility.
-- **Recommendation**: (a), if the R0 spike ([Tech stack § 8](00-tech-stack.md#8-r0-spikes-risks-to-retire-before-r1-development)) confirms it covers every requirement. Otherwise (b), with a pricing check at 25k MAU.
+
+  It recommended a self-hosted library if the R0 spike confirmed it covers every requirement, otherwise a managed provider. The spike (branch `spike/TECH-04-auth`, 2026-10-23) ran Better Auth 1.7.12 with its Prisma adapter inside NestJS 12 and Prisma 7.10.1 against PostgreSQL 18.6. Next to it ran a 325-line core of our own on `jose` 6.2. A fake identity provider signed the Google and Apple ID tokens, so both tracks ran their real verification code (25 tests):
+  - Better Auth covers:
+    - native Google and Apple ID-token sign-in, checking issuer, audience (several client IDs), expiry, algorithm and the Apple nonce;
+    - email codes: 6 digits, 10-minute expiry, 5 attempts, separate "wrong" and "expired" errors, stored hashed;
+    - linking only by verified email (BR-AUTH-01);
+    - httpOnly, SameSite=Lax cookies, with cookie requests from untrusted origins rejected;
+    - sign-out everywhere, effective on the next request.
+  - It doesn't cover:
+    - refresh rotation with reuse detection: one opaque token per session, whose expiry slides while the token never changes;
+    - hashed session tokens: they are stored in plain text;
+    - limits per email: its limiter keys on IP and path;
+    - a different idle limit per platform.
+  - Our own core covered every requirement. The cost: owning the security code, and building the controllers, web cookie handling and key management ourselves.
+  - Managed providers (pricing checked 2026-10-23 on the vendors' pages) cost little at 25k MAU: Clerk Pro and Supabase Pro $25/month, WorkOS $0, Auth0 $2,100. Each misses a hard requirement:
+    - data outside the region: Clerk, WorkOS, Firebase, Auth0;
+    - web cookies readable by scripts: Clerk, Supabase;
+    - no documented native ID-token sign-in: WorkOS, Kinde;
+    - user data outside our database: all of them.
+- **Decision**: **Better Auth** 1.7, pinned exactly, self-hosted inside the API. Its spec changes are accepted:
+  - **Sign-in**: the `emailOTP` plugin (6 digits, 600 s, 5 attempts, `storeOTP: 'hashed'`). Google and Apple use ID-token sign-in on mobile; the web flow is settled in TECH-09. BR-AUTH-03's per-email limits (resend after 60 s, 5 codes an hour) are added with a `hooks.before`.
+  - **Sessions**: Better Auth's database sessions, which expire after 90 days without use on every device and slide once a day (BR-AUTH-04, decision D-17). Mobile sends the session token as a bearer token (`bearer` plugin) kept in expo-secure-store by `@better-auth/expo`. Web uses its httpOnly cookie. The API's auth guard calls `auth.api.getSession` on every request.
+  - **No refresh rotation or reuse detection**, and session tokens are stored in plain text (accepted risk, NFR-SEC-11).
+  - **Routes**: its handler serves `/v1/auth/*`, mounted on the Express instance before Nest's body parser.
+  - **Tables**: its `session`, `account` and `verification` models become `auth_sessions`, `auth_identities` and `auth_verifications`. `users` gains `name`, `email_verified` and `image` ([Data model § 3.1](02-data-model.md#31-identity)).
+- **Alternatives**:
+  - Our own core on `jose` (option c): covers every requirement as written. Not chosen: the team prefers a maintained library to owning sign-in and session security code, and accepts the weaker session model.
+  - Supabase Auth: keeps rotation with reuse detection, at $25/month, with a São Paulo region. Not chosen because:
+    - its web cookies are readable by scripts;
+    - users live in Supabase's `auth` schema, which ties database hosting to Supabase or splits users across two systems;
+    - the spike didn't test it.
+  - Clerk, Auth0, WorkOS, Firebase, Kinde and Stytch: see Context.
+- **Consequences**:
+  - **Gains**: no per-user cost, users and sessions in our database, one library for mobile and web, and no new sub-processor.
+  - **Risk**: a stolen session token stays valid until it goes 90 days unused or the user signs out everywhere, with no reuse detection, and a database or backup read yields live sessions. Mitigations:
+    - encryption at rest (NFR-SEC-01) and break-glass production access (NFR-SEC-10);
+    - sign-out everywhere (AUTH-12);
+    - revoking every session first in a database incident ([Privacy § 11](../product/06-privacy-and-compliance.md#11-security-incidents)).
+
+    Revisit if Better Auth adds hashed tokens or rotation.
+  - **Contract pipeline**: `/v1/auth/*` sits outside it. Those routes use Better Auth's error shape, not problem+json, and aren't in the OpenAPI document. Clients sign in through the Better Auth client and use the Orval client for everything else. TECH-04 checks whether its `openAPI` plugin can feed our document, and maps its error codes to `packages/i18n` messages.
+  - **Watch on every upgrade**:
+    - It refuses to boot when a core column is missing (`users.image` is required although unused).
+    - Under a test runner it skips its CSRF origin check unless `advanced.disableOriginCheck: false`, so the test harness must set it.
+    - It stores provider ID and access tokens unless a `databaseHooks.account` hook strips them.
+    - Its rate limiter is off outside production and keeps counts in memory, so production uses database storage.
+    - It fetches Google's and Apple's keys on every sign-in.
+  - **Ownership**: Vercel announced its acquisition of Better Auth on 2026-07-07. The library stays MIT.
 
 ## ADR-008 · Push via Expo Push Service
 - **Context**: iOS and Android push with action buttons, receipts and token management.

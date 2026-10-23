@@ -60,7 +60,9 @@ erDiagram
 | Column | Type | Notes |
 |---|---|---|
 | email | citext unique | Verified primary identity (BR-AUTH-01). |
-| email_verified_at | timestamptz | |
+| email_verified | boolean | Better Auth requires a boolean. |
+| name | text | The provider's display name, used to prefill profile completion (AUTH-05). Empty after an email-code sign-up. Required by Better Auth. |
+| image | text null | Required by Better Auth and left empty: photos use `photo_key`. |
 | first_name, last_name | text null | Required at profile completion (AUTH-05); null between first sign-in and completion. |
 | nickname | text null | Display name source (BR-AUTH-07). |
 | birthdate | date null | Required at profile completion, like the names. Minor status is derived from it (BR-AUTH-05). [M] |
@@ -69,11 +71,13 @@ erDiagram
 | locale | text | Default `es`. |
 | deletion_requested_at, purge_at | timestamptz null | BR-AUTH-12. |
 
-**auth_identities**: `user_id`, `provider` (`google`, `apple`, `email`), `provider_subject`, `provider_email`. Unique (`provider`, `provider_subject`).
+Auth tables are Better Auth's models mapped to our names (ADR-007). It refuses to start if one of its columns is missing.
 
-**refresh_tokens**: `user_id`, `device_id`, `token_hash`, `expires_at`, `last_used_at`, `revoked_at`, `replaced_by_id` (rotation chain).
+**auth_identities** (Better Auth `account`): `user_id`, `provider` (`google`, `apple`), `provider_subject`, plus Better Auth's provider-token columns, kept empty by a hook. Unique (`provider`, `provider_subject`). Email-code sign-in uses `users.email` and adds no row.
 
-**email_codes**: `email`, `code_hash`, `expires_at`, `attempts`, `consumed_at`. Rate-limited (BR-AUTH-03).
+**auth_sessions** [P] (Better Auth `session`): `user_id`, `token` (unique, stored in **plain text**, an accepted risk under ADR-007), `expires_at` (moves forward with use; 90 days without use, BR-AUTH-04), `ip_address`, `user_agent`.
+
+**auth_verifications** (Better Auth `verification`): `identifier`, `value`, `expires_at`. It holds the email codes, hashed, with their attempt count (BR-AUTH-03).
 
 **devices**: `user_id`, `platform` (`ios`, `android`, `web`), `push_token` (unique when not null), `app_version`, `locale`, `last_seen_at`, `disabled_at`.
 

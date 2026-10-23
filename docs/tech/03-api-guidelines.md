@@ -10,7 +10,7 @@
 | Style | REST over HTTPS, JSON bodies, `camelCase` fields, plural resource nouns. |
 | Base path | `/v1`. Breaking changes require `/v2` or additive evolution. Old mobile app versions stay in the wild for months, so **only additive changes** are allowed in `v1`. |
 | Tenancy | Club-scoped resources live under `/v1/clubs/{clubId}/…`. The server always re-checks that the caller belongs to that club (never trust the path alone). |
-| Auth | `Authorization: Bearer <access token>` (mobile) or a secure httpOnly cookie (web). Public endpoints live under `/v1/public/…` and only return non-personal data. |
+| Auth | `Authorization: Bearer <session token>` (mobile) or a secure httpOnly cookie (web), both issued by Better Auth (ADR-007). Public endpoints live under `/v1/public/…` and only return non-personal data. |
 | Client headers | `X-App-Version`, `X-Platform` (`ios`, `android`, `web`), `Accept-Language`. Unsupported versions get `426` (see [Architecture § 6.11](01-architecture-overview.md#611-app-versions-and-configuration)). |
 | Idempotency | Every mutating request from mobile carries `Idempotency-Key` (UUID). The server stores results for 24 h and replays them on retries. **Required** for RSVP, roll call, wellness check-ins and routine logs. |
 | Concurrency | Documents with a `version` (session plans, events) use `If-Match: <version>`; a mismatch returns `409 Conflict` with the current version. |
@@ -37,13 +37,17 @@
 Release tags indicate when each endpoint is first needed.
 
 ### Auth and me (R1)
+
+Better Auth serves the `/v1/auth/*` routes with its own paths and error shape (ADR-007). They aren't problem+json and aren't in the OpenAPI document; TECH-04 checks whether its OpenAPI plugin can add them.
+
 | Method | Path | Purpose |
 |---|---|---|
-| POST | `/v1/auth/email/start` | Send an email code (AUTH-03). |
-| POST | `/v1/auth/email/verify` | Verify the code and issue tokens. |
-| POST | `/v1/auth/oauth/{provider}` | Exchange a Google or Apple ID token for session tokens. |
-| POST | `/v1/auth/refresh` | Rotate the refresh token. |
-| POST | `/v1/auth/logout` | `{ allDevices?: boolean }` |
+| POST | `/v1/auth/email-otp/send-verification-otp` | Send an email code (AUTH-03). |
+| POST | `/v1/auth/sign-in/email-otp` | Verify the code and start a session. |
+| POST | `/v1/auth/sign-in/social` | Exchange a Google or Apple ID token for a session (AUTH-01, AUTH-02). |
+| GET | `/v1/auth/get-session` | The current session and user. |
+| POST | `/v1/auth/sign-out` | Sign out this device (AUTH-12). |
+| POST | `/v1/auth/revoke-sessions` | Sign out of all devices (AUTH-12). |
 | GET / PATCH | `/v1/me` | Profile (AUTH-05). |
 | DELETE | `/v1/me` | Request account deletion (AUTH-13). |
 | POST | `/v1/me/legal-acceptances` | AUTH-04 |

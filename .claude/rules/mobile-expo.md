@@ -26,7 +26,7 @@ Specs: `docs/tech/00-tech-stack.md` § 4, ADR-002, ADR-015, ADR-016, `docs/ux/01
 - **Offline writes** for RSVP, bulk RSVP, roll call, wellness check-ins and routine logs are paused mutations persisted and resumed on reconnect, each with an `Idempotency-Key` created when the user acts (NFR-OFF-01). Use the `offline-mutation` skill.
 - The UI always shows sync state: queued, syncing, or failed with retry. Forms keep drafts until submitted (NFR-OFF-03).
 - **Zustand** only for local UI state (selected club and category, UI preferences). Never for server data.
-- Refresh tokens in **expo-secure-store** (Keychain / Keystore). Never in MMKV, AsyncStorage or logs (NFR-SEC-11).
+- The session token in **expo-secure-store** (Keychain / Keystore), kept there by the `@better-auth/expo` client (ADR-007). Never in MMKV, AsyncStorage or logs (NFR-SEC-11).
 
 ## UI and performance
 
