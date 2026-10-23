@@ -73,11 +73,13 @@ erDiagram
 
 Auth tables are Better Auth's models mapped to our names (ADR-007). It refuses to start if one of its columns is missing.
 
-**auth_identities** (Better Auth `account`): `user_id`, `provider` (`google`, `apple`), `provider_subject`, plus Better Auth's provider-token columns, kept empty by a hook. Unique (`provider`, `provider_subject`). Email-code sign-in uses `users.email` and adds no row.
+**auth_identities** (Better Auth `account`): `user_id`, `provider` (`google`, `apple`), `provider_subject`, plus Better Auth's provider-token and password columns: a hook strips them and a CHECK rejects them. Unique (`provider`, `provider_subject`). Email-code sign-in uses `users.email` and adds no row.
 
 **auth_sessions** [P] (Better Auth `session`): `user_id`, `token` (unique, stored in **plain text**, an accepted risk under ADR-007), `expires_at` (moves forward with use; 90 days without use, BR-AUTH-04), `ip_address`, `user_agent`.
 
 **auth_verifications** (Better Auth `verification`): `identifier`, `value`, `expires_at`. It holds the email codes, hashed, with their attempt count (BR-AUTH-03).
+
+**auth_rate_limits** (Better Auth `rateLimit`): `key` (unique), `count`, `last_request` (epoch milliseconds). Its per-IP counters (NFR-SEC-05).
 
 **devices**: `user_id`, `platform` (`ios`, `android`, `web`), `push_token` (unique when not null), `app_version`, `locale`, `last_seen_at`, `disabled_at`.
 

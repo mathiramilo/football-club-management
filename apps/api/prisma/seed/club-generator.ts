@@ -222,7 +222,7 @@ export function generateClub(today: string, months: number): ClubRows {
       rows.users.push({
         id: userId,
         email: `${faker.helpers.slugify(`${firstName}.${lastName}`).toLowerCase()}.${userId.slice(-8)}@example.test`,
-        emailVerifiedAt: reference,
+        emailVerified: true,
         firstName,
         lastName,
         nickname: faker.datatype.boolean(0.15) ? faker.helpers.arrayElement(NICKNAMES) : null,
