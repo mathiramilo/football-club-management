@@ -6,6 +6,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import type { ClubActor } from '../../src/core/authorization/club-actor.js';
 import { CurrentClubActor } from '../../src/core/authorization/current-club-actor.decorator.js';
+import { Can, clubPolicy, Policies } from '../../src/core/authorization/policy.js';
 import { Clock } from '../../src/core/clock/clock.js';
 import { PrismaService } from '../../src/core/database/prisma.service.js';
 import { as, type Cast, createCast, createSignedInMember } from '../support/club-cast.js';
@@ -13,8 +14,10 @@ import { createTestApp } from '../support/create-test-app.js';
 import { createCategoryMembership } from '../support/factories.js';
 import { FakeClock } from '../support/fake-clock.js';
 
+@Policies({ 'test.club.read': clubPolicy({ allows: () => true }) })
 @Controller('clubs/:clubId/test-actor')
 class ClubActorController {
+  @Can('test.club.read')
   @Get()
   show(@CurrentClubActor() actor: ClubActor) {
     const { clubMembershipId, isOwner, isAdmin, categories, today } = actor;

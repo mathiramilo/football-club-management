@@ -15,6 +15,7 @@ import type { App } from 'supertest/types.js';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 
+import { Can, Policies } from '../../src/core/authorization/policy.js';
 import { Clock } from '../../src/core/clock/clock.js';
 import { ResponseSchema } from '../../src/core/contract/response-schema.decorator.js';
 import { PrismaService } from '../../src/core/database/prisma.service.js';
@@ -28,6 +29,7 @@ import {
   uniqueEmail,
 } from '../support/auth-fixtures.js';
 import { createTestApp } from '../support/create-test-app.js';
+import { SIGNED_IN_TEST_ACTION, signedInTestPolicies } from '../support/test-policies.js';
 import { FakeClock } from '../support/fake-clock.js';
 
 const MINUTE_MS = 60_000;
@@ -68,6 +70,7 @@ const noteBody = z.object({ marker: z.string() });
 const noteResponse = z.object({ marker: z.string(), attempt: z.int() });
 type NoteBody = z.infer<typeof noteBody>;
 
+@Policies(signedInTestPolicies)
 @Controller('test/idempotent')
 class IdempotentTestController {
   constructor(
@@ -75,6 +78,7 @@ class IdempotentTestController {
     private readonly gate: Gate,
   ) {}
 
+  @Can(SIGNED_IN_TEST_ACTION)
   @Post('notes')
   @RequiresIdempotencyKey()
   @ResponseSchema(noteResponse, { status: HttpStatus.CREATED })
@@ -82,12 +86,14 @@ class IdempotentTestController {
     return { marker, attempt: this.executions.record(marker), internalNote: 'never stored' };
   }
 
+  @Can(SIGNED_IN_TEST_ACTION)
   @Post('optional')
   @ResponseSchema(noteResponse, { status: HttpStatus.CREATED })
   optional(@Body({ schema: noteBody }) { marker }: NoteBody) {
     return { marker, attempt: this.executions.record(marker) };
   }
 
+  @Can(SIGNED_IN_TEST_ACTION)
   @Post('conflicts')
   @RequiresIdempotencyKey()
   conflict(@Body({ schema: noteBody }) { marker }: NoteBody) {
@@ -95,6 +101,7 @@ class IdempotentTestController {
     throw new DomainError('CONFLICT', 'Someone else took it');
   }
 
+  @Can(SIGNED_IN_TEST_ACTION)
   @Post('flaky')
   @RequiresIdempotencyKey()
   @ResponseSchema(noteResponse, { status: HttpStatus.CREATED })
@@ -104,6 +111,7 @@ class IdempotentTestController {
     return { marker, attempt };
   }
 
+  @Can(SIGNED_IN_TEST_ACTION)
   @Post('slow')
   @RequiresIdempotencyKey()
   @ResponseSchema(noteResponse, { status: HttpStatus.CREATED })
