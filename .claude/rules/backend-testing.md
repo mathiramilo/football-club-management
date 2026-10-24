@@ -27,6 +27,7 @@ Mandatory for new backend behavior (NFR-MAINT-01, NFR-SEC-03). Stack: **Vitest +
 - Name `describe` blocks after the endpoint or rule and include the ID: `describe('PUT /v1/clubs/:clubId/events/:eventId/rsvp (EVT-08)')`, `it('rejects changes after the deadline on a locked event (BR-EVT-09)')`.
 - Each acceptance criterion of the story maps to at least one test.
 - Build data with the shared factories and seed helpers (synthetic clubs and people only). Each test creates what it needs; never depend on another test's data or order.
+- For authorization tests, `createCast(db)` (`test/support/club-cast.ts`) builds a club with a signed-in member for every role in the matrix, plus a member of another club and an anonymous caller; `as(app, actor)` sends requests with that member's session.
 - Control time through the injected clock. Never `sleep`.
 - Fake external providers (Expo Push, email, storage, video, Anthropic) at their client boundary. Never call real providers from tests.
 - Assert problem+json `code`, not message text.

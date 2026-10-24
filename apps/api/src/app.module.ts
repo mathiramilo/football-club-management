@@ -4,6 +4,7 @@ import type { Request } from 'express';
 import { ClsModule, type ClsService } from 'nestjs-cls';
 
 import { AuthModule } from './core/auth/auth.module.js';
+import { AuthorizationModule } from './core/authorization/authorization.module.js';
 import { clientInfoFrom } from './core/client/client-info.js';
 import { envSchema } from './core/config/env.js';
 import { ContractModule } from './core/contract/contract.module.js';
@@ -31,6 +32,8 @@ import type { RequestContext } from './core/request-context.js';
     IdempotencyModule,
     ContractModule,
     AuthModule,
+    // After AuthModule: global guards run in registration order, and this one needs the actor.
+    AuthorizationModule,
     HealthModule,
   ],
 })
