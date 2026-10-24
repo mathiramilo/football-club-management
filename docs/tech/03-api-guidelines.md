@@ -55,7 +55,8 @@
 
 ## 2. Authorization model in the API
 
-- Each handler declares the action it performs (e.g. `events.rsvp.proxy`). The policy module evaluates it against the [permission matrix](../product/02-personas-and-roles.md#4-permission-matrix).
+- Each handler declares the action it performs (e.g. `events.rsvp.proxy`), or that it is public. The policy module evaluates it against the [permission matrix](../product/02-personas-and-roles.md#4-permission-matrix), from the caller's memberships as they are in the database at that moment. The API doesn't start if a route declares neither.
+- Checks answer in a fixed order: no valid session → `401`; a club the caller isn't an active member of (including a malformed, unknown or deleted club), or a resource that isn't in that club → `404`; an action the caller's roles don't allow → `403`.
 - Collection endpoints filter by visibility rather than returning `403`. For example, a player listing events gets only the events they are invited to.
 - Responses are **shaped by role**. For example, `event_invitees` returns `rsvpReason` and `rsvpNote` only to staff and to the invitee themselves (BR-EVT-12). Shaping is implemented in serializers per role, never in clients.
 - Requests for a resource in another club return `404`, not `403`, so that its existence is not revealed.

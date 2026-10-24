@@ -8,7 +8,7 @@ argument-hint: <METHOD> <path> [story ID]
 
 Specs: `docs/tech/03-api-guidelines.md` (conventions and inventory), `docs/tech/02-data-model.md`, the feature spec of the story.
 
-The decorator and helper names below (`@Can`, `@Club`, `@CurrentActor`, `@RequiresIdempotencyKey`, `DomainError`, test helpers) are the conventions TECH-05 and TECH-06 set up. If the code already uses different names, follow the code.
+The decorator and helper names below (`@Policies`, `@Can`, `@CurrentClubActor`, `@CurrentActor`, `@RequiresIdempotencyKey`, `DomainError`, test helpers) are the conventions TECH-05 and TECH-06 set up. If the code already uses different names, follow the code.
 
 ## 1. Check the inventory
 
@@ -68,6 +68,7 @@ Name the action `<module>.<resource>.<verb>` (e.g. `events.rsvp.own`, `events.rs
 
 ```ts
 @ApiTags('events')
+@Policies(eventsPolicies)
 @Controller('clubs/:clubId/events/:eventId')
 export class RsvpController {
   constructor(private readonly rsvps: RsvpService) {}
@@ -77,12 +78,11 @@ export class RsvpController {
   @RequiresIdempotencyKey()
   @ResponseSchema(rsvpResponse)
   async updateOwn(
-    @Club() club: ClubContext,
-    @CurrentActor() actor: Actor,
+    @CurrentClubActor() actor: ClubActor,
     @Param('eventId', ParseUUIDPipe) eventId: string,
     @Body({ schema: updateOwnRsvpBody }) body: UpdateOwnRsvpBody,
   ): Promise<RsvpResponse> {
-    const invitee = await this.rsvps.updateOwn(club, actor, eventId, body);
+    const invitee = await this.rsvps.updateOwn(actor.club, actor, eventId, body);
     return serializeRsvp(invitee, actor);
   }
 }

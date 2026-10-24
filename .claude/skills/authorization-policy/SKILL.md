@@ -22,25 +22,43 @@ Changes here need **2 approvals, one from the tech lead**. Say so in the PR desc
 
 ## 3. Implement the policy
 
-In `modules/<context>/<context>.policy.ts`, as a pure function of the actor's **current** memberships and the resource's attributes. No database access inside the policy; the guard loads what it needs.
+In `modules/<context>/<context>.policy.ts`, with the helpers in `apps/api/src/core/authorization/policy.ts`. `allows` is a pure function of the actor's **current** roles and the resource's attributes, with no database access. When it needs the resource, a **scope loader** (a provider of the module) loads just those attributes through `prisma.forClub(club)`, and returning `null` answers 404.
 
 ```ts
+@Injectable()
+export class EventScopeLoader implements ScopeLoader<EventScope> {
+  constructor(private readonly events: EventsRepository) {}
+
+  load(club: ClubContext, params: RouteParams): Promise<EventScope | null> {
+    const eventId = idParam(params, 'eventId');
+    return eventId ? this.events.findScope(club, eventId) : Promise.resolve(null);
+  }
+}
+
 export const eventsPolicies = {
-  'events.rsvp.own': (actor: ActorContext, event: EventScope) =>
-    event.inviteeMembershipIds.includes(actor.clubMembershipId),
-  'events.rsvp.proxy': (actor: ActorContext, event: EventScope) =>
-    actor.isAdmin || actor.isStaffOfAny(event.categoryIds),
+  'events.rsvp.own': clubPolicy({
+    loader: EventScopeLoader,
+    allows: (actor, event) => event.inviteeMembershipIds.includes(actor.clubMembershipId),
+  }),
+  'events.rsvp.proxy': clubPolicy({
+    loader: EventScopeLoader,
+    allows: (actor, event) => actor.isAdmin || actor.isStaffOfAny(event.categoryIds),
+  }),
+  'clubs.settings.edit': clubPolicy({ allows: (actor) => actor.isAdmin }),
 } satisfies PolicyMap;
 ```
 
-- The actor context is loaded from current memberships on every request, never from token claims alone (BR-ROLE-08).
-- Club Admin alone doesn't grant staff permissions over health data (BR-ROLE-10, privacy § 1).
+- `clubPolicy` is for routes under `/clubs/:clubId`; `accountPolicy({ allows: (actor) => … })` is for the caller's own account (`/me`, creating a club, accepting an invite).
+- The `ClubActor` is loaded from the database on every request, never from token claims (BR-ROLE-08): `isOwner`, `isAdmin` (which includes the Owner), `categories` (only memberships current today in the club time zone, BR-ROLE-10), `isStaffOf`, `isStaffOfAny`, `isDtOf`, `isCoachOf`, `isPlayerOf`, `now` and `today`.
+- Club Admin alone doesn't grant staff permissions over health data (BR-ROLE-10, privacy § 1): use `isStaffOfAny`, never `isAdmin`, for health data.
 - Owner-only actions (transfer, delete club) check `isOwner`, not `isAdmin`.
+- Time-limited rules (roll call until 14 days after the end, BR-EVT-17) compare against `actor.now`, never the system clock.
 
 ## 4. Wire it
 
-- The controller declares the action with `@Can('<action>')`.
-- Cross-club resources return **404**. Collections filter by visibility instead of returning 403.
+- The controller class declares its module's map with `@Policies(eventsPolicies)`, and each handler its action with `@Can('<action>')`. Register the scope loader as a provider of the module. The app refuses to start when a route declares neither `@Can()` nor `@Public()`, when the action isn't in the controller's map, when a club action sits on a path without `:clubId`, or when no module provides its loader.
+- Handlers read the actor with `@CurrentClubActor()` (club routes) or `@CurrentActor()` (account routes), and pass `actor.club` to services and repositories as the club context.
+- The answer order is fixed: no session → 401; club not visible to the caller, or resource not in it → **404**; not allowed → **403**. Collections filter by visibility instead of returning 403.
 - **Response shaping**: if a role may see the resource but not every field, the serializer removes the fields (e.g. `rsvpReason`, `rsvpNote` per BR-EVT-12). Never rely on the client to hide them.
 - **Health data**: reads go through the `wellness` (or `content`) module's access-logged method, which writes `data_access_log` with actor, subject, resource and context (BR-WELL-16).
 
@@ -59,13 +77,13 @@ describe('PUT …/invitees/:inviteeId/rsvp: events.rsvp.proxy (EVT-12)', () => {
     ['Member of another club', 'otherClubMember', 404],
     ['Unauthenticated', 'anonymous', 401],
   ])('%s → %i', async (_label, actorKey, expectedStatus) => {
-    const res = await as(actors[actorKey]).put(path).send(body);
+    const res = await as(app, cast.actors[actorKey]).put(path).send(body);
     expect(res.status).toBe(expectedStatus);
   });
 });
 ```
 
-The rows above follow matrix § 4.2 for proxy RSVP; always re-read the matrix for the action at hand. Also test:
+`createCast(db)` (`apps/api/test/support/club-cast.ts`) creates the club, its Primera and Reserva categories, and a signed-in member for each actor key: `owner`, `adminOnly`, `dtOfCategory`, `coachOfCategory`, `player`, `playerCoach`, `dtOfOtherCategory`, `playerOfOtherCategory`, `formerPlayer`, `removedMember`, `otherClubMember` and `anonymous`. The rows above follow matrix § 4.2 for proxy RSVP; always re-read the matrix for the action at hand. `test/authorization/policy-guard.int.spec.ts` shows the full pattern. Also test:
 - role changes take effect on the next request (revoke a role, retry, get denied);
 - an ended category membership loses access to that category's health data;
 - shaped responses omit restricted fields for each role;

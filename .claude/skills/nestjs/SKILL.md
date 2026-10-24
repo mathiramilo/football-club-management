@@ -52,7 +52,7 @@ export class PolicyGuard implements CanActivate {
 
 - Use `getAllAndOverride` when a handler decorator overrides a class one (`@Public()`).
 - Compose repeated stacks with `applyDecorators` (`@Can` + `@ApiOperation` + error responses).
-- `@Club()` and `@CurrentActor()` are `createParamDecorator`s that read the CLS context set by the guards, never the raw request.
+- `@CurrentClubActor()` and `@CurrentActor()` are `createParamDecorator`s that read the CLS context set by the guards, never the raw request.
 - Fail at boot, not at request time: a startup check with `DiscoveryService` (`DiscoveryModule`) walks every controller method and throws if a route has neither `@Can` nor `@Public` (NFR-SEC-02).
 
 ## 3. Providers and injection
