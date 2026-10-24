@@ -118,7 +118,7 @@ flowchart LR
 - The mobile app keeps the session token in the Keychain / Keystore and sends it as a bearer token. The web app uses httpOnly, Secure, SameSite cookies, and Better Auth rejects cookie requests from untrusted origins.
 
 ### 6.2 Authorization
-- A single policy module answers `can(actor, action, resource)` from the actor's current club and category memberships. It implements the [permission matrix](../product/02-personas-and-roles.md#4-permission-matrix).
+- A single policy module answers `can(actor, action, resource)` from the actor's current club and category memberships. It implements the [permission matrix](../product/02-personas-and-roles.md#4-permission-matrix). Every handler declares its action (`@Can`) or is public, and the API refuses to start otherwise.
 - Every query is **scoped by `club_id`**. Repository methods require a club context argument and query through a client scoped to it (`prisma.forClub(club)`), which adds the club to every filter on club-owned tables and rejects writes for another club, so an unscoped query cannot be written. Raw SQL filters by `club_id` itself.
 - Health-data reads (wellness, individual content) go through dedicated methods that also write the **access log** (BR-WELL-16).
 - Every policy has backend tests, including cross-tenant negative tests ([NFR-SEC-03](05-non-functional-requirements.md)).

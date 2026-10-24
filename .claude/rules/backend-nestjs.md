@@ -43,7 +43,7 @@ If the scaffold (TECH-01) settles different names, follow the code and update th
 
 auth guard → club context (from `:clubId`, membership verified) → policy guard (the handler's declared action) → idempotency interceptor → Zod validation (`StandardSchemaValidationPipe`) → handler → role-based serializer → problem+json exception filter. This is Nest's own order (guards, interceptors, pipes); the `nestjs` skill explains what it implies.
 
-- **Controllers are thin**: no Prisma, no business rules. Every handler declares its action, e.g. `events.rsvp.proxy`, evaluated by the central policy module against the permission matrix (BR-ROLE-07, NFR-SEC-02). See the `authorization-policy` skill.
+- **Controllers are thin**: no Prisma, no business rules. Every handler declares its action with `@Can('events.rsvp.proxy')` from its controller's `@Policies(…)` map, or is `@Public()`, and the app refuses to start otherwise. The central policy guard evaluates it against the permission matrix (BR-ROLE-07, NFR-SEC-02). See the `authorization-policy` skill.
 - **Permissions come from current memberships** loaded per request, never from token claims alone: role changes take effect immediately (BR-ROLE-08).
 - **Tenancy**: every repository method takes the club context as its first argument and queries through `prisma.forClub(club)`, so an unscoped query on a tenant table can't be written. Never trust `:clubId` alone.
 - A resource in another club returns **404**, not 403. Collection endpoints filter by visibility instead of returning 403.

@@ -45,6 +45,7 @@ export class PolicyGuard implements CanActivate {
     if (this.reflector.getAllAndOverride<true | undefined>(PublicRoute.KEY, [handler, controller]))
       return true;
 
+    // RouteDeclarationsCheck stops the app from starting with an undeclared route; this fails closed anyway.
     const policy = declaredPolicy(this.reflector, controller, handler);
     if (!policy) throw new ForbiddenException();
 
