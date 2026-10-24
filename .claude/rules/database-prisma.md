@@ -30,9 +30,9 @@ Specs: `docs/tech/02-data-model.md`, ADR-005, ADR-013. See the `prisma-migration
 
 ## Queries
 
-- Repositories are the only code that uses the Prisma client, and every method takes the club context first.
+- Repositories are the only code that uses the Prisma client, and every method takes the club context first and queries through `this.prisma.forClub(club)`. That client ANDs the club into every filter on `clubs` and on club-owned tables, so a row of another club is never found, counted, updated or deleted, and it throws `ClubScopeViolation` when a write names another club. A new club-owned table goes into `CLUB_OWNED_MODELS` (`core/database/club-scope.ts`); a test fails until it does.
 - On club-scoped relations write the scalar foreign keys (`venueId`, `rsvpSetBy`), never relation `connect` / `disconnect`: `connect` rewrites `club_id` (the trigger rejects it) and `disconnect` tries to null `club_id`.
-- Look up tenant rows with the club in the filter: `findFirst` / `findFirstOrThrow({ where: { id, clubId } })` or a compound unique that includes `club_id`. Never `findUnique({ where: { id } })` on a tenant table.
+- The scoped client covers Prisma model queries only. Raw SQL filters by `club_id` itself, and models without `club_id` (users, sessions) pass through unscoped, together with the club rows reached through their relations: never include club data from them.
 - Interactive transactions use only `tx`, stay short, and contain no provider calls. The outbox row is written with the same `tx`.
 - Map `P2002` (unique), `P2003` (foreign key), `P2039` (check) and `P2025` (not found) to problem+json codes at the service boundary. A Prisma error's `meta` carries Postgres's `detail`, which for a CHECK violation is the whole failing row: never log, report or return `meta`.
 - `updateMany` doesn't set `@updatedAt`: set `updatedAt` explicitly. Use `createManyAndReturn` / `updateManyAndReturn` when you need the rows.
