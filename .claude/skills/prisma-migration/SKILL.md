@@ -95,6 +95,6 @@ CREATE TRIGGER event_invitees_club_id_immutable BEFORE UPDATE OF club_id ON even
 ## 5. Follow-through
 
 - Update the synthetic seed generator if the table needs seed data.
-- Repository methods for the new table take the club context first.
+- Repository methods for the new table take the club context first and query through `prisma.forClub(club)`. Add a new club-owned model to `CLUB_OWNED_MODELS` in `apps/api/src/core/database/club-scope.ts`.
 - Add integration tests that hit the new constraints (e.g. a second open membership is rejected).
 - Update `docs/tech/02-data-model.md` if anything differs from it.

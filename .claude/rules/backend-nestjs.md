@@ -45,7 +45,7 @@ auth guard → club context (from `:clubId`, membership verified) → policy gua
 
 - **Controllers are thin**: no Prisma, no business rules. Every handler declares its action, e.g. `events.rsvp.proxy`, evaluated by the central policy module against the permission matrix (BR-ROLE-07, NFR-SEC-02). See the `authorization-policy` skill.
 - **Permissions come from current memberships** loaded per request, never from token claims alone: role changes take effect immediately (BR-ROLE-08).
-- **Tenancy**: every repository method takes the club context as its first argument, so an unscoped query on a tenant table can't be written. Never trust `:clubId` alone.
+- **Tenancy**: every repository method takes the club context as its first argument and queries through `prisma.forClub(club)`, so an unscoped query on a tenant table can't be written. Never trust `:clubId` alone.
 - A resource in another club returns **404**, not 403. Collection endpoints filter by visibility instead of returning 403.
 - **Responses are shaped by role in serializers**, never in clients. Example: `rsvpReason` and `rsvpNote` only go to staff and the invitee themselves (BR-EVT-12).
 - **Errors** are `application/problem+json` (RFC 9457) with a stable `code` from the catalog in `packages/contracts`. Never leak stack traces, SQL or internal messages.
