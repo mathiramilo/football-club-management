@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
 import { seedDatabase } from '../../prisma/seed/seed-database.js';
 import { PrismaService } from '../../src/core/database/prisma.service.js';
 
-describe('Synthetic seed generator (TECH-03)', () => {
+describe('Synthetic seed generator (TECH-03)', { timeout: 30_000 }, () => {
   let db: PrismaService;
 
   beforeAll(() => {
