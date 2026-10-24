@@ -7,7 +7,9 @@ import type { App } from 'supertest/types.js';
 import { vi } from 'vitest';
 
 import { type Actor, CurrentActor } from '../../src/core/auth/actor.js';
+import { Can, Policies } from '../../src/core/authorization/policy.js';
 import { EmailSender, type EmailMessage } from '../../src/core/email/email-sender.js';
+import { SIGNED_IN_TEST_ACTION, signedInTestPolicies } from './test-policies.js';
 
 export const TEST_WEB_ORIGIN = 'http://localhost:3000';
 export const TEST_GOOGLE_CLIENT_IDS = {
@@ -83,8 +85,10 @@ export async function fakeGoogleAndApple(): Promise<{
   return { google: google.provider, apple: apple.provider };
 }
 
+@Policies(signedInTestPolicies)
 @Controller('test/whoami')
 class WhoAmIController {
+  @Can(SIGNED_IN_TEST_ACTION)
   @Get()
   whoAmI(@CurrentActor() actor: Actor) {
     return actor;

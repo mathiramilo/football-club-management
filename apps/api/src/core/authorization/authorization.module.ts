@@ -4,9 +4,14 @@ import { APP_GUARD } from '@nestjs/core';
 import { ClockModule } from '../clock/clock.js';
 import { ClubContextGuard } from './club-context.guard.js';
 import { ClubMembershipsRepository } from './club-memberships.repository.js';
+import { PolicyGuard } from './policy.guard.js';
 
 @Module({
   imports: [ClockModule],
-  providers: [ClubMembershipsRepository, { provide: APP_GUARD, useClass: ClubContextGuard }],
+  providers: [
+    ClubMembershipsRepository,
+    { provide: APP_GUARD, useClass: ClubContextGuard },
+    { provide: APP_GUARD, useClass: PolicyGuard },
+  ],
 })
 export class AuthorizationModule {}

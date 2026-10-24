@@ -19,9 +19,11 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 
 import { Public } from '../../src/core/auth/public.decorator.js';
+import { Can, Policies } from '../../src/core/authorization/policy.js';
 import { createOpenApiDocument } from '../../src/core/contract/create-openapi-document.js';
 import { ResponseSchema } from '../../src/core/contract/response-schema.decorator.js';
 import { createTestApp } from '../support/create-test-app.js';
+import { SIGNED_IN_TEST_ACTION, signedInTestPolicies } from '../support/test-policies.js';
 
 const thingColor = z.enum(['red', 'green']).meta({ id: 'TestThingColor' });
 const createThingBody = z
@@ -41,6 +43,7 @@ const listThingsQuery = z.object({
 });
 
 @ApiTags('test-things')
+@Policies(signedInTestPolicies)
 @Controller('test/things')
 class TestThingsController {
   @Public()
@@ -56,6 +59,7 @@ class TestThingsController {
     };
   }
 
+  @Can(SIGNED_IN_TEST_ACTION)
   @Get()
   list(@Query({ schema: listThingsQuery }) query: z.infer<typeof listThingsQuery>) {
     return { items: [], query };
