@@ -11,16 +11,24 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@repo/ui-tokens": "workspace:*",
+    "class-variance-authority": "0.7.1",
+    "lucide-react": "1.61.0",
     "next": "16.4.2",
+    "radix-ui": "1.8.1",
     "react": "catalog:",
     "react-dom": "catalog:"
   },
   "devDependencies": {
     "@repo/config": "workspace:*",
+    "@tailwindcss/postcss": "4.3.3",
     "@types/node": "24.19.2",
     "@types/react": "catalog:",
     "@types/react-dom": "19.3.0",
     "eslint": "catalog:",
+    "postcss": "8.5.31",
+    "shadcn": "4.22.1",
+    "tailwindcss": "4.3.3",
     "typescript": "catalog:"
   }
 }

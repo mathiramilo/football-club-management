@@ -1,0 +1,27 @@
+@import 'tailwindcss';
+@import 'shadcn/tailwind.css';
+@import '@repo/ui-tokens/theme.css';
+
+@theme inline {
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-archivo-semi-expanded), var(--font-archivo), ui-sans-serif, sans-serif;
+  --font-display: var(--font-archivo-expanded), var(--font-archivo), ui-sans-serif, sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply font-sans;
+  }
+
+  body {
+    @apply bg-background text-body text-foreground antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-3 outline-offset-2 outline-ring;
+  }
+}

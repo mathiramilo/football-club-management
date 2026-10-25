@@ -46,6 +46,7 @@ Use route groups to keep the surfaces apart, e.g. `app/(public)/…`, `app/(port
 ## Libraries
 
 - **shadcn/ui** components (Radix primitives) live in the repo under `components/ui/`; extend them there instead of adding another component library, following the `shadcn` skill. Tailwind with the preset from `packages/ui-tokens`.
+- `shadcn add` writes `import { cn } from "cn"` and Tailwind's default sizes (`text-sm`, `rounded-lg`, `h-8`). Point the import at `@/lib/utils` (its `cn` knows the token scales) and restyle the component with the tokens: the default scales are reset, so those classes do nothing.
 - **TanStack Table** for directories and per-player tables, **Recharts** for charts, **dnd-kit** for the plan builder and reordering, **Tiptap** (R3) for rich text stored as JSON.
 - **next-intl** reading the catalogs in `packages/i18n`.
 - `@sentry/nextjs` and `posthog-js` with privacy filters: no input capture, replay masked or off.
