@@ -41,4 +41,4 @@ The client only **hides** controls the user can't use. It never enforces permiss
 
 ## Tests and comments
 
-No unit or component tests (NFR-MAINT-02), and no comments in React code.
+No unit or component tests in `apps/web` and `apps/mobile` (NFR-MAINT-02), and no comments in React code. Pure functions in `packages/ui-tokens` (such as the club theme contrast guard) are unit-tested like `packages/domain`.
