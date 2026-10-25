@@ -1,19 +1,28 @@
 import '@/global.css';
 
+import { useIsRestoring } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { IntlProvider } from 'react-intl';
 
+import { QueryProvider } from '@/components/query-provider';
+import { setUpApiClient } from '@/lib/api-client';
 import { useAppFonts } from '@/lib/fonts';
 import { locale, messages } from '@/lib/i18n';
 
 void SplashScreen.preventAutoHideAsync();
+setUpApiClient();
 
-export default function RootLayout() {
+function useIsAppReady() {
   const [fontsLoaded, fontError] = useAppFonts();
-  const isReady = fontsLoaded || fontError !== null;
+  const isRestoring = useIsRestoring();
+  return (fontsLoaded || fontError !== null) && !isRestoring;
+}
+
+function RootStack() {
+  const isReady = useIsAppReady();
 
   useEffect(() => {
     if (isReady) SplashScreen.hide();
@@ -23,10 +32,16 @@ export default function RootLayout() {
     return null;
   }
 
+  return <Stack screenOptions={{ headerShown: false }} />;
+}
+
+export default function RootLayout() {
   return (
-    <IntlProvider locale={locale} defaultLocale={locale} messages={messages}>
-      <StatusBar style="auto" />
-      <Stack screenOptions={{ headerShown: false }} />
-    </IntlProvider>
+    <QueryProvider>
+      <IntlProvider locale={locale} defaultLocale={locale} messages={messages}>
+        <StatusBar style="auto" />
+        <RootStack />
+      </IntlProvider>
+    </QueryProvider>
   );
 }
