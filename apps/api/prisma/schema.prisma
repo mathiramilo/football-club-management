@@ -141,6 +141,16 @@ model OutboxEvent {
   @@map("outbox_events")
 }
 
+model AppConfig {
+  platform       String   @id
+  minimumVersion String?  @map("minimum_version")
+  storeUrl       String?  @map("store_url")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("app_config")
+}
+
 model Club {
   id              String    @id @default(uuid(7)) @db.Uuid
   name            String
