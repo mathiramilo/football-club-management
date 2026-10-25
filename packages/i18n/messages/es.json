@@ -1,4 +1,10 @@
 {
+  "agenda": {
+    "empty": {
+      "title": "Todavía no hay actividades",
+      "body": "Cuando te sumes a un equipo, acá vas a ver las prácticas y los partidos."
+    }
+  },
   "email": {
     "signInCode": {
       "subject": "Tu código para entrar",
@@ -24,5 +30,37 @@
     "TOO_MANY_ATTEMPTS": "Ese código ya no sirve. Pedí uno nuevo.",
     "UNAUTHENTICATED": "Tu sesión se cerró. Entrá de nuevo.",
     "VALIDATION_FAILED": "Revisá los datos y probá de nuevo."
+  },
+  "home": {
+    "empty": {
+      "title": "Todavía no estás en un equipo",
+      "body": "Pedile a tu DT el link de invitación y abrilo en este teléfono."
+    }
+  },
+  "nav": {
+    "tabs": {
+      "home": "Inicio",
+      "agenda": "Agenda",
+      "team": "Equipo",
+      "profile": "Perfil"
+    }
+  },
+  "notFound": {
+    "title": "No encontramos esta pantalla",
+    "body": "El link está mal o ya no existe.",
+    "action": "Ir al inicio"
+  },
+  "offline": {
+    "title": "Sin conexión",
+    "body": "Lo que confirmes se enviará cuando haya conexión."
+  },
+  "profile": {
+    "version": "{app} · versión {version}"
+  },
+  "team": {
+    "empty": {
+      "title": "Acá vas a ver a tu equipo",
+      "body": "Cuando te sumes, vas a ver a tus compañeros ordenados por línea."
+    }
   }
 }
