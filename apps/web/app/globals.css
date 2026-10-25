@@ -24,4 +24,14 @@
   :focus-visible {
     @apply outline-3 outline-offset-2 outline-ring;
   }
+
+  a,
+  button,
+  input,
+  label,
+  select,
+  textarea,
+  [role='button'] {
+    @apply touch-manipulation;
+  }
 }
