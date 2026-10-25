@@ -126,6 +126,21 @@ model IdempotencyKey {
   @@map("idempotency_keys")
 }
 
+model OutboxEvent {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  type        String
+  payload     Json
+  processedAt DateTime? @map("processed_at") @db.Timestamptz(6)
+  attempts    Int       @default(0)
+  lastError   String?   @map("last_error")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([createdAt], map: "outbox_events_pending_idx", where: raw("processed_at IS NULL"))
+  @@index([processedAt], map: "outbox_events_processed_idx", where: raw("processed_at IS NOT NULL"))
+  @@map("outbox_events")
+}
+
 model Club {
   id              String    @id @default(uuid(7)) @db.Uuid
   name            String
