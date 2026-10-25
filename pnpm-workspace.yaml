@@ -22,6 +22,7 @@ overrides:
 allowBuilds:
   '@prisma/engines': true
   '@scarf/scarf': false
+  '@sentry/cli': false
   cpu-features: false
   esbuild: false
   prisma: true

@@ -22,6 +22,10 @@ const variant = variants[variantName];
 const applicationId = `com.footballclubmanagement.app${variant.suffix}`;
 
 const appleTeamId = process.env.APPLE_TEAM_ID;
+const easProjectId = process.env.EAS_PROJECT_ID;
+const webUrl = process.env.EXPO_PUBLIC_WEB_URL;
+const linkHost = webUrl ? new URL(webUrl).host : undefined;
+const linkPathPrefixes = ['/e/', '/j/', '/c/'];
 const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
 const googleIosUrlScheme =
   googleIosClientId &&
@@ -33,19 +37,47 @@ const config: ExpoConfig = {
   version: '0.0.0',
   scheme: variant.scheme,
   orientation: 'portrait',
+  runtimeVersion: { policy: 'fingerprint' },
+  ...(easProjectId && {
+    updates: { url: `https://u.expo.dev/${easProjectId}` },
+    extra: { eas: { projectId: easProjectId } },
+  }),
   userInterfaceStyle: 'light',
   ios: {
     bundleIdentifier: applicationId,
     appleTeamId: appleTeamId === '' ? undefined : appleTeamId,
     usesAppleSignIn: true,
+    ...(linkHost && { associatedDomains: [`applinks:${linkHost}`] }),
   },
   android: {
     package: applicationId,
+    ...(linkHost && {
+      intentFilters: [
+        {
+          action: 'VIEW',
+          autoVerify: true,
+          data: linkPathPrefixes.map((pathPrefix) => ({
+            scheme: 'https',
+            host: linkHost,
+            pathPrefix,
+          })),
+          category: ['BROWSABLE', 'DEFAULT'],
+        },
+      ],
+    }),
   },
   plugins: [
     'expo-router',
     ['expo-splash-screen', { backgroundColor: '#ffffff' }],
     'expo-apple-authentication',
+    [
+      '@sentry/react-native/expo',
+      {
+        organization: process.env.SENTRY_ORG,
+        project: process.env.SENTRY_PROJECT,
+        disableAutoUpload: !process.env.SENTRY_AUTH_TOKEN,
+      },
+    ],
     ...(googleIosUrlScheme
       ? [
           [
