@@ -11,7 +11,7 @@ A framework for building ui, components and design systems. Components are added
 > **Project notes** (vendored from [shadcn-ui/ui](https://github.com/shadcn-ui/ui) `skills/shadcn` at `ba1503c`, MIT; see `.claude/skills/THIRD_PARTY.md`). These override the generic guidance below where they conflict:
 > - The web app is `apps/web` in a pnpm monorepo. Run the CLI as `pnpm --filter ./apps/web exec shadcn …`, using the version pinned in `apps/web` devDependencies (add it there if missing). Never `@latest`.
 > - The base is **Radix** (ADR-014): use `asChild` for custom triggers.
-> - Theme variables are generated from `packages/ui-tokens`, which also feeds NativeWind on mobile. Change colors, radius and fonts there. Don't hand-edit the generated variables, and don't run `init --preset`, `apply` or preset switches without an ADR and the user's approval.
+> - Theme variables come from `packages/ui-tokens/theme.css`, which also feeds NativeWind on mobile. Change colors, sizes, radii and shadows there; `app/globals.css` only maps the font families. Don't run `init --preset`, `apply` or preset switches without an ADR and the user's approval.
 > - Status colors (Voy, No voy, Sin responder, wellness flags) are semantic tokens from `packages/ui-tokens`, always shown with an icon and a label. Club theming sets the accent through CSS variables with a contrast check.
 > - Use only the official `@shadcn` registry unless the user names another. Never pass `--overwrite` without explicit approval.
 > - Example strings below are English placeholders: real copy comes from `packages/i18n`. React code in this repo has no comments, unlike the examples.

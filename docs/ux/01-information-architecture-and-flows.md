@@ -1,6 +1,6 @@
 # UX: Information Architecture, Navigation & Key Flows
 
-> Status: **Draft v0.1** · Owner: Product + Design · Last updated: 2026-10-23
+> Status: **Draft v0.1** · Owner: Product + Design · Last updated: 2026-10-25
 > Related: [Product principles](../product/01-vision-and-strategy.md#5-product-principles) · [Glossary](../product/03-glossary.md) · [NFR: accessibility, localization](../tech/05-non-functional-requirements.md)
 
 ## 1. UX principles
@@ -177,17 +177,17 @@ Avoid English loanwords where a common Spanish term exists ("práctica", not "tr
 
 - **Design tokens** in `packages/ui-tokens`, shared by web and mobile: color, typography, spacing and radius.
 - **Status colors always paired with an icon and a label** (NFR-A11Y-03): Voy green ✓, No voy red ✕, Sin responder grey ?, wellness flags 🔴🟠🟡🟢⚪.
-- **Club theming**: club primary color as an accent (header, active tab) with automatic contrast checks; crest in the header.
+- **Club theming**: club primary color as an accent (header, active tab) with an automatic contrast check; crest in the header. The check darkens the club color (mixing in black) until white text on it, and club-colored text on its tint, reach 4.5:1. A missing or malformed color falls back to the app neutral `#1B1B1F`.
 - **Dark mode** (Should, R1): much usage happens at night.
 - **Field mode / high contrast** for roll call and plan field mode.
 - **Charts**: simple and labelled, always with numerator and denominator (BR-ANL-04).
 
 ### 7.1 Visual direction: Camiseta
 
-Chosen on 2026-10-23 from three explored directions. These values seed `packages/ui-tokens` (TECH-15). Once the tokens exist, they are the source and the designs follow them.
+Chosen on 2026-10-23 from three explored directions. Since TECH-15 the values live in `packages/ui-tokens/theme.css`: the tokens are the source, and the designs follow them.
 
 - **Club header**: the club's primary color fills the top of the screen with a faint vertical stripe, like a kit, plus the crest and the club and category switch. Text on it is white. Tab roots show a wide title; the player home shows the player's name and shirt number.
-- **Type**: Archivo. Screen titles at 125% width and weight 900, card titles at 112% and 800, body 15–16 px, tabular figures for compared numbers. 12 px only for tab labels.
+- **Type**: Archivo. Screen titles at 125% width and weight 900, card titles at 112% and 800, body 15–16 px, tabular figures for compared numbers. 12 px only for tab labels. In the app, the 125% titles grow with dynamic type up to 140% so a wide title doesn't break mid-word; all other text grows fully (NFR-A11Y-02).
 - **Surfaces**: white background, hero cards overlapping the header (radius 28), list tiles on `#F4F4F6` (radius 22).
 - **Buttons**: pills. 64 px for Voy / No voy, 56 px for screen actions, 44 px for row actions.
 - **Status colors**, each with a tint and a darker text shade, always with an icon and a word: Voy / Presente `#157F3B`, No voy / Ausente `#B42318`, Tarde and warnings `#B54708`, Sin responder `#63636E`. The club color never marks status.
@@ -202,7 +202,7 @@ Chosen on 2026-10-23 from three explored directions. These values seed `packages
 4. Push notification and email templates (es) for N-01 to N-10 and N-18 to N-21.
 5. Store assets plan (icon, screenshots, descriptions) for the pilot builds (TestFlight / internal testing).
 
-Status on 2026-10-23: (1) the flows are clickable on the design canvas (§ 9); testing with players and DTs has not started. (2) Mobile foundations are drawn on the canvas; web is not; the tokens land in TECH-15. (3) First full pass done for the mobile screens; S-18 is web-only and not designed. (4) and (5) not started.
+Status on 2026-10-25: (1) the flows are clickable on the design canvas (§ 9); testing with players and DTs has not started. (2) Mobile foundations are drawn on the canvas; web is not. The tokens and core components for both platforms are built (TECH-15). (3) First full pass done for the mobile screens; S-18 is web-only and not designed. (4) and (5) not started.
 
 ## 9. Designs
 

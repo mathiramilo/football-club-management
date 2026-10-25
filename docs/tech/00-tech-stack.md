@@ -1,6 +1,6 @@
 # Tech Stack
 
-> Status: **Proposed v0.1**. Recommended stack, to be confirmed in R0 (OQ-15, [ADR log](adr-log.md)). · Last updated: 2026-10-23
+> Status: **Proposed v0.1**. Recommended stack, to be confirmed in R0 (OQ-15, [ADR log](adr-log.md)). · Last updated: 2026-10-25
 > Related: [Architecture overview](01-architecture-overview.md) · [API guidelines](03-api-guidelines.md) · [AI architecture](04-ai-architecture.md) · [NFRs](05-non-functional-requirements.md)
 
 **In one sentence**: a TypeScript monorepo with three apps that share contracts and business rules:
@@ -14,7 +14,7 @@
 |---|---|---|---|
 | Language / runtime | TypeScript · React Native (New Architecture, Hermes) | TypeScript · React | TypeScript · Node.js (Active LTS) |
 | Framework | **Expo** (managed workflow, development builds) + **Expo Router** | **Next.js** (App Router) | **NestJS** (modular monolith) |
-| UI | **NativeWind** (Tailwind for RN) + own primitives on shared tokens | **Tailwind CSS** + **shadcn/ui** (Radix primitives) | — |
+| UI | **NativeWind 5** (Tailwind v4 for RN) + own primitives on shared tokens | **Tailwind CSS v4** + **shadcn/ui** (Radix primitives) | — |
 | Server state / data | **TanStack Query** + generated client, persisted cache, offline mutations | **TanStack Query** (portal) · Server Components (public pages) | **Prisma** on **PostgreSQL** |
 | Validation / contracts | Zod schemas from `packages/contracts` | Zod schemas from `packages/contracts` | Zod → OpenAPI (NestJS 12 Standard Schema) |
 | Forms | React Hook Form + Zod | React Hook Form + Zod | — |
@@ -53,7 +53,7 @@ Shared across all three: `packages/contracts` (Zod), `packages/domain` (pure bus
 | Concern | Choice | Notes |
 |---|---|---|
 | Framework | **Next.js (App Router)** | Server Components and SSR for the **public pages** (event and invite landings with Open Graph tags for WhatsApp previews, generated OG images via `next/og`). Client components for the authenticated staff portal. Also serves the universal-link association files. |
-| Styling and components | **Tailwind CSS** + **shadcn/ui** (Radix primitives) | Accessible primitives (NFR-A11Y-01), with components owned in the repo. Theme colors come from `packages/ui-tokens` (club theming as CSS variables). |
+| Styling and components | **Tailwind CSS v4** + **shadcn/ui** (Radix primitives) · **Lucide** icons | Accessible primitives (NFR-A11Y-01), with components owned in the repo. The theme comes from `packages/ui-tokens/theme.css`, with club theming as CSS variables (ADR-014). |
 | Server state | **TanStack Query** with hooks from `packages/api-client` | Caching, optimistic updates (RSVP, roll call), refetch on focus (no realtime in R1). |
 | Session | httpOnly, Secure, SameSite cookies on the shared parent domain (`app.` / `api.` subdomains) | Final shape decided in the auth spike (TECH-04). No tokens in `localStorage`. |
 | Forms | **React Hook Form** + Zod resolver | The same Zod schemas as the API. |
@@ -72,7 +72,7 @@ Shared across all three: `packages/contracts` (Zod), `packages/domain` (pure bus
 |---|---|---|
 | Framework | **Expo** (latest SDK at R0) with **development builds** (not Expo Go), Continuous Native Generation + config plugins | Native modules are needed (Google sign-in, compression, PDF). React Native New Architecture and Hermes. |
 | Navigation and deep links | **Expo Router** | File-based routes. Universal links (iOS associated domains) and verified App Links (Android) for `/e/…`, `/j/…`, `/c/…` (NFR-COMP-03). |
-| Styling | **NativeWind** + own component primitives | The same Tailwind mental model as web. Tokens come from a shared Tailwind preset in `packages/ui-tokens`. Supports dark mode and high-contrast field screens (NFR-A11Y-04). |
+| Styling | **NativeWind 5** (release candidate) + own component primitives · **Lucide** icons | The same Tailwind v4 theme file as web, from `packages/ui-tokens` (ADR-015). Supports dark mode and high-contrast field screens (NFR-A11Y-04). |
 | Server state and offline | **TanStack Query** + a persisted cache on **react-native-mmkv** · **paused mutations** persisted and resumed on reconnect, each carrying an `Idempotency-Key` | Offline reads (NFR-OFF-02) and the offline write queue for RSVP, roll call, check-ins and routine logs (NFR-OFF-01), without a custom sync engine. |
 | Local UI state | **Zustand** | Selected club and category, UI preferences. |
 | Secure storage | **expo-secure-store** | The session token in the Keychain / Keystore, kept there by `@better-auth/expo` (NFR-SEC-11). |
@@ -107,7 +107,7 @@ flowchart LR
   I[packages/i18n<br/>ICU catalogs] --> API
   I --> W
   I --> M
-  T[packages/ui-tokens<br/>Tailwind / NativeWind preset] --> W
+  T[packages/ui-tokens<br/>Tailwind v4 theme for web and NativeWind] --> W
   T --> M
 ```
 
@@ -166,4 +166,4 @@ Chosen at TECH-01 (2026-10-23). Lift a hold when its condition is met, in its ow
 | In-app browsers | Does WhatsApp open links in an in-app browser that blocks Google OAuth, on each OS? | NFR-COMP-04, AUTH-01 |
 | Offline queue | Do TanStack Query paused mutations, persisted with MMKV, survive app restarts and replay idempotently? | NFR-OFF-01, EVT-15 |
 | ORM | Prisma vs. Drizzle on the RSVP + roll call slice, plus one analytics query | ADR-013 · **Done** (2026-10-23): Prisma confirmed |
-| Shared tokens | Does one Tailwind preset drive both Tailwind (web) and NativeWind (mobile), including club theming? | ADR-014/015, TECH-15 |
+| Shared tokens | Does one Tailwind preset drive both Tailwind (web) and NativeWind (mobile), including club theming? | ADR-014/015, TECH-15 · **Done** (2026-10-25): yes, one Tailwind v4 theme file with NativeWind 5 (release candidate, two workarounds); Android device check pending (TECH-08) |

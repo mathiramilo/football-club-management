@@ -1,6 +1,6 @@
 # Product Backlog
 
-> Status: **Draft v0.1** · Owner: Product · Last updated: 2026-10-24
+> Status: **Draft v0.1** · Owner: Product · Last updated: 2026-10-25
 > Ordered by release, then milestone, then priority. Story details and acceptance criteria live in the linked feature specs: **the spec is the source of truth**, and this file is the index. When a story changes in a spec, update its row here in the same PR.
 
 ## 1. How to use this backlog
@@ -26,7 +26,7 @@
 | TECH-09 | Web shell: Next.js, auth, i18n, design-system base, public SSR pages with OG images, association files | R0 | Must | M | ADR-003 |
 | TECH-10 | Observability and analytics baseline: Sentry, structured logs, uptime checks, PostHog with privacy filters | R0 | Must | S | ADR-012, NFR-OBS; sends the worker's `JobAlerts` to Sentry |
 | TECH-14 | App config endpoint and forced-update mechanism | R0 | Must | S | Architecture § 6.11 |
-| TECH-15 | Design system foundations: tokens and core components for web and mobile | R0 | Must | L | With design; UX § 7 |
+| TECH-15 | Design system foundations: tokens and core components for web and mobile | R0 | Must | L | UX § 7; ADR-014/015 (accepted after TECH-15). Adds `packages/ui-tokens` (`theme.css`, `clubTheme()`, `cn`, Archivo) and the core components on both apps. The club header, tab bar and sheets come with the shells (TECH-08, TECH-09) |
 | TECH-11 | Media pipeline: presigned uploads, image variants, document scanning | R1 (α) | Must | M | Crests and profile photos in R1; attachments in R3 |
 | TECH-13 | Data lifecycle jobs: account and club purge, retention schedules | R1 (β) | Must | M | BR-AUTH-12, BR-CLUB-13; wellness retention added in R2 |
 | TECH-12 | Back-office: audited support scripts (R1), admin UI (R2) | R1 (β) → R2 | Should | M | Architecture § 6.14 |
