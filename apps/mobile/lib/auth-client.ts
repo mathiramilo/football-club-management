@@ -2,6 +2,7 @@ import { createAuthClient } from 'better-auth/client';
 import { emailOTPClient } from 'better-auth/client/plugins';
 
 import { apiUrl } from '@/lib/api-client';
+import { signOutOfGoogle } from '@/lib/google-sign-in';
 import { errorMessageKey, type MessageKey } from '@/lib/i18n';
 import { endSession, getSessionToken, startSession } from '@/lib/session';
 
@@ -22,16 +23,17 @@ export const authClient = createAuthClient({
 export async function signOut() {
   const token = getSessionToken() ?? undefined;
   await endSession();
-  void authClient
-    .signOut({ fetchOptions: { auth: { type: 'Bearer', token } } })
-    .catch(() => undefined);
+  void Promise.allSettled([
+    authClient.signOut({ fetchOptions: { auth: { type: 'Bearer', token } } }),
+    signOutOfGoogle(),
+  ]);
 }
 
 export type AuthResult = { ok: true } | { ok: false; message: MessageKey };
 
 const statusCodes: Partial<Record<number, string>> = { 429: 'RATE_LIMITED' };
 
-async function attempt(
+export async function attempt(
   request: () => Promise<{ error: { code?: string; status: number } | null }>,
 ): Promise<AuthResult> {
   try {
