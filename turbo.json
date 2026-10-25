@@ -48,6 +48,25 @@
         "AUTH_RATE_LIMIT_ENABLED",
         "AUTH_TRUSTED_PROXIES"
       ]
+    },
+    "dev:worker": {
+      "dependsOn": ["^build", "db:generate"],
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": [
+        "DATABASE_URL",
+        "PORT",
+        "SHUTDOWN_DRAIN_MS",
+        "MAILPIT_URL",
+        "EMAIL_FROM",
+        "API_BASE_URL",
+        "BETTER_AUTH_SECRET",
+        "WEB_ORIGINS",
+        "GOOGLE_CLIENT_IDS",
+        "APPLE_CLIENT_IDS",
+        "AUTH_RATE_LIMIT_ENABLED",
+        "AUTH_TRUSTED_PROXIES"
+      ]
     }
   }
 }

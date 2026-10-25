@@ -60,7 +60,8 @@ Rows marked with an enabler ID don't run yet. They keep these names when that en
 | Install | `pnpm install` | ✅ |
 | Local Postgres | `docker compose up -d postgres`, then copy `apps/api/.env.example` to `apps/api/.env` (if 5432 is taken, set `POSTGRES_PORT` in a root `.env` and match it in `DATABASE_URL`) | ✅ |
 | Local email (catches every message the API sends) | `docker compose up -d mailpit`, then open http://localhost:8025 | ✅ |
-| Run everything in dev | `pnpm dev` | ✅ |
+| Run everything in dev (the API's job worker runs as its own process, `dev:worker`) | `pnpm dev` | ✅ |
+| Run the built job worker | `pnpm --filter ./apps/api start:worker` | ✅ |
 | Lint and format check | `pnpm lint` · `pnpm format:check` (`pnpm format` fixes) | ✅ |
 | Typecheck | `pnpm typecheck` | ✅ |
 | Backend tests (Docker must be running for Testcontainers) | `pnpm test` | ✅ |
