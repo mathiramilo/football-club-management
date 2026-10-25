@@ -22,7 +22,7 @@ Specs: `docs/ux/01-information-architecture-and-flows.md` (navigation § 3, scre
 ## 3. Data
 
 - Read with the generated hooks from `packages/api-client`. No hand-written fetches or types.
-- If the data is in the offline-read list (agenda for the next 14 days, event details and availability, published plans, active routines and nutrition plans, own stats), make sure its queries are persisted and render from cache when offline.
+- If the data is in the offline-read list (agenda for the next 14 days, event details and availability, published plans, active routines and nutrition plans, own stats), persist its queries with `meta: { persist: true }` (pass it through the generated hook's `query` options) and make sure they render from cache when offline.
 - Writes in the offline list (RSVP, bulk RSVP, roll call, check-ins, routine logs) use the `offline-mutation` skill. Other writes show a clear "needs connection" state.
 - Refetch on focus and pull-to-refresh. No polling, no realtime in R1.
 - Show only what the API returned for this role. Hide, don't enforce.

@@ -94,11 +94,14 @@ Copy comes from `packages/i18n` (for example "Se envÃ­a cuando vuelva la conexiÃ
 
 ## 5. Shared setup checklist (TECH-08)
 
-Verify these exist before relying on them:
-- `onlineManager` wired to device connectivity (`expo-network`), and `focusManager` wired to `AppState`;
-- `PersistQueryClientProvider` with an MMKV-backed persister, `maxAge` covering the offline window, a `buster` tied to the app version, and `onSuccess={() => queryClient.resumePausedMutations()}`;
-- every offline mutation's defaults registered before the provider restores;
-- the root layout waits for the cache restore (and the SecureStore session) before redirecting or handling deep links, so a cold start from a push doesn't flash the sign-in screen;
+Built in TECH-08 (`apps/mobile/lib/query-client.ts`, `components/query-provider.tsx`, `app/_layout.tsx`):
+- `onlineManager` follows `expo-network` and `focusManager` follows `AppState`;
+- `PersistQueryClientProvider` with an MMKV persister, a 14-day `maxAge`, the app version as `buster`, and `onSuccess` resuming paused mutations;
+- the splash screen stays up until the cache is restored; the session is read synchronously from SecureStore, so a cold start never flashes the sign-in screen;
+- a 401 ends the session, and ending a session clears the cache with any queued writes (sign-out warns first when some are queued).
+
+For each new mutation:
+- register its defaults in `lib/query-client.ts` (or a module it imports), so they exist before the provider restores;
 - the API endpoint requires and honors `Idempotency-Key` (`@RequiresIdempotencyKey()`).
 
 ## 6. Verify manually

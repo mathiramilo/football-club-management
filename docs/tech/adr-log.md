@@ -20,7 +20,7 @@
 | ADR-013 | ORM: Prisma | Accepted (2026-10-23, after the TECH-03 spike) | R0 week 1 |
 | ADR-014 | Web UI: Tailwind CSS + shadcn/ui with shared design tokens | Accepted (2026-10-25, after TECH-15) | R0 week 2 |
 | ADR-015 | Mobile UI: NativeWind with shared tokens; core native libraries | Accepted (2026-10-25, after TECH-15) | R0 week 2 |
-| ADR-016 | Client data layer: generated client (Orval) + TanStack Query + offline persistence | Proposed | R0 week 2 |
+| ADR-016 | Client data layer: generated client (Orval) + TanStack Query + offline persistence | Accepted (2026-10-26, after TECH-08) | R0 week 2 |
 | ADR-017 | Supporting providers: email (Postmark or Resend) and object storage (Cloudflare R2) | Proposed | R0 week 3 |
 
 ---
@@ -109,7 +109,7 @@
     - user data outside our database: all of them.
 - **Decision**: **Better Auth** 1.7, pinned exactly, self-hosted inside the API. Its spec changes are accepted:
   - **Sign-in**: the `emailOTP` plugin (6 digits, 600 s, 5 attempts, `storeOTP: 'hashed'`). Google and Apple use ID-token sign-in on mobile; the web flow is settled in TECH-09. BR-AUTH-03's per-email limits (resend after 60 s, 5 codes an hour) are added with a `hooks.before`.
-  - **Sessions**: Better Auth's database sessions, which expire after 90 days without use on every device and slide once a day (BR-AUTH-04, decision D-17). Mobile sends the session token as a bearer token (`bearer` plugin) kept in expo-secure-store by `@better-auth/expo`. Web uses its httpOnly cookie. The API's auth guard calls `auth.api.getSession` on every request.
+  - **Sessions**: Better Auth's database sessions, which expire after 90 days without use on every device and slide once a day (BR-AUTH-04, decision D-17). Mobile sends the session token as a bearer token (`bearer` plugin), kept in expo-secure-store by the app. TECH-08 dropped `@better-auth/expo`: it stores the session as a cookie and sends it in a `Cookie` header, and Better Auth checks the origin of any request that carries a cookie, so it would need that package's server plugin and the app schemes as trusted origins. Bearer requests skip that check. Web uses its httpOnly cookie. The API's auth guard calls `auth.api.getSession` on every request.
   - **No refresh rotation or reuse detection**, and session tokens are stored in plain text (accepted risk, NFR-SEC-11).
   - **Routes**: its handler serves `/v1/auth/*`, mounted on the Express instance before Nest's body parser.
   - **Tables**: its `session`, `account` and `verification` models become `auth_sessions`, `auth_identities` and `auth_verifications`. `users` gains `name`, `email_verified` and `image` ([Data model § 3.1](02-data-model.md#31-identity)).
@@ -210,18 +210,22 @@
   - Tamagui (a powerful cross-platform system, steeper learning curve); Unistyles or StyleSheet only (no shared mental model with web).
 - **Consequences**: designers and developers use the same tokens and class vocabulary on both platforms. The release candidate is the risk:
   - **Remove the workarounds** (the lightningcss override and the `react-native-css` patch in `pnpm-workspace.yaml`) when a release fixes them, and move to NativeWind 5.0 stable when it ships.
-  - **Not yet checked**: Android on a device, and a development build (TECH-08). Check the core components on both before R1; the TECH-15 PRs show them on iOS.
-  - **Watch**: fonts load at startup from JavaScript; TECH-08 checks cold start (NFR-PERF-03) and may embed them with the `expo-font` config plugin instead. Display titles cap font scaling at 1.4× so wide titles don't break mid-word (UX § 7.1); everything else scales fully.
+  - **Not yet checked**: Android on a device. TECH-08 ran the components in an iOS development build (Debug and Release, iOS 26.5 simulator) with no difference from Expo Go. Check Android before R1.
+  - **Watch**: fonts load at startup from JavaScript, behind the splash screen. On the simulator the Release build showed the first screen within 3 s, which says nothing about a low-end Android: measure cold start there (NFR-PERF-03) and embed the fonts with the `expo-font` config plugin if they cost too much. Display titles cap font scaling at 1.4× so wide titles don't break mid-word (UX § 7.1); everything else scales fully.
 
-## ADR-016 · Client data layer: generated client + TanStack Query + offline persistence
-- **Context**: two clients consuming one versioned API; offline writes for RSVP, roll call and check-ins; optimistic UI.
+## ADR-016 · Client data layer: generated client + TanStack Query + offline persistence (Accepted)
+- **Context**: two clients consuming one versioned API; offline writes for RSVP, roll call and check-ins; optimistic UI. TECH-06 built the generated client. TECH-08 (2026-10-25) built the mobile persistence on TanStack Query 5.104 and react-native-mmkv 4.3 and ran the R0 offline-queue spike on the iOS 26.5 simulator, against a temporary idempotent endpoint: a write queued while offline survived killing the app, was sent once after the restart, and a second request with the same `Idempotency-Key` was replayed without running again. Android was not available.
 - **Decision**:
   - **Orval** generates a typed fetch client and TanStack Query hooks from the OpenAPI document into `packages/api-client`.
   - A thin wrapper adds auth, version headers, `Idempotency-Key` and problem+json mapping.
   - On mobile, the query cache and **paused mutations** are persisted with react-native-mmkv and resumed on reconnect.
+    - Paused mutations are always persisted; queries only when they set `meta: { persist: true }` (the NFR-OFF-02 list).
+    - The cache lives 14 days, the offline agenda window, and is dropped when the app version changes.
+    - Queued writes resume once the cache is restored at startup and whenever the connection returns.
+    - Ending a session clears the cache, in memory and on disk. A cache found at launch without a session, such as one restored from a device backup, is dropped.
   - Zustand holds local UI state.
 - **Alternatives**: `openapi-typescript` + `openapi-fetch` with hand-written hooks; a custom sync engine (unnecessary at this scale).
-- **Consequences**: no hand-written API types, and offline behavior comes from a well-known library. Generated code is never edited by hand.
+- **Consequences**: no hand-written API types, and offline behavior comes from a well-known library. Generated code is never edited by hand. A store update changes the app version and drops writes still queued; a mutation's variables must stay compatible across OTA updates on the same version, since queued ones are replayed by the new code. Check the queue on Android before R1.
 
 ## ADR-017 · Supporting providers: email and object storage
 - **Decision**:
