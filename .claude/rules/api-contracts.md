@@ -27,7 +27,7 @@ Clients must tolerate unknown response fields and unknown enum values (render a 
 | Topic | Rule |
 |---|---|
 | Shape | REST, JSON, `camelCase` fields, plural resource nouns, base path `/v1` |
-| Tenancy | Club resources under `/v1/clubs/{clubId}/…`; public, non-personal endpoints under `/v1/public/…`; the caller's own data under `/v1/me/…` |
+| Tenancy | Club resources under `/v1/clubs/{clubId}/…`; public, non-personal endpoints under `/v1/public/…` (`GET /v1/app-config` is the one exception); the caller's own data under `/v1/me/…` |
 | IDs | UUID v7 strings |
 | Time | Instants as ISO 8601 with offset; local dates as `YYYY-MM-DD`; include the club `timezone` where relevant |
 | Pagination | Cursor-based: `?limit=50&cursor=…` → `{ items, nextCursor }`; default 50, max 200 |

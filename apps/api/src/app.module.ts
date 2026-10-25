@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import type { Request } from 'express';
 import { ClsModule, type ClsService } from 'nestjs-cls';
 
+import { AppConfigModule } from './core/app-config/app-config.module.js';
 import { AuthModule } from './core/auth/auth.module.js';
 import { AuthorizationModule } from './core/authorization/authorization.module.js';
 import { clientInfoFrom } from './core/client/client-info.js';
@@ -31,6 +32,8 @@ import type { RequestContext } from './core/request-context.js';
     // Its interceptor must wrap ContractModule's serializer, so it stores the response as sent.
     IdempotencyModule,
     ContractModule,
+    // Before AuthModule, so an outdated app is told to update rather than to sign in again.
+    AppConfigModule,
     AuthModule,
     // After AuthModule: global guards run in registration order, and this one needs the actor.
     AuthorizationModule,

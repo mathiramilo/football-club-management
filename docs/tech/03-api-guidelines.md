@@ -1,6 +1,6 @@
 # API Guidelines & Endpoint Inventory
 
-> Status: **Proposed v0.1** · Last updated: 2026-10-23
+> Status: **Proposed v0.1** · Last updated: 2026-10-25
 > Contract-first: request and response schemas live in `packages/contracts` (Zod) and generate the OpenAPI document and the typed client used by web and mobile.
 
 ## 1. Conventions
@@ -10,8 +10,8 @@
 | Style | REST over HTTPS, JSON bodies, `camelCase` fields, plural resource nouns. |
 | Base path | `/v1`. Breaking changes require `/v2` or additive evolution. Old mobile app versions stay in the wild for months, so **only additive changes** are allowed in `v1`. |
 | Tenancy | Club-scoped resources live under `/v1/clubs/{clubId}/…`. The server always re-checks that the caller belongs to that club (never trust the path alone). |
-| Auth | `Authorization: Bearer <session token>` (mobile) or a secure httpOnly cookie (web), both issued by Better Auth (ADR-007). Public endpoints live under `/v1/public/…` and only return non-personal data. |
-| Client headers | `X-App-Version` (a semantic version, `1.3.0`), `X-Platform` (`ios`, `android`, `web`), `Accept-Language`. The generated client sends them on every request. The API keeps the first two in the request context and drops a value that doesn't parse rather than rejecting the request. Unsupported versions get `426` (TECH-14, see [Architecture § 6.11](01-architecture-overview.md#611-app-versions-and-configuration)). |
+| Auth | `Authorization: Bearer <session token>` (mobile) or a secure httpOnly cookie (web), both issued by Better Auth (ADR-007). Public endpoints live under `/v1/public/…` and only return non-personal data. The one exception is `GET /v1/app-config`, which every app calls at launch (§ 3). |
+| Client headers | `X-App-Version` (a semantic version, `1.3.0`), `X-Platform` (`ios`, `android`, `web`), `Accept-Language`. The generated client sends them on every request. The API keeps the first two in the request context and drops a value that doesn't parse rather than rejecting the request. A version below its platform's minimum gets `426` `APP_UPDATE_REQUIRED` on every route except `GET /v1/app-config`, which tells the app where to update ([Architecture § 6.11](01-architecture-overview.md#611-app-versions-and-configuration)). |
 | Idempotency | Every mutating request from mobile carries `Idempotency-Key` (UUID). The server stores results for 24 h and replays them on retries ([§ 1.3](#13-idempotency)). **Required** for RSVP, roll call, wellness check-ins and routine logs. |
 | Concurrency | Documents with a `version` (session plans, events) use `If-Match: <version>`; a mismatch returns `409 Conflict` with the current version. |
 | Time | ISO 8601 with offset for instants (`2026-10-14T20:00:00-03:00`); `YYYY-MM-DD` for local dates. Responses include the club `timezone` where relevant. |
@@ -56,7 +56,7 @@
 ## 2. Authorization model in the API
 
 - Each handler declares the action it performs (e.g. `events.rsvp.proxy`), or that it is public. The policy module evaluates it against the [permission matrix](../product/02-personas-and-roles.md#4-permission-matrix), from the caller's memberships as they are in the database at that moment. The API doesn't start if a route declares neither.
-- Checks answer in a fixed order: no valid session → `401`; a club the caller isn't an active member of (including a malformed, unknown or deleted club), or a resource that isn't in that club → `404`; an action the caller's roles don't allow → `403`.
+- Checks answer in a fixed order: an app version below its platform's minimum → `426`; no valid session → `401`; a club the caller isn't an active member of (including a malformed, unknown or deleted club), or a resource that isn't in that club → `404`; an action the caller's roles don't allow → `403`.
 - Collection endpoints filter by visibility rather than returning `403`. For example, a player listing events gets only the events they are invited to.
 - Responses are **shaped by role**. For example, `event_invitees` returns `rsvpReason` and `rsvpNote` only to staff and to the invitee themselves (BR-EVT-12). Shaping is implemented in serializers per role, never in clients.
 - Requests for a resource in another club return `404`, not `403`, so that its existence is not revealed.
@@ -91,7 +91,7 @@ Code requests answer `429` in two cases (BR-AUTH-03, NFR-SEC-05):
 | PUT | `/v1/me/devices/{deviceId}` | Register or refresh the push token (NOTIF-01). |
 | GET / PUT | `/v1/me/notification-preferences` | NOTIF-04 |
 | GET | `/v1/me/notifications?cursor` · POST `/v1/me/notifications/read` | Inbox (NOTIF-03). |
-| GET | `/v1/app-config` | Minimum versions, flags. |
+| GET | `/v1/app-config` | Public. Minimum version per platform, whether the calling app must update, and store links (TECH-14). Flags join later ([Architecture § 6.12](01-architecture-overview.md#612-feature-flags)). |
 
 ### Invites, joins and claims (R1)
 | Method | Path | Purpose |

@@ -5,5 +5,8 @@
  * OpenAPI spec version: 1
  */
 
+export * from './appConfigResponse';
+export * from './appConfigResponseMinimumVersions';
+export * from './appConfigResponseStoreUrls';
 export * from './problemDetails';
 export * from './problemDetailsErrorsItem';

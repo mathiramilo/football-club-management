@@ -28,6 +28,7 @@
     "confirm": "Confirmar"
   },
   "errors": {
+    "APP_UPDATE_REQUIRED": "Hay una versión nueva de la app. Actualizala para seguir usándola.",
     "BAD_REQUEST": "No pudimos procesar el pedido. Probá de nuevo.",
     "CODE_RATE_LIMITED": "Pediste muchos códigos seguidos. Probá de nuevo en un rato.",
     "CODE_RESEND_TOO_SOON": "Esperá un minuto y pedí un código nuevo.",
