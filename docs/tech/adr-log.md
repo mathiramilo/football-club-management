@@ -10,7 +10,7 @@
 | ADR-003 | Web: Next.js (App Router) | Proposed | R0 week 1 |
 | ADR-004 | Backend: NestJS modular monolith, REST + OpenAPI from Zod | Proposed | R0 week 1 |
 | ADR-005 | PostgreSQL, shared-schema multi-tenancy by `club_id` | Accepted (2026-10-23) | R0 week 1 |
-| ADR-006 | pg-boss job queue plus transactional outbox | Proposed | R0 week 2 |
+| ADR-006 | pg-boss job queue plus transactional outbox | Accepted (2026-10-24, after TECH-07) | R0 week 2 |
 | ADR-007 | Authentication: Better Auth | Accepted (2026-10-23, after the TECH-04 spike) | R0 week 2 |
 | ADR-008 | Push via Expo Push Service | Proposed | R0 week 2 |
 | ADR-009 | Video hosting provider | Open | Start of R2 |
@@ -60,11 +60,26 @@
 - **Alternatives**: schema-per-tenant (migration overhead with many small clubs); document databases (relational integrity matters here).
 - **Consequences**: simple operations and cross-club platform features (starter library). Isolation must be tested rigorously.
 
-## ADR-006 · pg-boss job queue plus transactional outbox
-- **Context**: reliable scheduled work (reminders, digests, wellness cycles, purges) and cross-module side effects.
-- **Decision**: **pg-boss** for queueing and scheduling (`startAfter` for scheduled sends, `singletonKey` for de-duplication, retries with backoff, dead-letter queues), plus an `outbox_events` table written in the same transaction as state changes.
-- **Alternatives**: BullMQ + Redis (one more piece of infrastructure, but higher throughput; revisit if needed); Graphile Worker (a similar Postgres-based option); cloud schedulers (vendor lock-in, harder local development).
-- **Consequences**: one datastore to operate, and transactional enqueueing. Throughput is sufficient for Year 1 (NFR-SCALE-02).
+## ADR-006 · pg-boss job queue plus transactional outbox (Accepted)
+- **Context**: reliable scheduled work (reminders, digests, wellness cycles, purges) and cross-module side effects. The first draft chose pg-boss plus an `outbox_events` table written in the same transaction as each state change. TECH-07 (2026-10-24) built both on pg-boss 12.38.0, Prisma 7.10.1 and PostgreSQL 18.6, tested with 22 integration tests on pg-boss's `TestClock`, and found:
+  - pg-boss 12 can write jobs inside a Prisma interactive transaction (`fromPrisma(tx)`), so the relay publishes an event and marks its outbox row processed in one transaction.
+  - `singletonKey` de-duplicates only on `short`, `singleton`, `stately` and `exclusive` queues. A `standard` queue ignores it.
+  - `createQueue` never changes an existing queue: settings go through `updateQueue`, and a queue's policy can't change in place.
+  - `redrive` only moves dead-lettered jobs that no worker has taken, so nothing may consume the dead-letter queue.
+  - The oldest ready job's wait (`readyOldestSeconds`) is only computed with `persistQueueStats` on.
+  - There is no API to list event subscriptions; deleting a queue drops its subscriptions and schedules.
+- **Decision**: **pg-boss 12**, pinned exactly, used only by the worker process, which runs it in its own `pgboss` schema and lets it migrate that schema on start. The API writes `outbox_events` rows and never enqueues. The worker relays them about once a second, in batches claimed with `FOR UPDATE SKIP LOCKED`, to the queues subscribed to the event type (pg-boss publish and subscribe). Each handler owns a queue, with 5 retries from 30 s doubling up to 15 min, then a shared `dead_letter` queue with an alert. The details are in [Architecture § 6.4](01-architecture-overview.md#64-domain-events-outbox-and-jobs).
+- **Alternatives**:
+  - Enqueuing from the API's transactions with `fromPrisma`, without an outbox: fewer moving parts. Not chosen: the API would run pg-boss, and each write would have to know the queues that react to it. The outbox keeps domain events apart from queue names.
+  - BullMQ + Redis: one more piece of infrastructure, but higher throughput; revisit if needed.
+  - Graphile Worker: a similar Postgres-based option.
+  - Cloud schedulers: vendor lock-in and harder local development.
+- **Consequences**:
+  - **Gains**: one datastore to operate, transactional enqueueing, and enough throughput for Year 1 (NFR-SCALE-02). An event reaches its handlers about a second after its transaction commits.
+  - **Alerts** (dead letters, lag over 2 minutes, relay failures) are logged until TECH-10 sends them to Sentry.
+  - **Retiring an event handler** means deleting its queue, or pg-boss keeps filling it until retention drops the jobs.
+  - **Shutdown**: the worker lets running jobs finish for up to 30 s, so the host's grace period must be longer (TECH-02).
+  - **Watch on every upgrade**: pg-boss migrates its schema when the worker starts, so read the release notes for long migrations. Its `TestClock` also prints a `pg` deprecation warning in tests.
 
 ## ADR-007 · Authentication: Better Auth (Accepted)
 - **Context**: the first draft set these requirements:
