@@ -2,8 +2,13 @@
   "$schema": "https://turborepo.com/schema.json",
   "extends": ["//"],
   "tasks": {
+    "build": {
+      "env": ["APP_VARIANT", "EXPO_PUBLIC_*"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"]
+    },
     "dev": {
-      "interactive": true
+      "interactive": true,
+      "passThroughEnv": ["APP_VARIANT", "EXPO_PUBLIC_*"]
     }
   }
 }
