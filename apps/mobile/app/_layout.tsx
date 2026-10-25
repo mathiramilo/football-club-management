@@ -39,7 +39,7 @@ export default function RootLayout() {
   return (
     <QueryProvider>
       <IntlProvider locale={locale} defaultLocale={locale} messages={messages}>
-        <StatusBar style="auto" />
+        <StatusBar style="dark" />
         <RootStack />
       </IntlProvider>
     </QueryProvider>
