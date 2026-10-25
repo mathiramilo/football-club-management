@@ -6,3 +6,5 @@ next-env.d.ts
 .expo/
 expo-env.d.ts
 packages/api-client/openapi.json
+apps/mobile/ios/
+apps/mobile/android/

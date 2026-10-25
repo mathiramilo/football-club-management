@@ -73,6 +73,7 @@ Rows marked with an enabler ID don't run yet. They keep these names when that en
 | Create a migration without applying it | `pnpm --filter ./apps/api exec prisma migrate dev --create-only --name <verb_noun>` | ✅ |
 | Apply migrations (local; also regenerates the client) | `pnpm --filter ./apps/api db:migrate` | ✅ |
 | Seed synthetic data (local; needs a database with no clubs) | `pnpm --filter ./apps/api db:seed` (`--clubs 5 --months 12 --seed 1 --today YYYY-MM-DD` are the defaults, with today taken from the current date) | ✅ |
-| Mobile dev client | `pnpm --filter ./apps/mobile start` | ✅ Metro only; the development build arrives with TECH-08 |
+| Mobile development build (iOS needs Xcode and CocoaPods; Android needs Android Studio). `APP_VARIANT` picks the bundle ID: `development` (default), `preview`, `staging` or `production` | `pnpm --filter ./apps/mobile ios` · `pnpm --filter ./apps/mobile android` | ✅ |
+| Mobile dev server for an installed development build | `pnpm --filter ./apps/mobile start` | ✅ |
 
 Keep this table in sync with the root `package.json`.
