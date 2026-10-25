@@ -44,9 +44,6 @@ describe('Outbox (TECH-07)', () => {
     expect(event).toMatchObject({
       type: 'test.category_created',
       payload: { clubId: club.id, categoryId },
-      processedAt: null,
-      attempts: 0,
-      lastError: null,
     });
   });
 

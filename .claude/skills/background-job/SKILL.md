@@ -58,11 +58,22 @@ export class DispatchNotificationJob {
 }
 ```
 
+A reaction to a domain event gets its own queue from `eventQueue`, which takes the event's payload plus an `outboxEventId`:
+
+```ts
+export const addMemberToFutureEvents = eventQueue(
+  'events.add_member_to_future_events',
+  membershipStarted,
+);
+```
+
+The worker subscribes that queue to the event type. Its relay publishes every outbox row about once a second, in batches of 100 claimed with `FOR UPDATE SKIP LOCKED`, inside the same transaction that marks the row processed, so each subscribed queue gets the event exactly once even with several workers running. A failed publish leaves the row pending, bumps `attempts`, records the error name in `last_error` and alerts. Processed rows are deleted after 7 days. Removing an event handler leaves its queue subscribed: pg-boss keeps adding the event's jobs to a queue no worker reads, until its 14-day retention drops them. Retire it by deleting the queue with pg-boss's `deleteQueue`, which also drops its subscription and schedule.
+
 On start, the worker creates every handled queue with the default retries (5, from 30 s doubling up to 15 min) and the shared `dead_letter` queue, then starts its workers. It refuses to start when two handlers claim one queue, or when a queue's policy no longer matches the database (a policy can't change in place: use a new queue name). Each job runs in its own CLS context, with data parsed by the queue's schema. Override `retryLimit`, `retryDelaySeconds`, `retryDelayMaxSeconds`, `expireInSeconds` or `concurrency` in the queue's settings only with a reason.
 
 1. **Load fresh state** by ID. Never trust data in the payload beyond IDs.
 2. **Check relevance**: is the work still needed? (Event cancelled or moved, RSVP already answered, membership ended, club deleted.) If not, return without side effects.
-3. **Be idempotent**: a second run must not duplicate anything. Use a deterministic key with a unique constraint (insert … on conflict do nothing), or check-then-act inside a transaction.
+3. **Be idempotent**: a second run must not duplicate anything. Use a deterministic key with a unique constraint (insert … on conflict do nothing), or check-then-act inside a transaction. An event reaction without a natural key can key its write on `outboxEventId`.
 4. **Compute times in the club time zone** with `packages/domain` helpers (quiet hours, wall-clock schedules). Get `now` from the injected clock.
 5. **Keep transactions short**: never hold one open across a provider call. Pass `job.signal` to provider calls that accept one.
 
@@ -102,4 +113,4 @@ In `apps/api/test/<context>/`:
 - running the handler twice produces one effect;
 - providers are faked at their client boundary.
 
-`startTestWorker([MyJobsModule])` (`test/support/test-worker.ts`) boots `WorkerModule` on its own pg-boss schema with pg-boss's `TestClock` and a `FakeJobAlerts`. Move time with `worker.clock.tick(POLL_MS)` (a poll) and `worker.clock.setTime(…)` (a jump), never with real waits; get a spy before sending (`worker.boss.getSpy(queue.name)`) and await `waitForJob(…, 'completed')`.
+`startTestWorker([MyJobsModule])` (`test/support/test-worker.ts`) boots `WorkerModule` on its own pg-boss schema with pg-boss's `TestClock` (the injected `Clock` reads it too) and a `FakeJobAlerts`. The background relay loop is off: relay with `worker.module.get(OutboxRelay).relayPending()`, which relays every pending row in the shared test database, so assert on your own rows only. Move time with `worker.clock.tick(POLL_MS)` (a poll) and `worker.clock.setTime(…)` (a jump), never with real waits; get a spy before sending (`worker.boss.getSpy(queue.name)`) and await `waitForJob(…, 'completed')`.

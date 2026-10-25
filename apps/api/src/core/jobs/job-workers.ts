@@ -57,8 +57,15 @@ export class JobWorkers implements OnModuleInit, OnApplicationBootstrap, BeforeA
     this.registrations = this.discoverHandlers();
     await this.boss.start();
     await this.boss.createQueue(DEAD_LETTER_QUEUE);
-    for (const { queue } of this.registrations) await this.ensureQueue(queue);
+    for (const { queue } of this.registrations) {
+      await this.ensureQueue(queue);
+      if (queue.event) await this.boss.subscribe(queue.event, queue.name);
+    }
     await this.syncSchedules();
+  }
+
+  queueNames(): string[] {
+    return this.registrations.map(({ queue }) => queue.name);
   }
 
   async onApplicationBootstrap(): Promise<void> {

@@ -24,7 +24,7 @@ Specs: `docs/tech/01-architecture-overview.md` § 6.4, ADR-006, ADR-008, `docs/f
 - Spread burst jobs (digests, Monday reminders) with ±5 min jitter (NFR-SCALE-03).
 - Retries with backoff (5 retries from 30 s, doubling up to 15 min), then the `dead_letter` queue with an alert (NFR-AVAIL-04).
 - Handlers get the time from the injected clock, and evaluate wall-clock rules in the club time zone.
-- Queues are declared with `jobQueue(name, dataShape, settings)` and handled with `@JobHandler(queue)`; the worker creates them, with retries and the dead-letter queue, before any job runs. Send with `Jobs.send(queue, data, options)`, never with pg-boss directly. Jobs modules are imported by `WorkerModule` only.
+- Queues are declared with `jobQueue(name, dataShape, settings)`, or `eventQueue(name, domainEvent, settings)` for a reaction to a domain event, and handled with `@JobHandler(queue)`; the worker creates them, with retries and the dead-letter queue, before any job runs. Send with `Jobs.send(queue, data, options)`, never with pg-boss directly. Jobs modules are imported by `WorkerModule` only.
 
 ## Notifications
 
