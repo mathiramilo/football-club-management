@@ -1,4 +1,5 @@
 import { Link } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { SearchXIcon } from 'lucide-react-native';
 import { useIntl } from 'react-intl';
 import { View } from 'react-native';
@@ -13,6 +14,7 @@ export default function NotFoundScreen() {
 
   return (
     <View className="flex-1 bg-background">
+      <StatusBar style="dark" />
       <SafeAreaView>
         <View className="px-5 py-6">
           <EmptyState
