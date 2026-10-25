@@ -11,6 +11,22 @@
       "text": "¡Hola! Tu código para entrar es {code}. Vence en {minutes} minutos.\n\nSi no lo pediste, ignorá este correo: sin el código nadie puede entrar a tu cuenta."
     }
   },
+  "emailCode": {
+    "title": "Revisá tu email",
+    "subtitle": "Te mandamos un código de 6 números",
+    "back": "Volver",
+    "sentTo": "Lo enviamos a <b>{email}</b>",
+    "changeEmail": "Cambiar email",
+    "codeLabel": "Código de 6 números",
+    "paste": "Pegar código",
+    "openMail": "Abrir mi correo",
+    "notReceived": "¿No te llegó?",
+    "resendIn": "Mirá en correo no deseado. Podés pedir otro en {time}. El código vence en {minutes} minutos.",
+    "resendNow": "Mirá en correo no deseado o pedí otro código.",
+    "resend": "Pedir otro código",
+    "resent": "Te mandamos un código nuevo.",
+    "confirm": "Confirmar"
+  },
   "errors": {
     "BAD_REQUEST": "No pudimos procesar el pedido. Probá de nuevo.",
     "CODE_RATE_LIMITED": "Pediste muchos códigos seguidos. Probá de nuevo en un rato.",
