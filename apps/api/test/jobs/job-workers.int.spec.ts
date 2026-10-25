@@ -132,8 +132,10 @@ describe('Job workers (TECH-07)', { timeout: 30_000 }, () => {
 
     await jobs().send(fragile, { marker });
     await worker.clock.tick(POLL_MS);
+    await worker.clock.setTime(worker.clock.now() + 60_000);
+    await worker.clock.tick(POLL_MS);
     await vi.waitFor(() => {
-      expect(handlers().fragileAttempts).toBe(1);
+      expect(worker.alerts.deadLetters).toHaveLength(1);
     });
 
     const [job] = await worker.boss.findJobs(fragile.name, { data: { marker } });
@@ -173,12 +175,15 @@ describe('Job workers (TECH-07)', { timeout: 30_000 }, () => {
     await boss.createQueue('test.retired');
     await boss.schedule('test.retired', '0 * * * *');
 
-    worker = await startTestWorker([TestHandlersModule], undefined, boss);
+    worker = await startTestWorker([TestHandlersModule], { boss });
 
     const schedules = await worker.boss.getSchedules();
-    expect(schedules.map(({ name, cron, timezone }) => ({ name, cron, timezone }))).toEqual([
-      { name: nightly.name, cron: '0 3 * * *', timezone: 'America/Montevideo' },
-    ]);
+    expect(schedules.map(({ name, cron, timezone }) => ({ name, cron, timezone }))).toContainEqual({
+      name: nightly.name,
+      cron: '0 3 * * *',
+      timezone: 'America/Montevideo',
+    });
+    expect(schedules.map(({ name }) => name)).not.toContain('test.retired');
   });
 });
 

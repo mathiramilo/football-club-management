@@ -1,7 +1,7 @@
 import { Reflector } from '@nestjs/core';
 import { z } from 'zod';
 
-import type { PayloadShape } from '../outbox/domain-event.js';
+import type { DomainEvent, PayloadShape } from '../outbox/domain-event.js';
 
 export interface QueueSettings {
   readonly policy?: 'standard' | 'short' | 'singleton' | 'stately' | 'exclusive';
@@ -17,6 +17,7 @@ export interface JobQueue<Name extends string = string, Shape extends PayloadSha
   readonly name: Name;
   readonly data: z.ZodObject<Shape, z.core.$strict>;
   readonly settings: QueueSettings;
+  readonly event?: string;
 }
 
 export type JobData<Queue extends JobQueue> = z.output<Queue['data']>;
@@ -27,6 +28,15 @@ export function jobQueue<const Name extends `${string}.${string}`, Shape extends
   settings: QueueSettings = {},
 ): JobQueue<Name, Shape> {
   return { name, data: z.strictObject(shape), settings };
+}
+
+export function eventQueue<const Name extends `${string}.${string}`, Shape extends PayloadShape>(
+  name: Name,
+  event: DomainEvent<string, Shape>,
+  settings: QueueSettings = {},
+): JobQueue<Name, Shape & { outboxEventId: z.ZodUUID }> {
+  const data = z.strictObject({ ...event.payload.shape, outboxEventId: z.uuid() });
+  return { name, data, settings, event: event.type };
 }
 
 export interface JobContext {

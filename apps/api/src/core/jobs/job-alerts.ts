@@ -10,6 +10,8 @@ export interface DeadLetteredJob {
 export abstract class JobAlerts {
   abstract deadLettered(job: DeadLetteredJob, error: unknown): void;
   abstract queueFailed(error: unknown): void;
+  abstract lagging(source: string, waitedSeconds: number): void;
+  abstract deadLettersWaiting(count: number): void;
 }
 
 // TODO(TECH-10): report these to Sentry as well.
@@ -25,5 +27,13 @@ export class LoggerJobAlerts extends JobAlerts {
 
   queueFailed(error: unknown): void {
     this.logger.error(`Job queue error (${nameOf(error)})`, framesOf(error));
+  }
+
+  lagging(source: string, waitedSeconds: number): void {
+    this.logger.error(`${source} has work waiting for ${String(waitedSeconds)} s`);
+  }
+
+  deadLettersWaiting(count: number): void {
+    this.logger.error(`${String(count)} jobs are waiting in the dead-letter queue`);
   }
 }
