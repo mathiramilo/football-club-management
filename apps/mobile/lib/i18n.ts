@@ -27,6 +27,10 @@ type ErrorMessageCode = keyof typeof es.errors;
 
 const hasErrorMessage = (code: string): code is ErrorMessageCode => code in es.errors;
 
-export function errorMessageKey(code: string | undefined): MessageKey {
-  return code !== undefined && hasErrorMessage(code) ? `errors.${code}` : 'errors.INTERNAL_ERROR';
+export function errorMessageKey(...codes: (string | undefined)[]): MessageKey {
+  const code = codes.find(
+    (candidate): candidate is ErrorMessageCode =>
+      candidate !== undefined && hasErrorMessage(candidate),
+  );
+  return code === undefined ? 'errors.INTERNAL_ERROR' : `errors.${code}`;
 }

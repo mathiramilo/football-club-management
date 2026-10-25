@@ -55,7 +55,24 @@
     "body": "Lo que confirmes se enviará cuando haya conexión."
   },
   "profile": {
-    "version": "{app} · versión {version}"
+    "version": "{app} · versión {version}",
+    "signOut": "Cerrar sesión",
+    "signOutQueued": {
+      "title": "Tenés respuestas sin enviar",
+      "body": "Si cerrás sesión ahora, se pierden. Esperá a tener conexión para que se envíen.",
+      "confirm": "Cerrar igual",
+      "cancel": "Esperar"
+    }
+  },
+  "signIn": {
+    "title": "Ingresá",
+    "email": {
+      "label": "Tu email",
+      "hint": "Te mandamos un código de 6 números. No hace falta contraseña.",
+      "invalid": "Revisá el email, parece que le falta algo.",
+      "send": "Enviarme el código"
+    },
+    "offline": "Necesitás conexión para entrar. Probá de nuevo cuando tengas señal."
   },
   "team": {
     "empty": {
