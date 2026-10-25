@@ -18,15 +18,21 @@ Specs: `docs/tech/01-architecture-overview.md` § 6.4, ADR-006, NFR-AVAIL-04, NF
 
 ## 2. Emit the domain event
 
-Write the event in the same transaction as the change. The payload carries IDs only.
+Declare the event once in `modules/<context>/events/`, with a payload of IDs and scalars only. `domainEvent` makes the payload strict, so a field the event doesn't declare (a name, a note, a whole entity) throws instead of reaching the outbox.
 
 ```ts
-await this.prisma.$transaction(async (tx) => {
+export const eventCreated = domainEvent('events.event_created', {
+  clubId: z.uuid(),
+  eventId: z.uuid(),
+});
+```
+
+Write it with `Outbox` (`core/outbox`, import `OutboxModule`) in the same transaction as the change:
+
+```ts
+await this.prisma.forClub(club).$transaction(async (tx) => {
   const event = await this.eventsRepository.create(tx, club, input);
-  await this.outbox.add(tx, {
-    type: 'events.event_created',
-    payload: { clubId: club.id, eventId: event.id },
-  });
+  await this.outbox.add(tx, eventCreated, { clubId: club.clubId, eventId: event.id });
 });
 ```
 
