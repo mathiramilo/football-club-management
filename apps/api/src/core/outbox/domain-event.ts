@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-type PayloadShape = Record<string, z.ZodType<string | number | boolean | null>>;
+export type PayloadShape = Record<string, z.ZodType<string | number | boolean | null>>;
 
 export interface DomainEvent<
   Type extends string = string,

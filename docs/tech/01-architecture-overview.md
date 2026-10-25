@@ -130,6 +130,8 @@ flowchart LR
 ### 6.4 Domain events, outbox and jobs
 - Commands write their state change **and** an `outbox_events` row in the same transaction. The worker relays outbox rows to job handlers (at-least-once delivery), and handlers are idempotent.
 - The scheduler uses **pg-boss**, a Postgres-backed queue (ADR-006), with jobs keyed by idempotency keys (`singletonKey`, BR-NOTIF-03).
+- Only the worker process (`worker.ts`) talks to pg-boss, which keeps its tables in its own `pgboss` schema and updates them when the worker starts. The API writes outbox rows and never enqueues jobs itself.
+- Each handler owns one queue. A failed job is retried 5 times, from 30 s apart doubling up to 15 min, so it gets 6 attempts over about 15 minutes before it moves to the shared `dead_letter` queue with an alert (NFR-AVAIL-04). Dead-lettered jobs wait there to be redriven or deleted. A failed job's stored error keeps only its name and stack frames, never its message.
 - Example flow:
   1. `EventCreated` → compute the invitees.
   2. Schedule N-01, N-03 and N-08.

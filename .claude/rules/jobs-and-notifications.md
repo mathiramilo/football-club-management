@@ -22,9 +22,9 @@ Specs: `docs/tech/01-architecture-overview.md` § 6.4, ADR-006, ADR-008, `docs/f
 - **Re-check relevance at execution time** (BR-NOTIF-04): the event may be cancelled or moved, the RSVP already answered, the membership ended, or the preference turned off. Skip and record `skip_reason` rather than send.
 - When an event's time changes, reschedule its time-based jobs from the new time; don't leave the old ones to fire.
 - Spread burst jobs (digests, Monday reminders) with ±5 min jitter (NFR-SCALE-03).
-- Retries with backoff, then a dead-letter queue with an alert (NFR-AVAIL-04).
+- Retries with backoff (5 retries from 30 s, doubling up to 15 min), then the `dead_letter` queue with an alert (NFR-AVAIL-04).
 - Handlers get the time from the injected clock, and evaluate wall-clock rules in the club time zone.
-- In pg-boss 10+, queues must be created (`createQueue`) before `send`, and `work` handlers receive an array of jobs. Check the pinned version.
+- Queues are declared with `jobQueue(name, dataShape, settings)` and handled with `@JobHandler(queue)`; the worker creates them, with retries and the dead-letter queue, before any job runs. Send with `Jobs.send(queue, data, options)`, never with pg-boss directly. Jobs modules are imported by `WorkerModule` only.
 
 ## Notifications
 
