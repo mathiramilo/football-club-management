@@ -11,9 +11,11 @@ import { QueryProvider } from '@/components/query-provider';
 import { setUpApiClient } from '@/lib/api-client';
 import { useAppFonts } from '@/lib/fonts';
 import { locale, messages } from '@/lib/i18n';
+import { setUpSentry, withSentry } from '@/lib/sentry';
 import { useIsSignedIn } from '@/lib/session';
 
 void SplashScreen.preventAutoHideAsync();
+setUpSentry();
 setUpApiClient();
 
 function useIsAppReady() {
@@ -46,7 +48,7 @@ function RootStack() {
   );
 }
 
-export default function RootLayout() {
+function RootLayout() {
   return (
     <QueryProvider>
       <IntlProvider locale={locale} defaultLocale={locale} messages={messages}>
@@ -56,3 +58,5 @@ export default function RootLayout() {
     </QueryProvider>
   );
 }
+
+export default withSentry(RootLayout);

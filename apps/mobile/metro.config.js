@@ -1,7 +1,7 @@
-const { getDefaultConfig } = require('expo/metro-config');
+const { getSentryExpoConfig } = require('@sentry/react-native/metro');
 const { withNativewind } = require('nativewind/metro');
 
-module.exports = withNativewind(getDefaultConfig(__dirname), {
+module.exports = withNativewind(getSentryExpoConfig(__dirname), {
   inlineRem: 16,
   inlineVariables: { exclude: ['--club', '--club-tint'] },
 });
