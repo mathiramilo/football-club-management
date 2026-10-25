@@ -2,7 +2,7 @@
   "name": "@repo/mobile",
   "version": "0.0.0",
   "private": true,
-  "main": "expo-router/entry",
+  "main": "index.ts",
   "scripts": {
     "dev": "expo start",
     "start": "expo start",
@@ -13,6 +13,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@formatjs/intl-locale": "5.3.12",
+    "@formatjs/intl-pluralrules": "6.3.16",
+    "@formatjs/intl-relativetimeformat": "12.3.16",
+    "@repo/i18n": "workspace:*",
     "@repo/ui-tokens": "workspace:*",
     "class-variance-authority": "0.7.1",
     "expo": "58.0.17",
@@ -27,6 +31,7 @@
     "lucide-react-native": "1.61.0",
     "nativewind": "5.0.0-rc.0",
     "react": "catalog:",
+    "react-intl": "12.1.5",
     "react-native": "0.88.0",
     "react-native-css": "3.1.0-rc.0",
     "react-native-reanimated": "4.7.1",
