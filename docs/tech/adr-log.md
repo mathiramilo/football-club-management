@@ -18,8 +18,8 @@
 | ADR-011 | Primary hosting region: São Paulo | Proposed | R0 week 2 |
 | ADR-012 | Observability and product analytics: Sentry and PostHog | Proposed | R0 week 2 |
 | ADR-013 | ORM: Prisma | Accepted (2026-10-23, after the TECH-03 spike) | R0 week 1 |
-| ADR-014 | Web UI: Tailwind CSS + shadcn/ui with shared design tokens | Proposed | R0 week 2 |
-| ADR-015 | Mobile UI: NativeWind with shared tokens; core native libraries | Proposed | R0 week 2 |
+| ADR-014 | Web UI: Tailwind CSS + shadcn/ui with shared design tokens | Accepted (2026-10-25, after TECH-15) | R0 week 2 |
+| ADR-015 | Mobile UI: NativeWind with shared tokens; core native libraries | Accepted (2026-10-25, after TECH-15) | R0 week 2 |
 | ADR-016 | Client data layer: generated client (Orval) + TanStack Query + offline persistence | Proposed | R0 week 2 |
 | ADR-017 | Supporting providers: email (Postmark or Resend) and object storage (Cloudflare R2) | Proposed | R0 week 3 |
 
@@ -176,25 +176,42 @@
 - **Alternatives**: Drizzle (SQL-first, lighter runtime). The spike found no problem it would solve, and switching would cost the migrations workflow and the generated client already in place.
 - **Consequences**: two preview features in use (`partialIndexes`, `postgresqlExtensions`): check them on every Prisma upgrade. Raw SQL row types are hand-declared, so each analytics query needs an integration test that checks its rows. The membership-on-date check is the largest share of the attendance query; add a `(club_membership_id, category_id)` index if F04 needs it. Watch: `pg` waits forever for a connection unless `connectionTimeoutMillis` is set, and a Prisma error's `meta` carries the failing row (database rule).
 
-## ADR-014 · Web UI: Tailwind CSS + shadcn/ui with shared design tokens
-- **Context**: a data-heavy staff portal (tables, dashboards, editors) and fast public pages; accessibility target WCAG 2.2 AA.
+## ADR-014 · Web UI: Tailwind CSS + shadcn/ui with shared design tokens (Accepted)
+- **Context**: a data-heavy staff portal (tables, dashboards, editors) and fast public pages; accessibility target WCAG 2.2 AA. The first draft chose Tailwind with a preset generated from `packages/ui-tokens`, shared with NativeWind (ADR-015), to be confirmed by the R0 shared-tokens spike. TECH-15 (2026-10-25) built the tokens and the core components on Next.js 16.4, Tailwind CSS 4.3.3 and the shadcn CLI 4.22.1, and found:
+  - Tailwind v4 has no JavaScript preset: its theme is CSS (`@theme`). One hand-written `theme.css` is the shared source, and both apps import it.
+  - The shadcn CLI now writes `import { cn } from "cn"` (shadcn's class merger, the successor to `clsx` + `tailwind-merge`) and Tailwind's default sizes. The stock `cn` treats a custom text size such as `text-title` as a color and drops it next to `text-foreground`.
+  - `next/font/local` loads the shared Archivo files straight from `packages/ui-tokens`, and Turbopack compiles the TypeScript workspace package without `transpilePackages`.
 - **Decision**:
-  - Tailwind CSS with a preset generated from `packages/ui-tokens`.
-  - shadcn/ui components (Radix primitives, owned in the repo).
-  - TanStack Table for tables, Recharts for charts, dnd-kit for drag and drop, and Tiptap for rich text (R3).
-  - Club theming through CSS variables.
-- **Alternatives**: MUI or Mantine (faster start, heavier, harder to match the mobile look); custom CSS (slower).
-- **Consequences**: one styling language shared with mobile (ADR-015), and accessible primitives by default.
+  - **Tailwind CSS v4** reading `packages/ui-tokens/theme.css`. The theme resets Tailwind's default colors, text sizes, radii, shadows and font families, so screens can only use the tokens. Spacing keeps Tailwind's 4 px scale, which matches the designs.
+  - **shadcn/ui** on Radix (`radix-nova` style), restyled with the tokens. Components import `cn` from `@/lib/utils`, which re-exports the one in `packages/ui-tokens` that knows the token scales.
+  - Archivo through `next/font/local` as three families: `font-sans`, `font-heading` (SemiExpanded) and `font-display` (Expanded), the same names the app uses.
+  - Club theming through the `--club` and `--club-tint` CSS variables. `ClubTheme` sets them from `clubTheme()`, which darkens a club color until it passes 4.5:1 (UX § 7.1).
+  - Lucide icons (`lucide-react`), shadcn's default.
+  - TanStack Table for tables, Recharts for charts, dnd-kit for drag and drop, and Tiptap for rich text (R3). These arrive with their stories.
+- **Alternatives**: MUI or Mantine (faster start, heavier, harder to match the mobile look); custom CSS (slower); Tailwind v3 with a shared JavaScript preset, which NativeWind 4 would read too, but current shadcn targets v4 and the mobile side would be stuck on Tailwind v3.
+- **Consequences**: one theme file and one class vocabulary shared with mobile (ADR-015), and accessible primitives by default. Every `shadcn add` needs two edits: point `cn` at `@/lib/utils`, and restyle the component, because the default sizes it uses are reset. Six Archivo files load on the web; check their weight against the public-page budget (NFR-PERF-04) in TECH-09.
 
-## ADR-015 · Mobile UI: NativeWind with shared tokens; core native libraries
-- **Context**: one design system across web and mobile; outdoor-readable screens; low-end Android performance.
+## ADR-015 · Mobile UI: NativeWind with shared tokens; core native libraries (Accepted)
+- **Context**: one design system across web and mobile; outdoor-readable screens; low-end Android performance. The R0 shared-tokens spike asked whether one Tailwind theme drives both Tailwind (web) and NativeWind (mobile), including club theming. On 2026-10-25 the stable NativeWind (4.2.7) still required Tailwind v3; NativeWind 5 runs on Tailwind v4 through `react-native-css` but was a release candidate (5.0.0-rc.0, 2026-09-13), with docs tested on Expo 57 and React Native 0.86. Uniwind 1.13 was a stable Tailwind v4 alternative. TECH-15 ran NativeWind 5.0.0-rc.0 with `react-native-css` 3.1.0-rc.0 on Expo SDK 58, React Native 0.88 and Tailwind 4.3.3, checked the components on the iOS 26.5 simulator in Expo Go, and exported both platform bundles (no Android device or emulator was available). It found:
+  - The same `theme.css` compiles for native: colors, the type scale, radii and shadows match the web. rem defaults to 14 px on native, so Metro sets it to 16.
+  - `react-native-css` inlines any CSS variable declared once, which would freeze the club color at its default. Excluding `--club` and `--club-tint` keeps them live, and `VariableContextProvider` sets them per club at runtime.
+  - `react-native-css` compiles with the lightningcss that `@expo/metro-config` resolves; Expo 58's 1.33 fails to deserialize its output. A pnpm override pins that copy to 1.30.1.
+  - NativeWind's Metro resolver sends third-party `react-native` imports to a shim that lists React Native's exports by hand and misses `AssetRegistry`, which React Native 0.88 made public. expo-asset then gets `undefined`, and every font and asset load fails. A pnpm patch adds it until nativewind/react-native-css#504 ships.
+  - Native text doesn't inherit styles, and `TextInput` takes its placeholder color as a prop. Custom families load at runtime with `useFonts`, which accepts several weights per family in SDK 58, so `font-heading` with a weight picks the right Archivo face.
 - **Decision**:
-  - NativeWind, using the same token preset as web, with our own primitives on top.
+  - **NativeWind 5** (pinned exactly: `nativewind` 5.0.0-rc.0, `react-native-css` 3.1.0-rc.0) on Tailwind v4, reading the same `packages/ui-tokens/theme.css` as the web, with our own primitives in `apps/mobile/components/ui`. Platform controls such as `Switch` stay unwrapped and take the club color from `useClubTheme()`.
+  - Lucide icons (`lucide-react-native` on `react-native-svg`), the same family as the web.
   - FlashList for long lists.
   - Reanimated, Gesture Handler and Bottom Sheet for interactions.
   - expo-image and expo-video for media; victory-native for charts; react-native-svg for the body map.
-- **Alternatives**: Tamagui (a powerful cross-platform system, steeper learning curve); Unistyles or StyleSheet only (no shared mental model with web).
-- **Consequences**: designers and developers use the same tokens and class vocabulary on both platforms. NativeWind configuration is validated in the R0 spike.
+- **Alternatives**:
+  - NativeWind 4.2.7 (stable): mobile would stay on Tailwind v3, with the tokens generated into two theme formats and class names that differ slightly from the web's.
+  - Uniwind 1.13: stable and on Tailwind v4, so the same `theme.css` would move over unchanged. Not chosen while NativeWind 5 works, since it means a younger project and a smaller community; it is the fallback if the release candidate stalls.
+  - Tamagui (a powerful cross-platform system, steeper learning curve); Unistyles or StyleSheet only (no shared mental model with web).
+- **Consequences**: designers and developers use the same tokens and class vocabulary on both platforms. The release candidate is the risk:
+  - **Remove the workarounds** (the lightningcss override and the `react-native-css` patch in `pnpm-workspace.yaml`) when a release fixes them, and move to NativeWind 5.0 stable when it ships.
+  - **Not yet checked**: Android on a device, and a development build (TECH-08). Check the core components on both before R1; the TECH-15 PRs show them on iOS.
+  - **Watch**: fonts load at startup from JavaScript; TECH-08 checks cold start (NFR-PERF-03) and may embed them with the `expo-font` config plugin instead. Display titles cap font scaling at 1.4× so wide titles don't break mid-word (UX § 7.1); everything else scales fully.
 
 ## ADR-016 · Client data layer: generated client + TanStack Query + offline persistence
 - **Context**: two clients consuming one versioned API; offline writes for RSVP, roll call and check-ins; optimistic UI.
