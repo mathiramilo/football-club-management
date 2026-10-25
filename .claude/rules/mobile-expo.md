@@ -14,7 +14,7 @@ Specs: `docs/tech/00-tech-stack.md` § 4, ADR-002, ADR-015, ADR-016, `docs/ux/01
 - Deep links: universal links (iOS) and verified App Links (Android) for `/e/…`, `/j/…`, `/c/…` must open the matching screen (NFR-COMP-03).
 - EAS Build, Submit and Update with channels `preview`, `staging`, `production` and the `fingerprint` runtime-version policy. OTA updates may only change JS and assets; anything native needs a store build.
 - Native dependencies are declared in `apps/mobile/package.json` (autolinking only sees them there), installed with `npx expo install` so versions match the SDK, and kept at one version across the workspace.
-- Keep `babel.config.js` and `metro.config.js`: NativeWind needs them.
+- NativeWind 5 (release candidate, on Tailwind v4) reads `global.css` through `metro.config.js` and `postcss.config.mjs`; no Babel preset. `metro.config.js` sets rem to 16 px and keeps `--club` and `--club-tint` as runtime variables (react-native-css inlines any variable declared once). The `react-native-css` patch in `patches/` adds React Native 0.88's `AssetRegistry`; drop it when the fix ships.
 - Task skills: `expo-dev-client` (dev builds), `eas-update` (OTA), `expo-upgrade` (SDK upgrades), `expo-animation` (motion and gestures), `expo-design-system` (tokens, primitives, native tells), `react-native-skills` (lists, animation, UI patterns), `mobile-performance` (speed and size).
 - Read the docs for the installed SDK: `https://docs.expo.dev/llms.txt` and `docs.expo.dev/versions/v<major>.0.0/`. The installed version wins over memory.
 - `create-expo-app` writes `.claude/settings.json` (it turns on the full Expo plugin, including skills that conflict with this stack, such as `expo-ui` and `expo-data-fetching`) and an `AGENTS.md`. `apps/mobile` was created without either at TECH-01. If you run the generator again, delete that settings file and don't import that `AGENTS.md`; this rule and the vendored Expo skills replace them.
@@ -30,7 +30,8 @@ Specs: `docs/tech/00-tech-stack.md` § 4, ADR-002, ADR-015, ADR-016, `docs/ux/01
 
 ## UI and performance
 
-- **NativeWind** classes with the shared preset, on top of the project's own primitives. No inline style objects with hard-coded values.
+- **NativeWind** classes with the shared preset, on top of the project's own primitives in `components/ui` (`Text`, `Icon`, `Button`…). No inline style objects with hard-coded values.
+- Text doesn't inherit styles on native: always render copy through `components/ui/text`, which sets the Archivo family, and style labels inside a primitive through `TextClassContext`. Platform controls (`Switch`, date pickers) stay unwrapped; take the club color for them from `useClubTheme()`.
 - Target low and mid-range Android: cold start to Home ≤ 3 s (NFR-PERF-03), download ≤ 40 MB (NFR-DATA-03).
 - Long lists (roll call, directory, agenda) use **@shopify/flash-list**, never `ScrollView` + `map`. FlashList v2 needs no `estimatedItemSize`; use `getItemType` for mixed rows, and never put `entering` animations on rows.
 - Reanimated 4 with `react-native-worklets`: `scheduleOnRN` (not the removed `runOnJS`), shared values read and written with `.get()` / `.set()`, never `setState` in gesture or scroll handlers. Animate `transform` and `opacity` only.
