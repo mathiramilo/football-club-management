@@ -7,7 +7,7 @@ function Spinner({ className, ...props }: React.ComponentProps<'svg'>) {
     <Loader2Icon
       data-slot="spinner"
       aria-hidden="true"
-      className={cn('animate-spin', className)}
+      className={cn('motion-safe:animate-spin', className)}
       {...props}
     />
   );
