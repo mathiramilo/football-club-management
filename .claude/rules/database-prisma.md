@@ -13,6 +13,7 @@ Specs: `docs/tech/02-data-model.md`, ADR-005, ADR-013. See the `prisma-migration
 - Primary keys: `id`, UUID v7 (`@default(uuid(7)) @db.Uuid`).
 - **Every club-owned table has `club_id`** (FK, indexed, leading most composite indexes). Starter-library rows use `club_id = NULL` with `source = 'starter'`.
 - Tables `snake_case` plural via `@@map`; columns `snake_case` via `@map`; Prisma models and fields stay PascalCase / camelCase.
+- The one exception to both: `app_config` holds one row per platform, keyed by `platform` (data model § 3.9).
 - `created_at` and `updated_at` as `timestamptz` on every table. `date` columns only for calendar days in the club time zone (e.g. `wellness_checkins.local_date`).
 - Enums are `text` columns with `CHECK` constraints, not native Postgres enums. Values come from the glossary.
 - Soft delete: `archived_at` for user-facing archiving; `deleted_at` + `purge_at` for scheduled hard deletes done by purge jobs.
