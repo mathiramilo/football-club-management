@@ -88,7 +88,10 @@
       "invalid": "Revisá el email, parece que le falta algo.",
       "send": "Enviarme el código"
     },
-    "offline": "Necesitás conexión para entrar. Probá de nuevo cuando tengas señal."
+    "offline": "Necesitás conexión para entrar. Probá de nuevo cuando tengas señal.",
+    "or": "o",
+    "google": "Continuar con Google",
+    "providerFailed": "No pudimos entrar con esa cuenta. Probá de nuevo o usá tu email."
   },
   "team": {
     "empty": {
