@@ -16,6 +16,7 @@ export const errorCode = extensibleEnum([
   'IDEMPOTENCY_KEY_REQUIRED',
   'IDEMPOTENCY_KEY_REUSED',
   'IDEMPOTENCY_REQUEST_IN_PROGRESS',
+  'APP_UPDATE_REQUIRED',
 ]);
 
 export type ErrorCode = z.infer<typeof errorCode>;
@@ -39,6 +40,7 @@ export const errorCatalog: Record<ErrorCode, ErrorDefinition> = {
   IDEMPOTENCY_KEY_REQUIRED: { status: 400, title: 'Idempotency key required' },
   IDEMPOTENCY_KEY_REUSED: { status: 422, title: 'Idempotency key reused' },
   IDEMPOTENCY_REQUEST_IN_PROGRESS: { status: 409, title: 'Request in progress' },
+  APP_UPDATE_REQUIRED: { status: 426, title: 'App update required' },
 };
 
 // Better Auth answers /v1/auth/* with { code, message } instead of problem+json (ADR-007).

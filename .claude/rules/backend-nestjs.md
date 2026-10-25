@@ -41,7 +41,7 @@ If the scaffold (TECH-01) settles different names, follow the code and update th
 
 ## Request pipeline
 
-auth guard → club context (from `:clubId`, membership verified) → policy guard (the handler's declared action) → idempotency interceptor → Zod validation (`StandardSchemaValidationPipe`) → handler → role-based serializer → problem+json exception filter. This is Nest's own order (guards, interceptors, pipes); the `nestjs` skill explains what it implies.
+app version guard → auth guard → club context (from `:clubId`, membership verified) → policy guard (the handler's declared action) → idempotency interceptor → Zod validation (`StandardSchemaValidationPipe`) → handler → role-based serializer → problem+json exception filter. This is Nest's own order (guards, interceptors, pipes); the `nestjs` skill explains what it implies.
 
 - **Controllers are thin**: no Prisma, no business rules. Every handler declares its action with `@Can('events.rsvp.proxy')` from its controller's `@Policies(…)` map, or is `@Public()`, and the app refuses to start otherwise. The central policy guard evaluates it against the permission matrix (BR-ROLE-07, NFR-SEC-02). See the `authorization-policy` skill.
 - **Permissions come from current memberships** loaded per request, never from token claims alone: role changes take effect immediately (BR-ROLE-08).
@@ -51,7 +51,7 @@ auth guard → club context (from `:clubId`, membership verified) → policy gua
 - **Errors** are `application/problem+json` (RFC 9457) with a stable `code` from the catalog in `packages/contracts`. Never leak stack traces, SQL or internal messages.
 - **Idempotency**: mutating mobile requests carry `Idempotency-Key`; results are stored 24 h and replayed. Required on RSVP, bulk RSVP, roll call, wellness check-ins and routine logs.
 - **Optimistic locking**: events and session plans use `If-Match: <version>`; a mismatch returns 409 with the current version.
-- **App versions**: unsupported `X-App-Version` returns 426 (TECH-14).
+- **App versions**: an `X-App-Version` below its platform's minimum in `app_config` gets 426 `APP_UPDATE_REQUIRED` from the global `AppVersionGuard`, before the session check (TECH-14). Only `GET /v1/app-config` opts out, with `@AnyAppVersion()`.
 
 ## Other rules
 

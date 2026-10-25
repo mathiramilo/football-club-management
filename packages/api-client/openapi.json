@@ -1,6 +1,39 @@
 {
   "openapi": "3.0.0",
-  "paths": {},
+  "paths": {
+    "/v1/app-config": {
+      "get": {
+        "operationId": "appConfigGet",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppConfigResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Problem details (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "platform"
+        ],
+        "security": []
+      }
+    }
+  },
   "info": {
     "title": "Football Club Management API",
     "description": "",
@@ -25,6 +58,70 @@
       }
     },
     "schemas": {
+      "AppConfigResponse": {
+        "type": "object",
+        "properties": {
+          "minimumVersions": {
+            "type": "object",
+            "properties": {
+              "ios": {
+                "nullable": true,
+                "description": "The oldest version still served; null when every version is",
+                "type": "string",
+                "pattern": "^\\d+\\.\\d+\\.\\d+(?:[-+][0-9A-Za-z.-]+)?$"
+              },
+              "android": {
+                "nullable": true,
+                "description": "The oldest version still served; null when every version is",
+                "type": "string",
+                "pattern": "^\\d+\\.\\d+\\.\\d+(?:[-+][0-9A-Za-z.-]+)?$"
+              },
+              "web": {
+                "nullable": true,
+                "description": "The oldest version still served; null when every version is",
+                "type": "string",
+                "pattern": "^\\d+\\.\\d+\\.\\d+(?:[-+][0-9A-Za-z.-]+)?$"
+              }
+            },
+            "required": [
+              "ios",
+              "android",
+              "web"
+            ],
+            "additionalProperties": false
+          },
+          "updateRequired": {
+            "type": "boolean",
+            "description": "Whether this request's X-App-Version is below the minimum for its X-Platform"
+          },
+          "storeUrls": {
+            "type": "object",
+            "properties": {
+              "ios": {
+                "nullable": true,
+                "type": "string",
+                "format": "uri"
+              },
+              "android": {
+                "nullable": true,
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "required": [
+              "ios",
+              "android"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "minimumVersions",
+          "updateRequired",
+          "storeUrls"
+        ],
+        "additionalProperties": false
+      },
       "ProblemDetails": {
         "type": "object",
         "properties": {
@@ -54,7 +151,8 @@
               "SERVICE_UNAVAILABLE",
               "IDEMPOTENCY_KEY_REQUIRED",
               "IDEMPOTENCY_KEY_REUSED",
-              "IDEMPOTENCY_REQUEST_IN_PROGRESS"
+              "IDEMPOTENCY_REQUEST_IN_PROGRESS",
+              "APP_UPDATE_REQUIRED"
             ]
           },
           "detail": {

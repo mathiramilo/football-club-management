@@ -13,7 +13,7 @@ export interface ClientInfo {
   appVersion?: string;
 }
 
-// Until TECH-14 enforces minimum versions these headers only inform, so a bad value is dropped, not rejected.
+// A bad value is dropped, not rejected: only a well-formed version below its platform's minimum is refused (TECH-14).
 export function clientInfoFrom(headers: IncomingHttpHeaders): ClientInfo {
   const parsedPlatform = platform.safeParse(headers[PLATFORM_HEADER]);
   const parsedVersion = appVersion.safeParse(headers[APP_VERSION_HEADER]);

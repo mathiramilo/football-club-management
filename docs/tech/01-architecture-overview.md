@@ -1,6 +1,6 @@
 # Architecture Overview
 
-> Status: **Proposed v0.1**. Every technology choice here is a recommendation to be confirmed in the [ADR log](adr-log.md) during R0. · Last updated: 2026-10-23
+> Status: **Proposed v0.1**. Every technology choice here is a recommendation to be confirmed in the [ADR log](adr-log.md) during R0. · Last updated: 2026-10-25
 > Related: [Tech stack](00-tech-stack.md) (libraries and tools per app) · [Data model](02-data-model.md) · [API guidelines](03-api-guidelines.md) · [AI architecture](04-ai-architecture.md) · [NFRs](05-non-functional-requirements.md)
 
 ## 1. Drivers and constraints
@@ -169,12 +169,15 @@ flowchart LR
 - Push and email templates are localized server-side. Dates and times use 24 h format, with Monday as the first day of the week.
 
 ### 6.11 App versions and configuration
-- Clients send `X-App-Version` and `X-Platform`. `GET /v1/app-config` returns minimum supported versions, feature flags and links.
-- Requests from unsupported versions get `426 Upgrade Required`, and the app shows a blocking update screen.
+- Clients send `X-App-Version` and `X-Platform`. On mobile the version is the installed binary's store version, which an OTA update doesn't change, so a minimum version always means a store update.
+- `GET /v1/app-config` is public. It returns the minimum version per platform, whether the calling app must update (`updateRequired`, from its own headers) and the store links. It answers outdated apps too, so they can show the update screen. Feature flags join it with the first story that needs one (§ 6.12).
+- Every other `/v1` route the API serves answers `426` `APP_UPDATE_REQUIRED` to a version below its platform's minimum, before it checks the session. A request without both headers, or with a value that doesn't parse, is served. Better Auth's `/v1/auth/*` routes aren't checked: the app checks `app-config` at launch, before it shows sign-in.
+- The minimums live in `app_config`, one row per platform; null serves every version. Versions compare by Semantic Versioning, so `1.4.0-beta.2` is below `1.4.0`. The API rereads them at most once a minute, so a raised minimum applies within a minute and without a deploy. Until the back-office (TECH-12), it is raised with SQL: `UPDATE app_config SET minimum_version = '1.4.0', updated_at = now() WHERE platform = 'ios'`.
+- The generated client calls `onUpdateRequired` on an `APP_UPDATE_REQUIRED` response. The app shell then shows the blocking update screen (S-34, with TECH-08), and the web app reloads (TECH-09).
 - JS-only fixes ship through EAS Update (OTA) per channel. Native changes go through store releases.
 
 ### 6.12 Feature flags
-- Club-level and user-level flags (DB-backed or the analytics tool's flags) gate pilot features, AI enablement and gradual rollouts. Flags are evaluated server-side and exposed through `app-config`.
+- Club-level and user-level flags (DB-backed or the analytics tool's flags) gate pilot features, AI enablement and gradual rollouts. Flags are evaluated server-side and exposed through `app-config`, which gains a `flags` field with the first one.
 
 ### 6.13 Observability
 - Sentry in all three apps (errors and performance), with release tracking per app version.
