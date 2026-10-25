@@ -1,8 +1,11 @@
+import { ApiError } from '@repo/api-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import {
   defaultShouldDehydrateQuery,
   focusManager,
+  MutationCache,
   onlineManager,
+  QueryCache,
   QueryClient,
 } from '@tanstack/react-query';
 import type { PersistQueryClientProviderProps } from '@tanstack/react-query-persist-client';
@@ -11,6 +14,8 @@ import * as Network from 'expo-network';
 import { useSyncExternalStore } from 'react';
 import { AppState } from 'react-native';
 import { createMMKV } from 'react-native-mmkv';
+
+import { endSession, getSessionToken, subscribeToSession } from '@/lib/session';
 
 declare module '@tanstack/react-query' {
   interface Register {
@@ -21,7 +26,13 @@ declare module '@tanstack/react-query' {
 const DAY_MS = 24 * 60 * 60 * 1000;
 const CACHE_MAX_AGE_MS = 14 * DAY_MS;
 
+const endSessionWhenRejected = (error: Error) => {
+  if (error instanceof ApiError && error.status === 401) void endSession();
+};
+
 export const queryClient = new QueryClient({
+  queryCache: new QueryCache({ onError: endSessionWhenRejected }),
+  mutationCache: new MutationCache({ onError: endSessionWhenRejected }),
   defaultOptions: { queries: { gcTime: CACHE_MAX_AGE_MS } },
 });
 
@@ -49,10 +60,16 @@ export const persistOptions: PersistQueryClientProviderProps['persistOptions'] =
   },
 };
 
-export async function clearQueryCache() {
+const forgetCache = () => {
   queryClient.clear();
-  await queryPersister.removeClient();
-}
+  void queryPersister.removeClient();
+};
+
+if (getSessionToken() === null) forgetCache();
+
+subscribeToSession(() => {
+  if (getSessionToken() === null) forgetCache();
+});
 
 const isOnline = (state: Network.NetworkState) =>
   state.isInternetReachable ?? state.isConnected ?? true;

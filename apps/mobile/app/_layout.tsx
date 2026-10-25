@@ -11,6 +11,7 @@ import { QueryProvider } from '@/components/query-provider';
 import { setUpApiClient } from '@/lib/api-client';
 import { useAppFonts } from '@/lib/fonts';
 import { locale, messages } from '@/lib/i18n';
+import { useIsSignedIn } from '@/lib/session';
 
 void SplashScreen.preventAutoHideAsync();
 setUpApiClient();
@@ -23,6 +24,7 @@ function useIsAppReady() {
 
 function RootStack() {
   const isReady = useIsAppReady();
+  const isSignedIn = useIsSignedIn();
 
   useEffect(() => {
     if (isReady) SplashScreen.hide();
@@ -32,7 +34,16 @@ function RootStack() {
     return null;
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Protected guard={isSignedIn}>
+        <Stack.Screen name="(tabs)" />
+      </Stack.Protected>
+      <Stack.Protected guard={!isSignedIn}>
+        <Stack.Screen name="(auth)" />
+      </Stack.Protected>
+    </Stack>
+  );
 }
 
 export default function RootLayout() {
