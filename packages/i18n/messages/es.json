@@ -99,5 +99,10 @@
       "title": "Acá vas a ver a tu equipo",
       "body": "Cuando te sumes, vas a ver a tus compañeros ordenados por línea."
     }
+  },
+  "updateRequired": {
+    "title": "Actualizá la app",
+    "body": "Esta versión ya no funciona. Instalá la última desde {store, select, ios {la App Store} other {Google Play}} para seguir usándola.",
+    "action": "Abrir {store, select, ios {la App Store} other {Google Play}}"
   }
 }

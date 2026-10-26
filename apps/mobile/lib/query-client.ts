@@ -26,6 +26,15 @@ declare module '@tanstack/react-query' {
 const DAY_MS = 24 * 60 * 60 * 1000;
 const CACHE_MAX_AGE_MS = 14 * DAY_MS;
 
+const MAX_QUERY_RETRIES = 3;
+const RETRIED_CLIENT_ERRORS = new Set([408, 429]);
+
+const isFinalError = (error: Error) =>
+  error instanceof ApiError && error.status < 500 && !RETRIED_CLIENT_ERRORS.has(error.status);
+
+const shouldRetry = (failureCount: number, error: Error) =>
+  !isFinalError(error) && failureCount < MAX_QUERY_RETRIES;
+
 const endSessionWhenRejected = (error: Error) => {
   if (error instanceof ApiError && error.status === 401) void endSession();
 };
@@ -33,7 +42,7 @@ const endSessionWhenRejected = (error: Error) => {
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({ onError: endSessionWhenRejected }),
   mutationCache: new MutationCache({ onError: endSessionWhenRejected }),
-  defaultOptions: { queries: { gcTime: CACHE_MAX_AGE_MS } },
+  defaultOptions: { queries: { gcTime: CACHE_MAX_AGE_MS, retry: shouldRetry } },
 });
 
 const storage = createMMKV({ id: 'query-cache' });
