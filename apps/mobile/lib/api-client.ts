@@ -2,6 +2,7 @@ import { configureApiClient } from '@repo/api-client';
 import * as Application from 'expo-application';
 import { Platform } from 'react-native';
 
+import { requireUpdate } from '@/lib/app-update';
 import { locale } from '@/lib/i18n';
 import { getSessionToken } from '@/lib/session';
 
@@ -26,5 +27,6 @@ export function setUpApiClient() {
     locale,
     credentials: 'omit',
     getAuthHeaders: authHeaders,
+    onUpdateRequired: requireUpdate,
   });
 }
