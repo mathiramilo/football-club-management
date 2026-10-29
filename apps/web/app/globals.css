@@ -17,6 +17,10 @@
     @apply font-sans;
   }
 
+  html:has([data-slot='tab-bar']) {
+    @apply scroll-pb-28;
+  }
+
   body {
     @apply bg-background text-body text-foreground antialiased;
   }
