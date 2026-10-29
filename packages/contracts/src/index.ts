@@ -1,3 +1,4 @@
+export * from './client/header-names.js';
 export * from './client/headers.js';
 export * from './clubs/roles.js';
 export * from './errors/codes.js';

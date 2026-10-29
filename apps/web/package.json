@@ -23,7 +23,7 @@
     "radix-ui": "1.8.1",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "zod": "catalog:"
+    "server-only": "0.0.1"
   },
   "devDependencies": {
     "@repo/config": "workspace:*",

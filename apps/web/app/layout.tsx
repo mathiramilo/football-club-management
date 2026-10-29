@@ -5,7 +5,6 @@ import type { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 
-import { Providers } from '@/components/providers';
 import { locale } from '@/i18n/locale';
 import { cn } from '@/lib/utils';
 
@@ -16,9 +15,13 @@ export async function generateMetadata(): Promise<Metadata> {
   const name = t('name');
 
   return {
+    ...(process.env.NEXT_PUBLIC_WEB_URL && {
+      metadataBase: new URL(process.env.NEXT_PUBLIC_WEB_URL),
+    }),
     title: { default: name, template: `%s · ${name}` },
     description: t('description'),
     applicationName: name,
+    openGraph: { siteName: name, locale: 'es_UY', type: 'website' },
   };
 }
 
@@ -35,9 +38,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       className={cn(archivo.variable, archivoSemiExpanded.variable, archivoExpanded.variable)}
     >
       <body>
-        <NextIntlClientProvider>
-          <Providers>{children}</Providers>
-        </NextIntlClientProvider>
+        <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>
   );
