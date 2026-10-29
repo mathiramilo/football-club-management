@@ -113,9 +113,9 @@ flowchart LR
 ## 6. Cross-cutting concerns
 
 ### 6.1 Authentication
-- Sign-in with Google, Apple and email one-time codes (F01), through **Better Auth** running inside the API (ADR-007). On mobile, Google and Apple sign-in is native: the app sends the provider's ID token and the API verifies it.
+- Sign-in with Google, Apple and email one-time codes (F01), through **Better Auth** running inside the API (ADR-007). On mobile, Google and Apple sign-in is native: the app sends the provider's ID token and the API verifies it. On the web it is the redirect flow through the API, which then sends the browser back to the page it came from.
 - Sessions live in the database and are looked up on every request, so signing out of all devices takes effect on the next call. A session expires after 90 days without use (BR-AUTH-04). There are no refresh tokens to rotate.
-- The mobile app keeps the session token in the Keychain / Keystore and sends it as a bearer token. The web app uses httpOnly, Secure, SameSite cookies, and Better Auth rejects cookie requests from untrusted origins.
+- The mobile app keeps the session token in the Keychain / Keystore and sends it as a bearer token. The web app uses httpOnly, Secure, SameSite cookies on the parent domain it shares with the API, and calls the API from the browser with CORS limited to the web origins. A request that changes data and is signed in by cookie must come from a web origin. The Next.js server never sends the session to the API (ADR-003).
 
 ### 6.2 Authorization
 - A single policy module answers `can(actor, action, resource)` from the actor's current club and category memberships. It implements the [permission matrix](../product/02-personas-and-roles.md#4-permission-matrix). Every handler declares its action (`@Can`) or is public, and the API refuses to start otherwise.
@@ -161,7 +161,7 @@ flowchart LR
 
 ### 6.9 Deep links and link previews
 - Public routes on the web domain: `/e/{shareToken}` (event), `/j/{code}` (invite), `/c/{claimToken}` (claim), `/consent/{token}` (guardian), `/delete-account` (info).
-- iOS universal links and Android App Links open the app for the same paths when it is installed.
+- iOS universal links and Android App Links open the app for `/e`, `/j` and `/c` when it is installed. The web app serves `/.well-known/apple-app-site-association` and `/.well-known/assetlinks.json` for the builds each environment lists (`APPLE_TEAM_ID`, `APP_LINKS_APP_IDS`, `ANDROID_CERT_FINGERPRINTS`).
 - Event and invite pages render Open Graph tags and a generated OG image (crest, title, date) for WhatsApp previews, never with personal data (EVT-07).
 
 ### 6.10 Internationalization
@@ -173,7 +173,7 @@ flowchart LR
 - `GET /v1/app-config` is public. It returns the minimum version per platform, whether the calling app must update (`updateRequired`, from its own headers) and the store links. It answers outdated apps too, so they can show the update screen. Feature flags join it with the first story that needs one (§ 6.12).
 - Every other `/v1` route the API serves answers `426` `APP_UPDATE_REQUIRED` to a version below its platform's minimum, before it checks the session. A request without both headers, or with a value that doesn't parse, is served. Better Auth's `/v1/auth/*` routes aren't checked: the app asks `app-config` at launch, and the update screen covers sign-in as soon as the answer says to update.
 - The minimums live in `app_config`, one row per platform; null serves every version. Versions compare by Semantic Versioning, so `1.4.0-beta.2` is below `1.4.0`. The API rereads them at most once a minute, so a raised minimum applies within a minute and without a deploy. Until the back-office (TECH-12), it is raised with SQL: `UPDATE app_config SET minimum_version = '1.4.0', updated_at = now() WHERE platform = 'ios'`.
-- The generated client calls `onUpdateRequired` on an `APP_UPDATE_REQUIRED` response. The app then shows the blocking update screen (S-34) in place of every other screen, with a link to its store when `app_config` has one, and the web app reloads (TECH-09). A later `app-config` answer that serves the version lifts the block, so lowering a minimum raised by mistake doesn't need an app restart. The app doesn't hold its splash screen for the `app-config` answer, so a slow network doesn't delay launch (NFR-PERF-03).
+- The generated client calls `onUpdateRequired` on an `APP_UPDATE_REQUIRED` response. The app then shows the blocking update screen (S-34) in place of every other screen, with a link to its store when `app_config` has one. The web app reloads to load the current build instead; if the next answer still says to update within a minute, it shows S-34 with a reload button, so a minimum raised past the deployed build can't loop. The web's version is the one in `apps/web/package.json`, so raising the web minimum means bumping it in the fixing deploy. A later `app-config` answer that serves the version lifts the block, so lowering a minimum raised by mistake doesn't need an app restart. The app doesn't hold its splash screen for the `app-config` answer, so a slow network doesn't delay launch (NFR-PERF-03).
 - JS-only fixes ship through EAS Update (OTA) per channel. Native changes go through store releases.
 
 ### 6.12 Feature flags

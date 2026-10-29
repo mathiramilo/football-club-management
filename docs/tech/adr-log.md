@@ -7,7 +7,7 @@
 |---|---|---|---|
 | ADR-001 | Monorepo with TypeScript end to end | Proposed | R0 week 1 |
 | ADR-002 | Mobile: React Native with Expo | Proposed | R0 week 1 |
-| ADR-003 | Web: Next.js (App Router) | Proposed | R0 week 1 |
+| ADR-003 | Web: Next.js (App Router) | Accepted (2026-10-29, after TECH-09) | R0 week 1 |
 | ADR-004 | Backend: NestJS modular monolith, REST + OpenAPI from Zod | Proposed | R0 week 1 |
 | ADR-005 | PostgreSQL, shared-schema multi-tenancy by `club_id` | Accepted (2026-10-23) | R0 week 1 |
 | ADR-006 | pg-boss job queue plus transactional outbox | Accepted (2026-10-24, after TECH-07) | R0 week 2 |
@@ -37,11 +37,19 @@
 - **Alternatives**: Flutter (separate language, no code sharing with web), native apps (two codebases), PWA only (weak push on iOS, no actionable notifications, poor store presence).
 - **Consequences**: fast iteration and OTA updates. Native modules come through config plugins. EAS pricing must be checked for build volume.
 
-## ADR-003 · Web: Next.js (App Router)
-- **Context**: the web app serves both an authenticated staff portal and **public, server-rendered pages** whose Open Graph tags power WhatsApp previews. It also hosts the universal-link association files.
-- **Decision**: Next.js App Router. Server Components for public pages and client components with TanStack Query for the portal. UI stack in ADR-014.
+## ADR-003 · Web: Next.js (App Router) (Accepted)
+- **Context**: the web app serves both an authenticated staff portal and **public, server-rendered pages** whose Open Graph tags power WhatsApp previews. It also hosts the universal-link association files. TECH-09 (2026-10-29) built the web shell on Next.js 16.4 with Cache Components, React 19.3 and next-intl 4.14: sign-in, the player shell, the association files and a default link preview, checked in a headless browser against the local API and measured with Lighthouse on a phone over 4G.
+- **Decision**: Next.js App Router. Server Components for public pages and client components with TanStack Query for the portal and the player shell. UI stack in ADR-014.
+  - One route group per surface: `(auth)` and `(player)` now, `(public)` and `(portal)` with their first pages. Pages prerender as static shells.
+  - **The Next.js server never sends the session to the API.** Its own requests to the API are anonymous, so public pages hold only public data and can be cached at the edge. Anything personal, such as the RSVP buttons on `/e`, is a client component that calls the API with the session cookie. `proxy.ts` only checks that a session cookie exists, to send visitors without one to `/sign-in?next=…`; the API makes every access decision.
+  - next-intl with one locale and no locale in the URL. Its request config is static, so pages still prerender.
+  - The query client, the generated API client and the update screen live in the layouts of the surfaces that call the API, not in the root layout.
+  - On a `426` the page reloads once to load the current build; a second `426` within a minute shows the update screen (S-34) instead, so a minimum raised past the deployed build can't loop. The web reports the version in `apps/web/package.json`.
+  - The association files are route handlers, prerendered as JSON from env (Architecture § 6.9).
 - **Alternatives**: a Vite SPA plus a separate server for OG pages (two deployables); Remix.
 - **Consequences**: SSR and edge caching for public pages, and preview deployments per PR. Next.js is **not** the backend: all business logic stays in the NestJS API.
+  - **Every page ships about 173 KB of JS gzipped (139 KB with Brotli) before its own code**: 133 KB of framework (React DOM, the Next.js runtime and Turbopack's loader), 28 KB of shared UI helpers (the class merger from ADR-014, cva and icons) and 12 KB of next-intl's formatter. NFR-PERF-04 allows the public event and invite pages 150 KB gzipped, so they can't meet it as the stack stands; decide how with EVT-07 and EVT-10. `/sign-in` loads 207 KB, with LCP at 1.5 s under applied 4G throttling (3.4 s in Lighthouse's simulated mode).
+  - Vercel previews on `*.vercel.app` can't see the API's session cookie, which lives on the parent domain. TECH-02 must give previews a subdomain of that domain, or previews run signed out.
 
 ## ADR-004 · Backend: NestJS modular monolith, REST + OpenAPI from Zod
 - **Context**: many cross-cutting rules (authorization, tenancy, scheduling); two clients, with old mobile versions in the wild.
@@ -108,8 +116,8 @@
     - no documented native ID-token sign-in: WorkOS, Kinde;
     - user data outside our database: all of them.
 - **Decision**: **Better Auth** 1.7, pinned exactly, self-hosted inside the API. Its spec changes are accepted:
-  - **Sign-in**: the `emailOTP` plugin (6 digits, 600 s, 5 attempts, `storeOTP: 'hashed'`). Google and Apple use ID-token sign-in on mobile; the web flow is settled in TECH-09. BR-AUTH-03's per-email limits (resend after 60 s, 5 codes an hour) are added with a `hooks.before`.
-  - **Sessions**: Better Auth's database sessions, which expire after 90 days without use on every device and slide once a day (BR-AUTH-04, decision D-17). Mobile sends the session token as a bearer token (`bearer` plugin), kept in expo-secure-store by the app. TECH-08 dropped `@better-auth/expo`: it stores the session as a cookie and sends it in a `Cookie` header, and Better Auth checks the origin of any request that carries a cookie, so it would need that package's server plugin and the app schemes as trusted origins. Bearer requests skip that check. Web uses its httpOnly cookie. The API's auth guard calls `auth.api.getSession` on every request.
+  - **Sign-in**: the `emailOTP` plugin (6 digits, 600 s, 5 attempts, `storeOTP: 'hashed'`). BR-AUTH-03's per-email limits (resend after 60 s, 5 codes an hour) are added with a `hooks.before`. Google and Apple use ID-token sign-in on mobile. The web uses the redirect flow (authorization code with PKCE) through the API, settled in TECH-09: the buttons are ours, no Google or Apple script runs on our pages, and Apple sign-in works inside in-app browsers, where popups fail. It needs Google's web client secret, and Apple's client secret is a JWT signed with the team's key and valid for at most six months, so the API signs a five-minute one each time it is used instead of storing one to rotate. `APPLE_CLIENT_IDS` lists the services ID first, because the redirect flow uses the first ID.
+  - **Sessions**: Better Auth's database sessions, which expire after 90 days without use on every device and slide once a day (BR-AUTH-04, decision D-17). Mobile sends the session token as a bearer token (`bearer` plugin), kept in expo-secure-store by the app. TECH-08 dropped `@better-auth/expo`: it stores the session as a cookie and sends it in a `Cookie` header, and Better Auth checks the origin of any request that carries a cookie, so it would need that package's server plugin and the app schemes as trusted origins. Bearer requests skip that check. Web uses its httpOnly cookie, set for the parent domain shared by `app.` and `api.` (`AUTH_COOKIE_DOMAIN`), and calls the API across origins with CORS limited to `WEB_ORIGINS`. The API's auth guard calls `auth.api.getSession` on every request, and rejects a request that changes data and is signed in by cookie unless it comes from a web origin, since same-site form posts carry the cookie without a CORS preflight.
   - **No refresh rotation or reuse detection**, and session tokens are stored in plain text (accepted risk, NFR-SEC-11).
   - **Routes**: its handler serves `/v1/auth/*`, mounted on the Express instance before Nest's body parser.
   - **Tables**: its `session`, `account` and `verification` models become `auth_sessions`, `auth_identities` and `auth_verifications`. `users` gains `name`, `email_verified` and `image` ([Data model § 3.1](02-data-model.md#31-identity)).
@@ -189,7 +197,7 @@
   - Lucide icons (`lucide-react`), shadcn's default.
   - TanStack Table for tables, Recharts for charts, dnd-kit for drag and drop, and Tiptap for rich text (R3). These arrive with their stories.
 - **Alternatives**: MUI or Mantine (faster start, heavier, harder to match the mobile look); custom CSS (slower); Tailwind v3 with a shared JavaScript preset, which NativeWind 4 would read too, but current shadcn targets v4 and the mobile side would be stuck on Tailwind v3.
-- **Consequences**: one theme file and one class vocabulary shared with mobile (ADR-015), and accessible primitives by default. Every `shadcn add` needs two edits: point `cn` at `@/lib/utils`, and restyle the component, because the default sizes it uses are reset. Six Archivo files load on the web; check their weight against the public-page budget (NFR-PERF-04) in TECH-09.
+- **Consequences**: one theme file and one class vocabulary shared with mobile (ADR-015), and accessible primitives by default. Every `shadcn add` needs two edits: point `cn` at `@/lib/utils`, and restyle the component, because the default sizes it uses are reset. Six Archivo files load on the web. TECH-09 subset them to Google Fonts' "latin" range (every Spanish and Portuguese character), 138 KB for all six instead of 310 KB; `packages/ui-tokens/fonts/subset-web-fonts.sh` rebuilds them from the TTFs, which the app keeps whole. They swap in, so they don't hold LCP back.
 
 ## ADR-015 · Mobile UI: NativeWind with shared tokens; core native libraries (Accepted)
 - **Context**: one design system across web and mobile; outdoor-readable screens; low-end Android performance. The R0 shared-tokens spike asked whether one Tailwind theme drives both Tailwind (web) and NativeWind (mobile), including club theming. On 2026-10-25 the stable NativeWind (4.2.7) still required Tailwind v3; NativeWind 5 runs on Tailwind v4 through `react-native-css` but was a release candidate (5.0.0-rc.0, 2026-09-13), with docs tested on Expo 57 and React Native 0.86. Uniwind 1.13 was a stable Tailwind v4 alternative. TECH-15 ran NativeWind 5.0.0-rc.0 with `react-native-css` 3.1.0-rc.0 on Expo SDK 58, React Native 0.88 and Tailwind 4.3.3, checked the components on the iOS 26.5 simulator in Expo Go, and exported both platform bundles (no Android device or emulator was available). It found:
