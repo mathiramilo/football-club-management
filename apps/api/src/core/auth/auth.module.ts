@@ -25,14 +25,21 @@ import { EmailCodeRequestsRepository } from './email-code-requests.repository.js
         emailSender: EmailSender,
         emailCodeRequests: EmailCodeRequestsRepository,
         clock: Clock,
-      ): Auth =>
-        createAuth(
+      ): Auth => {
+        const teamId = config.get('APPLE_TEAM_ID', { infer: true });
+        const keyId = config.get('APPLE_KEY_ID', { infer: true });
+        const privateKey = config.get('APPLE_PRIVATE_KEY', { infer: true });
+        return createAuth(
           {
             baseUrl: config.get('API_BASE_URL', { infer: true }),
             secret: config.get('BETTER_AUTH_SECRET', { infer: true }),
             webOrigins: config.get('WEB_ORIGINS', { infer: true }),
+            cookieDomain: config.get('AUTH_COOKIE_DOMAIN', { infer: true }),
             googleClientIds: config.get('GOOGLE_CLIENT_IDS', { infer: true }),
+            googleClientSecret: config.get('GOOGLE_CLIENT_SECRET', { infer: true }),
             appleClientIds: config.get('APPLE_CLIENT_IDS', { infer: true }),
+            appleSigningKey:
+              teamId && keyId && privateKey ? { teamId, keyId, privateKey } : undefined,
             rateLimitEnabled: config.get('AUTH_RATE_LIMIT_ENABLED', { infer: true }),
             trustedProxies: config.get('AUTH_TRUSTED_PROXIES', { infer: true }),
           },
@@ -43,7 +50,8 @@ import { EmailCodeRequestsRepository } from './email-code-requests.repository.js
             clock,
             logger: new Logger('BetterAuth'),
           },
-        ),
+        );
+      },
     },
     { provide: APP_GUARD, useClass: AuthGuard },
   ],

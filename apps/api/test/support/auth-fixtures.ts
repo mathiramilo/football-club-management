@@ -1,6 +1,6 @@
-import { createHash, randomUUID } from 'node:crypto';
+import { createHash, generateKeyPairSync, randomUUID } from 'node:crypto';
 
-import { Controller, Get, Module } from '@nestjs/common';
+import { Controller, Get, HttpCode, Module, Post } from '@nestjs/common';
 import { exportJWK, generateKeyPair, type JWK, type JWTPayload, SignJWT } from 'jose';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
@@ -17,7 +17,15 @@ export const TEST_GOOGLE_CLIENT_IDS = {
   ios: 'test-ios.apps.googleusercontent.com',
   android: 'test-android.apps.googleusercontent.com',
 };
-export const TEST_APPLE_CLIENT_IDS = { bundle: 'uy.clubapp.test', services: 'uy.clubapp.test.web' };
+export const TEST_GOOGLE_CLIENT_SECRET = 'test-google-web-client-secret';
+export const TEST_APPLE_CLIENT_IDS = { services: 'uy.clubapp.test.web', bundle: 'uy.clubapp.test' };
+const appleKeyPair = generateKeyPairSync('ec', { namedCurve: 'P-256' });
+export const TEST_APPLE_SIGNING_KEY = {
+  teamId: 'TEAM123456',
+  keyId: 'KEY1234567',
+  privateKey: appleKeyPair.privateKey.export({ type: 'pkcs8', format: 'pem' }).toString(),
+  publicKey: appleKeyPair.publicKey,
+};
 
 export const uniqueEmail = (prefix: string) => `${prefix}-${randomUUID().slice(0, 8)}@example.test`;
 export const uniqueSubject = () => randomUUID();
@@ -91,6 +99,13 @@ class WhoAmIController {
   @Can(SIGNED_IN_TEST_ACTION)
   @Get()
   whoAmI(@CurrentActor() actor: Actor) {
+    return actor;
+  }
+
+  @Can(SIGNED_IN_TEST_ACTION)
+  @Post()
+  @HttpCode(200)
+  confirm(@CurrentActor() actor: Actor) {
     return actor;
   }
 }

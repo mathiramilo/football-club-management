@@ -11,6 +11,7 @@ import type { Clock } from '../clock/clock.js';
 import type { PrismaService } from '../database/prisma.service.js';
 import type { EmailSender } from '../email/email-sender.js';
 import { formatMessage } from '../i18n/messages.js';
+import { type AppleSigningKey, signAppleClientSecret } from './apple-client-secret.js';
 import type { EmailCodeRequestsRepository } from './email-code-requests.repository.js';
 
 export const AUTH_BASE_PATH = '/v1/auth';
@@ -58,8 +59,11 @@ export interface AuthOptions {
   baseUrl: string;
   secret: string;
   webOrigins: string[];
+  cookieDomain?: string;
   googleClientIds: string[];
+  googleClientSecret?: string;
   appleClientIds: string[];
+  appleSigningKey?: AppleSigningKey;
   rateLimitEnabled: boolean;
   trustedProxies: string[];
 }
@@ -82,11 +86,22 @@ const emailOf = (body: unknown) =>
     ? body.email.trim().toLowerCase()
     : undefined;
 
+function appleProvider(clientIds: string[], signingKey: AppleSigningKey | undefined, clock: Clock) {
+  const [servicesId = ''] = clientIds;
+  const provider = { clientId: clientIds, audience: clientIds };
+  if (!signingKey) return provider;
+  return {
+    ...provider,
+    get clientSecret() {
+      return signAppleClientSecret(signingKey, servicesId, clock.now());
+    },
+  };
+}
+
 export function createAuth(
   options: AuthOptions,
   { prisma, emailSender, emailCodeRequests, clock, logger }: AuthDependencies,
 ) {
-  const [appleClientId] = options.appleClientIds;
   const hashEmail = (email: string) =>
     createHmac('sha256', options.secret).update(`email-code:${email}`).digest('base64url');
 
@@ -111,10 +126,10 @@ export function createAuth(
     verification: { modelName: 'authVerification' },
     socialProviders: {
       ...(options.googleClientIds.length > 0 && {
-        google: { clientId: options.googleClientIds },
+        google: { clientId: options.googleClientIds, clientSecret: options.googleClientSecret },
       }),
-      ...(appleClientId && {
-        apple: { clientId: appleClientId, audience: options.appleClientIds },
+      ...(options.appleClientIds.length > 0 && {
+        apple: appleProvider(options.appleClientIds, options.appleSigningKey, clock),
       }),
     },
     plugins: [
@@ -166,6 +181,9 @@ export function createAuth(
     advanced: {
       database: { generateId: false },
       disableOriginCheck: false,
+      ...(options.cookieDomain && {
+        crossSubDomainCookies: { enabled: true, domain: options.cookieDomain },
+      }),
       // Without a resolvable client IP, Better Auth puts every caller in one shared rate-limit bucket.
       ipAddress: { trustedProxies: options.trustedProxies },
     },
