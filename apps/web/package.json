@@ -11,10 +11,14 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@repo/api-client": "workspace:*",
+    "@repo/i18n": "workspace:*",
     "@repo/ui-tokens": "workspace:*",
+    "@tanstack/react-query": "5.104.5",
     "class-variance-authority": "0.7.1",
     "lucide-react": "1.61.0",
     "next": "16.4.2",
+    "next-intl": "4.14.9",
     "radix-ui": "1.8.1",
     "react": "catalog:",
     "react-dom": "catalog:"

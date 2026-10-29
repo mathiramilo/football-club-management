@@ -5,6 +5,10 @@
       "body": "Cuando te sumes a un equipo, acá vas a ver las prácticas y los partidos."
     }
   },
+  "app": {
+    "name": "Football Club Management",
+    "description": "Confirmaciones, asistencia y plantel de tu club, en un solo lugar."
+  },
   "email": {
     "signInCode": {
       "subject": "Tu código para entrar",
@@ -26,6 +30,11 @@
     "resend": "Pedir otro código",
     "resent": "Te mandamos un código nuevo.",
     "confirm": "Confirmar"
+  },
+  "errorPage": {
+    "title": "Algo falló",
+    "body": "No pudimos mostrar esta página. Probá de nuevo en un rato.",
+    "retry": "Probar de nuevo"
   },
   "errors": {
     "APP_UPDATE_REQUIRED": "Hay una versión nueva de la app. Actualizala para seguir usándola.",
@@ -103,6 +112,11 @@
   "updateRequired": {
     "title": "Actualizá la app",
     "body": "Esta versión ya no funciona. Instalá la última desde {store, select, ios {la App Store} other {Google Play}} para seguir usándola.",
-    "action": "Abrir {store, select, ios {la App Store} other {Google Play}}"
+    "action": "Abrir {store, select, ios {la App Store} other {Google Play}}",
+    "web": {
+      "title": "Hay una versión nueva",
+      "body": "Recargá la página para seguir usándola.",
+      "action": "Recargar"
+    }
   }
 }
