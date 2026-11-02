@@ -14,7 +14,7 @@
     "@repo/ui-tokens": "workspace:*",
     "class-variance-authority": "0.7.1",
     "lucide-react": "1.61.0",
-    "next": "16.4.2",
+    "next": "16.4.3",
     "radix-ui": "1.8.1",
     "react": "catalog:",
     "react-dom": "catalog:"
