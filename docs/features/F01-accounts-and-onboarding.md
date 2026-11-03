@@ -185,6 +185,17 @@ As a user, I want to use the app in English or Spanish so that I can understand 
 - Changing the language updates the UI, notifications and emails for that user.
 - Strings are externalized from R0 onwards, so this story only adds the English translations and the selector.
 
+### AUTH-15 · Opt out of usage analytics
+**Release:** R1 · **Priority:** Must · **Size:** S · **Platforms:** Mobile, Web
+
+As a user, I want to stop sharing how I use the app so that my usage isn't measured (NFR-OBS-05, [privacy § 7](../product/06-privacy-and-compliance.md#7-data-subject-rights)).
+
+**Acceptance criteria**
+- Settings → privacy (S-20) has a "Compartir datos de uso" switch, on by default, that says what is shared: which features are used, never names, messages or health data. *(Copy proposal.)*
+- Turning it off stops product analytics for my account on every device: the app and the web stop sending events, and so does the API. It takes effect on each device from its next request.
+- The choice is stored on my account, not on the device, so it holds after signing out and back in or on a new device.
+- Production analytics stays off until this story ships (ADR-012).
+
 ## 5. Edge cases
 
 | Case | Expected behavior |

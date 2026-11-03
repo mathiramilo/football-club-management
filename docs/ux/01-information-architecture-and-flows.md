@@ -89,7 +89,7 @@ Top bar: club switcher, category filter, inbox, profile.
 | S-17 | Category attendance dashboard + player table | Staff | ✅ | ✅ | R1 | ANL-02–07 |
 | S-18 | Club overview | Admin | – | ✅ | R1 | ANL-09 |
 | S-19 | Inbox | All | ✅ | ✅ | R1 | NOTIF-03 |
-| S-20 | Settings: notifications, privacy, account | All | ✅ | ✅ | R1 | NOTIF-04, AUTH-12, AUTH-13 |
+| S-20 | Settings: notifications, privacy, account | All | ✅ | ✅ | R1 | NOTIF-04, AUTH-12, AUTH-13, AUTH-15 |
 | S-21 | Exercise library (list, filters) | Staff | ✅ | ✅ | R2 | EXR-05, EXR-08 |
 | S-22 | Exercise detail | All | ✅ | ✅ | R2 | EXR-06 |
 | S-23 | Exercise editor / quick capture | Staff | ✅ | ✅ | R2 | EXR-01–04, EXR-07, EXR-09 |
