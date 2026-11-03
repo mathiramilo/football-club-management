@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@repo/api-client": "workspace:*",
+    "@repo/contracts": "workspace:*",
     "@repo/i18n": "workspace:*",
     "@repo/ui-tokens": "workspace:*",
     "@sentry/nextjs": "11.10.0",
@@ -21,6 +22,7 @@
     "lucide-react": "1.61.0",
     "next": "16.4.2",
     "next-intl": "4.14.9",
+    "posthog-js": "1.444.4",
     "radix-ui": "1.8.1",
     "react": "catalog:",
     "react-dom": "catalog:",

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
+import { track } from '@/lib/analytics';
 import { requestSignInCode } from '@/lib/auth-client';
 import type { MessageKey } from '@/lib/messages';
 
@@ -32,6 +33,7 @@ export function SignInForm() {
       return;
     }
     setIsSending(true);
+    track('sign_in_started', { method: 'email_code' });
     const result = await requestSignInCode(address);
     setIsSending(false);
     if (!result.ok) {

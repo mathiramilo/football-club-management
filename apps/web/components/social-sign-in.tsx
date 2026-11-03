@@ -10,6 +10,7 @@ import { Alert, AlertContent, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { FieldError } from '@/components/ui/field';
 import { Spinner } from '@/components/ui/spinner';
+import { track } from '@/lib/analytics';
 import { signInWithProvider, type SocialProvider } from '@/lib/auth-client';
 import { nextPathFromLocation } from '@/lib/next-path';
 import { useSignInEnvironment } from '@/lib/sign-in-environment';
@@ -71,6 +72,7 @@ export function SocialSignIn() {
   const signInWith = async (provider: SocialProvider) => {
     setHasFailed(false);
     setPending(provider);
+    track('sign_in_started', { method: provider });
     const result = await signInWithProvider(provider, nextPathFromLocation());
     if (!result.ok) {
       setPending(null);
