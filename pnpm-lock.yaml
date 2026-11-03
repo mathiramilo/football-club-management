@@ -277,7 +277,7 @@ importers:
         version: link:../../packages/i18n
       '@sentry/nestjs':
         specifier: 11.10.0
-        version: 11.10.0(@nestjs/common@12.2.0(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0))(@nestjs/core@12.2.0)
+        version: 11.10.0(@nestjs/common@12.2.0(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0))(@nestjs/core@12.2.0)(rollup@4.67.4)
       better-auth:
         specifier: 1.7.12
         version: 1.7.12(@opentelemetry/api@1.10.0)(@prisma/client@7.10.1(prisma@7.10.1(@types/node@24.19.2)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3))(typescript@6.0.3))(mysql2@3.24.4(@types/node@24.19.2))(next@16.4.2(@babel/core@7.29.7(supports-color@7.2.0))(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.23.1)(prisma@7.10.1(@types/node@24.19.2)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@5.0.5(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)))
@@ -302,6 +302,9 @@ importers:
       pino-http:
         specifier: 11.0.0
         version: 11.0.0
+      posthog-node:
+        specifier: 5.61.2
+        version: 5.61.2(@opentelemetry/api@1.10.0)(rxjs@7.8.2)
       reflect-metadata:
         specifier: 0.2.2
         version: 0.2.2
@@ -2823,6 +2826,12 @@ packages:
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
+
+  '@posthog/core@1.62.1':
+    resolution: {integrity: sha512-IncceYaKKQ6kirQuUWATQOjg0nDc4QXKJdvDfpIYhcaYJJb9Nk8S5Xqs+QMfuRGQs4NbemNzds/m+FyPRGUqyA==}
+
+  '@posthog/types@1.419.0':
+    resolution: {integrity: sha512-XX7zRYt/vK8AzaD6V+oDquAzacZf5exJv971dja9En8Qf6g84Qvc3rpT0w6hDYYLWrjaSSkdjFfvvoXI0ouJDg==}
 
   '@prisma/adapter-pg@7.10.1':
     resolution: {integrity: sha512-EP9ruPYHjKP80WZlb5qVaEXKgZjJieBFjAxcBtQnDAHD6+16UN4keVmBh6L/RUpuDQT2FQRbvKNgq5d4Ix+IkQ==}
@@ -8651,6 +8660,18 @@ packages:
     resolution: {integrity: sha512-Jtc2612XINuBjIl/QTWsV5UvE8UHuNblcO3vVADSrKsrc6RqGX6lOW1cEo3CM2v0XG4Nat8nI+YM7/f26VxXLw==}
     engines: {node: '>=12'}
 
+  posthog-node@5.61.2:
+    resolution: {integrity: sha512-6pMhzR+APW+CBreUlHce3qrxwU7l90gYp1A5eN0kf/o3rVf++Zz2KPtZQC63ct+hWkzCwi3Arm+GT8EjUBrUag==}
+    engines: {node: ^20.20.0 || >=22.22.0}
+    peerDependencies:
+      '@opentelemetry/api': ^1.2.0
+      rxjs: ^7.0.0
+    peerDependenciesMeta:
+      '@opentelemetry/api':
+        optional: true
+      rxjs:
+        optional: true
+
   powershell-utils@0.2.1:
     resolution: {integrity: sha512-C+y9x90UElAddDZmV4qOx9W53B61PO7cIqWz2dQsWlwswuq4mr8NEwytdGKboYbQlGZ3awrkTeNvcZiZNHnQ8A==}
     engines: {node: '>=20'}
@@ -12267,6 +12288,12 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
+  '@posthog/core@1.62.1':
+    dependencies:
+      '@posthog/types': 1.419.0
+
+  '@posthog/types@1.419.0': {}
+
   '@prisma/adapter-pg@7.10.1':
     dependencies:
       '@prisma/driver-adapter-utils': 7.10.1
@@ -13605,16 +13632,6 @@ snapshots:
       - encoding
       - supports-color
 
-  '@sentry/bundler-plugins@11.10.0':
-    dependencies:
-      '@sentry/core': 11.10.0
-      dotenv: 17.4.2
-      glob: 13.0.6
-      magic-string: 1.4.3
-      oxc-parser: 0.152.0
-      sentry: 0.45.0
-      supports-color: 8.1.1
-
   '@sentry/bundler-plugins@11.10.0(rollup@4.67.4)':
     dependencies:
       '@sentry/core': 11.10.0
@@ -13749,13 +13766,13 @@ snapshots:
     dependencies:
       '@sentry/core': 11.10.0
 
-  '@sentry/nestjs@11.10.0(@nestjs/common@12.2.0(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0))(@nestjs/core@12.2.0)':
+  '@sentry/nestjs@11.10.0(@nestjs/common@12.2.0(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0))(@nestjs/core@12.2.0)(rollup@4.67.4)':
     dependencies:
       '@nestjs/common': 12.2.0(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0)
       '@nestjs/core': 12.2.0(@nestjs/common@12.2.0(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0))(@nestjs/platform-express@12.2.0)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@sentry/conventions': 0.29.0
       '@sentry/core': 11.10.0
-      '@sentry/node': 11.10.0
+      '@sentry/node': 11.10.0(rollup@4.67.4)
       '@sentry/server-utils': 11.10.0
     transitivePeerDependencies:
       - rollup
@@ -13786,19 +13803,6 @@ snapshots:
       - vite
       - webpack
       - wrangler
-
-  '@sentry/node@11.10.0':
-    dependencies:
-      '@opentelemetry/api': 1.10.0
-      '@sentry/bundler-plugins': 11.10.0
-      '@sentry/conventions': 0.29.0
-      '@sentry/core': 11.10.0
-      '@sentry/opentelemetry': 11.10.0(@opentelemetry/api@1.10.0)
-      '@sentry/server-runtime-injection': 11.10.0
-      '@sentry/server-utils': 11.10.0
-    transitivePeerDependencies:
-      - rollup
-      - webpack
 
   '@sentry/node@11.10.0(rollup@4.67.4)':
     dependencies:
@@ -18287,6 +18291,13 @@ snapshots:
       xtend: 4.0.2
 
   postgres@3.4.7: {}
+
+  posthog-node@5.61.2(@opentelemetry/api@1.10.0)(rxjs@7.8.2):
+    dependencies:
+      '@posthog/core': 1.62.1
+    optionalDependencies:
+      '@opentelemetry/api': 1.10.0
+      rxjs: 7.8.2
 
   powershell-utils@0.2.1: {}
 

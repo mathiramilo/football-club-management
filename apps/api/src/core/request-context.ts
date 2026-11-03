@@ -18,6 +18,7 @@ export interface RequestContext extends ClsStore {
   clubActor?: ClubActor;
   client?: ClientInfo;
   job?: JobContext;
+  accountCreated?: boolean;
 }
 
 export const requestContextOptions = {

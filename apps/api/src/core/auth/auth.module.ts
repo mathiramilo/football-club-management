@@ -2,6 +2,7 @@ import { Logger, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 
+import { AnalyticsModule } from '../analytics/analytics.module.js';
 import { Clock, ClockModule } from '../clock/clock.js';
 import type { Env } from '../config/env.js';
 import { PrismaService } from '../database/prisma.service.js';
@@ -11,20 +12,30 @@ import { AuthGuard } from './auth.guard.js';
 import { AUTH } from './auth.tokens.js';
 import { type Auth, createAuth } from './create-auth.js';
 import { EmailCodeRequestsRepository } from './email-code-requests.repository.js';
+import { SignInAnalytics } from './sign-in-analytics.js';
 
 @Module({
-  imports: [EmailModule, ClockModule],
+  imports: [EmailModule, ClockModule, AnalyticsModule],
   providers: [
     EmailCodeRequestsRepository,
+    SignInAnalytics,
     {
       provide: AUTH,
-      inject: [ConfigService, PrismaService, EmailSender, EmailCodeRequestsRepository, Clock],
+      inject: [
+        ConfigService,
+        PrismaService,
+        EmailSender,
+        EmailCodeRequestsRepository,
+        Clock,
+        SignInAnalytics,
+      ],
       useFactory: (
         config: ConfigService<Env, true>,
         prisma: PrismaService,
         emailSender: EmailSender,
         emailCodeRequests: EmailCodeRequestsRepository,
         clock: Clock,
+        signIns: SignInAnalytics,
       ): Auth => {
         const teamId = config.get('APPLE_TEAM_ID', { infer: true });
         const keyId = config.get('APPLE_KEY_ID', { infer: true });
@@ -49,6 +60,7 @@ import { EmailCodeRequestsRepository } from './email-code-requests.repository.js
             emailCodeRequests,
             clock,
             logger: new Logger('BetterAuth'),
+            signIns,
           },
         );
       },

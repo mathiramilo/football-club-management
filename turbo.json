@@ -57,7 +57,9 @@
         "APPLE_KEY_ID",
         "APPLE_PRIVATE_KEY",
         "AUTH_RATE_LIMIT_ENABLED",
-        "AUTH_TRUSTED_PROXIES"
+        "AUTH_TRUSTED_PROXIES",
+        "POSTHOG_API_KEY",
+        "POSTHOG_HOST"
       ]
     },
     "dev:worker": {
@@ -87,7 +89,9 @@
         "APPLE_KEY_ID",
         "APPLE_PRIVATE_KEY",
         "AUTH_RATE_LIMIT_ENABLED",
-        "AUTH_TRUSTED_PROXIES"
+        "AUTH_TRUSTED_PROXIES",
+        "POSTHOG_API_KEY",
+        "POSTHOG_HOST"
       ]
     }
   }
