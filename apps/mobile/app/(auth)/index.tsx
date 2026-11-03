@@ -15,6 +15,7 @@ import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui
 import { Icon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
+import { track } from '@/lib/analytics';
 import { type AuthResult, requestSignInCode } from '@/lib/auth-client';
 import type { MessageKey } from '@/lib/i18n';
 import { isGoogleSignInAvailable, signInWithApple, signInWithGoogle } from '@/lib/social-sign-in';
@@ -55,6 +56,7 @@ export default function SignInScreen() {
       return;
     }
     setIsSending(true);
+    track('sign_in_started', { method: 'email_code' });
     const result = await requestSignInCode(address);
     setIsSending(false);
     if (!result.ok) {
