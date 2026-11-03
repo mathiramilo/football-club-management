@@ -4,6 +4,13 @@
   "tasks": {
     "build": {
       "env": ["NEXT_PUBLIC_*", "APPLE_TEAM_ID", "APP_LINKS_APP_IDS", "ANDROID_CERT_FINGERPRINTS"],
+      "passThroughEnv": [
+        "SENTRY_AUTH_TOKEN",
+        "SENTRY_ORG",
+        "SENTRY_PROJECT",
+        "SENTRY_RELEASE",
+        "VERCEL_GIT_COMMIT_SHA"
+      ],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
