@@ -12,6 +12,7 @@ import { ErrorsModule } from './core/errors/errors.module.js';
 import { HealthModule } from './core/health/health.module.js';
 import { IdempotencyModule } from './core/idempotency/idempotency.module.js';
 import { LoggingModule } from './core/logging/logging.module.js';
+import { ObservabilityModule } from './core/observability/observability.module.js';
 import { requestContextOptions } from './core/request-context.js';
 
 @Module({
@@ -19,6 +20,7 @@ import { requestContextOptions } from './core/request-context.js';
     ConfigModule.forRoot({ isGlobal: true, validate: (env) => envSchema.parse(env) }),
     ClsModule.forRoot({ global: true, middleware: { mount: true, ...requestContextOptions } }),
     LoggingModule,
+    ObservabilityModule,
     DatabaseModule,
     ErrorsModule,
     // Its interceptor must wrap ContractModule's serializer, so it stores the response as sent.

@@ -4,7 +4,7 @@ import { DiscoveryModule } from '@nestjs/core';
 import { type ConstructorOptions, PgBoss } from 'pg-boss';
 
 import type { Env } from '../config/env.js';
-import { JobAlerts, LoggerJobAlerts } from './job-alerts.js';
+import { JobAlerts, ReportedJobAlerts } from './job-alerts.js';
 import { JobMonitor } from './job-monitor.js';
 import { JobWorkers } from './job-workers.js';
 import { Jobs } from './jobs.js';
@@ -25,7 +25,7 @@ export const PG_BOSS_OPTIONS = { persistQueueStats: true } satisfies Constructor
           connectionString: config.get('DATABASE_URL', { infer: true }),
         }),
     },
-    { provide: JobAlerts, useClass: LoggerJobAlerts },
+    { provide: JobAlerts, useClass: ReportedJobAlerts },
     Jobs,
     JobWorkers,
     JobMonitor,

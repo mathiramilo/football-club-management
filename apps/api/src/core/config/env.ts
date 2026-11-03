@@ -13,8 +13,17 @@ const commaSeparated = z
 const optional = <T extends z.ZodType>(schema: T) =>
   z.preprocess((value) => (value === '' ? undefined : value), schema.optional());
 
+export const sentryEnvSchema = z.object({
+  SENTRY_DSN: optional(z.url()),
+  SENTRY_ENVIRONMENT: z.string().default('development'),
+  SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0),
+});
+
+export type SentryEnv = z.infer<typeof sentryEnvSchema>;
+
 export const envSchema = z
   .object({
+    ...sentryEnvSchema.shape,
     DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
     PORT: z.coerce.number().int().positive().default(3001),
     SHUTDOWN_DRAIN_MS: z.coerce.number().int().min(0).default(0),
