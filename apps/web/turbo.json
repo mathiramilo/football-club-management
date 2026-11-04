@@ -3,7 +3,17 @@
   "extends": ["//"],
   "tasks": {
     "build": {
+      "env": ["NEXT_PUBLIC_*", "APPLE_TEAM_ID", "APP_LINKS_APP_IDS", "ANDROID_CERT_FINGERPRINTS"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "dev": {
+      "passThroughEnv": [
+        "NEXT_PUBLIC_*",
+        "APPLE_TEAM_ID",
+        "APP_LINKS_APP_IDS",
+        "ANDROID_CERT_FINGERPRINTS"
+      ]
     }
   }
 }
