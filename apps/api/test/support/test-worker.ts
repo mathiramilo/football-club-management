@@ -61,7 +61,11 @@ export interface TestWorkerOptions {
   readonly customize?: (builder: TestingModuleBuilder) => TestingModuleBuilder;
 }
 
-export function createTestBoss(clock = new TestClock(new Date('2026-11-02T12:00:00Z'))): PgBoss {
+// Jobs the outbox relay inserts through Prisma's connection get Postgres's real time, not the test
+// clock's, so the clock starts ahead of real time or those jobs would never come due.
+const aheadOfRealTime = () => new TestClock(Date.now() + 60_000);
+
+export function createTestBoss(clock = aheadOfRealTime()): PgBoss {
   return new PgBoss({
     ...PG_BOSS_OPTIONS,
     connectionString: inject('databaseUrl'),
@@ -76,7 +80,7 @@ export async function startTestWorker(
   testModules: Type[],
   options: TestWorkerOptions = {},
 ): Promise<TestWorker> {
-  const clock = options.clock ?? new TestClock(new Date('2026-11-02T12:00:00Z'));
+  const clock = options.clock ?? aheadOfRealTime();
   const boss = options.boss ?? createTestBoss(clock);
   const alerts = new FakeJobAlerts();
   let builder = Test.createTestingModule({ imports: [WorkerModule, ...testModules] })
