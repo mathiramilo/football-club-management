@@ -3,8 +3,7 @@
 import { MailIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
-import { z } from 'zod';
+import { useRef, useState } from 'react';
 
 import { useSignInEmail } from '@/components/sign-in-email';
 import { Button } from '@/components/ui/button';
@@ -14,21 +13,22 @@ import { Spinner } from '@/components/ui/spinner';
 import { requestSignInCode } from '@/lib/auth-client';
 import type { MessageKey } from '@/lib/messages';
 
-const emailAddress = z.email();
-
 export function SignInForm() {
   const t = useTranslations();
   const router = useRouter();
   const { email, setEmail, setSentCode } = useSignInEmail();
   const [error, setError] = useState<MessageKey | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const emailInput = useRef<HTMLInputElement>(null);
 
   const sendCode = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isSending) return;
     const address = email.trim().toLowerCase();
-    if (!emailAddress.safeParse(address).success) {
+    const input = emailInput.current;
+    if (!input?.checkValidity()) {
       setError('signIn.email.invalid');
+      input?.focus();
       return;
     }
     setIsSending(true);
@@ -36,6 +36,7 @@ export function SignInForm() {
     setIsSending(false);
     if (!result.ok) {
       setError(result.message);
+      input.focus();
       return;
     }
     setEmail(address);
@@ -48,9 +49,11 @@ export function SignInForm() {
       <Field data-invalid={error !== null || undefined}>
         <FieldLabel htmlFor="sign-in-email">{t('signIn.email.label')}</FieldLabel>
         <Input
+          ref={emailInput}
           id="sign-in-email"
           name="email"
           type="email"
+          required
           inputMode="email"
           autoComplete="email"
           autoCapitalize="none"
