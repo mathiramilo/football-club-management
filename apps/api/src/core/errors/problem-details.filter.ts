@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
+import { captureException } from '@sentry/nestjs';
 
 import { framesOf, nameOf } from './redacted-error.js';
 import { toProblem } from './to-problem.js';
@@ -24,6 +25,9 @@ export class ProblemDetailsFilter implements ExceptionFilter {
     const { status, body } = toProblem(exception);
     if (status >= 500 && !(exception instanceof HttpException)) {
       this.logger.error(`Unhandled ${nameOf(exception)}`, framesOf(exception));
+      captureException(exception, {
+        mechanism: { handled: false, type: 'problem_details_filter' },
+      });
     }
 
     const { httpAdapter } = this.adapterHost;
