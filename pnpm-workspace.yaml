@@ -25,6 +25,7 @@ allowBuilds:
   '@scarf/scarf': false
   '@sentry/cli': false
   '@swc/core': false
+  core-js: false
   cpu-features: false
   esbuild: false
   prisma: true
