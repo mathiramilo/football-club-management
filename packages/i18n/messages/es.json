@@ -9,6 +9,10 @@
     "name": "Football Club Management",
     "description": "Confirmaciones, asistencia y plantel de tu club, en un solo lugar."
   },
+  "downloadApp": {
+    "banner": "Descargá la app para recibir recordatorios",
+    "store": "{store, select, ios {App Store} other {Google Play}}"
+  },
   "email": {
     "signInCode": {
       "subject": "Tu código para entrar",
@@ -69,7 +73,8 @@
       "agenda": "Agenda",
       "team": "Equipo",
       "profile": "Perfil"
-    }
+    },
+    "label": "Secciones"
   },
   "notFound": {
     "title": "No encontramos esta pantalla",
