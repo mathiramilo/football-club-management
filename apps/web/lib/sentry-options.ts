@@ -1,16 +1,10 @@
 import type { Breadcrumb, BrowserOptions, Event } from '@sentry/nextjs';
 
-const TOKEN_PATH = /^\/(e|j|c|consent)\/[^/]+/;
-const ORIGIN = /^[a-z][a-z\d+.-]*:\/\/[^/]+/i;
+import { scrubUrl } from './scrub-url';
+
 const FORWARDED_HEADERS = new Set(['user-agent']);
 const URL_KEYS = ['url', 'from', 'to'];
 const UNSENT_BREADCRUMBS = new Set(['console', 'ui.input']);
-
-export function scrubUrl(url: string): string {
-  const [withoutQuery = ''] = url.split(/[?#]/);
-  const origin = ORIGIN.exec(withoutQuery)?.[0] ?? '';
-  return origin + withoutQuery.slice(origin.length).replace(TOKEN_PATH, '/$1/:token');
-}
 
 function scrubTransaction(name: string): string {
   const [method, path] = name.split(' ');

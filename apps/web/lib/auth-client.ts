@@ -1,6 +1,7 @@
 import { createAuthClient } from 'better-auth/client';
 import { emailOTPClient } from 'better-auth/client/plugins';
 
+import { identifyUser, resetAnalytics } from '@/lib/analytics';
 import { apiUrl } from '@/lib/api-client';
 import { errorMessageKey, type MessageKey } from '@/lib/messages';
 import { signInPath } from '@/lib/next-path';
@@ -36,8 +37,16 @@ async function attempt(
 export const requestSignInCode = (email: string) =>
   attempt(() => authClient().emailOtp.sendVerificationOtp({ email, type: 'sign-in' }));
 
-export const signInWithCode = (email: string, otp: string) =>
-  attempt(() => authClient().signIn.emailOtp({ email, otp }));
+export async function signInWithCode(email: string, otp: string): Promise<AuthResult> {
+  let userId: string | undefined;
+  const result = await attempt(async () => {
+    const response = await authClient().signIn.emailOtp({ email, otp });
+    userId = response.data?.user.id;
+    return response;
+  });
+  if (result.ok && userId) identifyUser(userId);
+  return result;
+}
 
 export type SocialProvider = 'google' | 'apple';
 
@@ -54,5 +63,6 @@ export const signInWithProvider = (provider: SocialProvider, next: string) =>
 
 export async function signOut() {
   await attempt(() => authClient().signOut());
+  resetAnalytics();
   window.location.assign(signInPath('/'));
 }
