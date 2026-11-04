@@ -180,10 +180,10 @@ flowchart LR
 - Club-level and user-level flags (DB-backed or the analytics tool's flags) gate pilot features, AI enablement and gradual rollouts. Flags are evaluated server-side and exposed through `app-config`, which gains a `flags` field with the first one.
 
 ### 6.13 Observability
-- Sentry in all three apps (errors and performance), with release tracking per app version.
-- Structured JSON logs that include `request_id`, `club_id` and `user_id`, and **never** health data, tokens or AI message content.
-- Metrics and alerts: API error rate and latency, queue lag, notification delivery failures, AI error rate and spend ([NFR § Observability](05-non-functional-requirements.md#9-observability)).
-- Product analytics: PostHog events defined in each feature doc. Health data and free-text content are never sent.
+- Sentry in all three apps (errors and performance), with release tracking per app version. Events keep the user ID and errors' type and frames, never request bodies, cookies, query strings or error messages (ADR-012).
+- Structured JSON logs that include `request_id`, `club_id` and `user_id` (`job_id` and `queue` in the worker), and **never** health data, tokens or AI message content. Every response carries the request ID as `X-Request-Id`.
+- Metrics and alerts: API error rate and latency, queue lag, notification delivery failures, AI error rate and spend ([NFR § Observability](05-non-functional-requirements.md#9-observability)). Job alerts are Sentry issues; the alert rules and uptime checks are set up with the hosting (TECH-02).
+- Product analytics: PostHog events defined in each feature doc and typed in `packages/contracts`. Health data and free-text content are never sent. The web loads Sentry and PostHog after the page has loaded, so neither counts toward the public-page budget (NFR-PERF-04).
 
 ### 6.14 Back-office
 - A minimal internal admin (protected and audited) for support tasks: account merges, data subject requests, starter-library management, club lookups. R1 can start with audited scripts; a proper UI arrives in R2 (TECH-12 in the [backlog](../delivery/backlog.md)).

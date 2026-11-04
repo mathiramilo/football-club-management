@@ -57,7 +57,7 @@ app version guard → auth guard → club context (from `:clubId`, membership ve
 
 - Uploads never pass through the API: issue presigned URLs, then confirm (`media` module).
 - Administrative and roster actions write `audit_log` with sensitive fields redacted (NFR-SEC-09).
-- Logging with `nestjs-pino`: include `request_id`, `club_id`, `user_id`; redaction configured centrally. Errors to Sentry (`@sentry/nestjs`) with the same scrubbing.
+- Logging with `nestjs-pino` (`core/logging`): every line gets `request_id`, `user_id` and `club_id` (`job_id` and `queue` in the worker) from the request context, so log through Nest's `Logger` and never add them by hand. Log names and IDs, never request bodies, entities or error messages (`framesOf`, `nameOf`). Errors go to Sentry (`@sentry/nestjs`), scrubbed in `core/observability/sentry-options.ts`.
 - Rate limits with `@nestjs/throttler` on a Postgres-backed store (no Redis in the MVP). Stricter limits on auth, invites, nudges and AI (NFR-SEC-05).
 - Configuration is a Zod-validated env schema parsed at boot; fail fast on missing values.
 - Never hold a database transaction open across a call to an external provider (push, email, storage, LLM).
@@ -71,5 +71,6 @@ Framework mechanics (decorators, dynamic modules, the filter, the worker context
 - Every fire-and-forget promise has a `.catch`. Job handlers catch, report and rethrow so pg-boss retries.
 - Global guards, pipes, filters and interceptors are `APP_*` providers in their `core/` module (`AuthModule`, `ErrorsModule`), and one `configureApp(app)` function applies the global prefix and mounts the Better Auth handler. Both `main.ts` and the integration-test harness build `AppModule` and call `configureApp`, so tests run the production pipeline.
 - `enableShutdownHooks()`: close Prisma and pg-boss on shutdown, and make the readiness endpoint return 503 while draining.
-- Sentry: `instrument.ts` is imported first, `SentryModule` comes from `@sentry/nestjs/setup`, and the problem+json filter is decorated with `@SentryExceptionCaptured()` so unexpected errors still reach Sentry.
+- Sentry: `instrument.ts` is imported first and loaded with `--import` by the start scripts, `SentryModule` comes from `@sentry/nestjs/setup` (in `ObservabilityModule`), and the problem+json filter reports what it logs as unhandled. Don't use `@SentryExceptionCaptured()`: it reports every `DomainError` too.
+- Product analytics events from the server go through `Analytics.capture` with an event from the catalog in `packages/contracts`; tests replace `Analytics` with a fake.
 - Behind the hosting proxy, the throttler's `getTracker` reads the client IP from the trusted proxy header. Health endpoints use `@SkipThrottle()`.

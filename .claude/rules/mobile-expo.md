@@ -55,4 +55,4 @@ Every interactive element has an accessibility label and role; dynamic type up t
 
 ## i18n and observability
 
-FormatJS (`react-intl`) with `expo-localization`, catalogs from `packages/i18n` (Intl polyfills where Hermes needs them). `@sentry/react-native` and `posthog-react-native` with the same privacy filters as web.
+FormatJS (`react-intl`) with `expo-localization`, catalogs from `packages/i18n` (Intl polyfills where Hermes needs them). `@sentry/react-native` and `posthog-react-native` with the same privacy filters as web: events through `track()` in `lib/analytics.ts`, the user set and cleared by `lib/observed-user.ts` on sign-in and sign-out.

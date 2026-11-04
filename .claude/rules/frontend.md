@@ -37,7 +37,7 @@ The client only **hides** controls the user can't use. It never enforces permiss
 ## Copy and telemetry
 
 - No hard-coded user-facing strings. Everything comes from `packages/i18n`; see `i18n-and-copy.md`.
-- PostHog events are the ones defined in the feature spec, with IDs and enums only: no names, free text or health data (NFR-OBS-05). Sentry with PII scrubbing.
+- PostHog events are the ones defined in the feature spec, with IDs and enums only: no names, free text or health data (NFR-OBS-05). Add a new event to `AnalyticsEvents` in `packages/contracts` first, then send it with each app's `track()`. Sentry with PII scrubbing.
 
 ## Tests and comments
 

@@ -23,6 +23,7 @@
 | Streaming | AI chat and generation progress use **Server-Sent Events**. |
 | Realtime | None in R1. Clients refetch on focus, on pull-to-refresh and on relevant push receipt. |
 | Webhooks (inbound) | `/v1/webhooks/{provider}` with signature verification (video provider, email provider). |
+| Request IDs | Every response carries `X-Request-Id`, a UUID the API generates per request; one sent by the caller is ignored. Logs and Sentry events carry the same ID (NFR-OBS-02). |
 | Health | `GET /health` answers `{ "status": "ok" }` while the process is up (NFR-OBS-04). `GET /health/ready` answers the same when the database responds within 2 s, and 503 when it doesn't (the cause is logged) or while the process drains: after SIGTERM the API keeps serving for `SHUTDOWN_DRAIN_MS` with readiness at 503, so the host stops routing traffic before the server closes. TECH-02 sets the drain to match the host's probe interval. Both sit outside `/v1` and outside the OpenAPI document, because they aren't part of the client contract. |
 
 ### 1.1 Errors

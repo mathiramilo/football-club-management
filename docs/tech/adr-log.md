@@ -16,7 +16,7 @@
 | ADR-009 | Video hosting provider | Open | Start of R2 |
 | ADR-010 | LLM provider: Anthropic Claude (Opus 5.5 default) | Proposed | Start of R3 |
 | ADR-011 | Primary hosting region: São Paulo | Proposed | R0 week 2 |
-| ADR-012 | Observability and product analytics: Sentry and PostHog | Proposed | R0 week 2 |
+| ADR-012 | Observability and product analytics: Sentry and PostHog | Accepted (2026-11-03, after TECH-10) | R0 week 2 |
 | ADR-013 | ORM: Prisma | Accepted (2026-10-23, after the TECH-03 spike) | R0 week 1 |
 | ADR-014 | Web UI: Tailwind CSS + shadcn/ui with shared design tokens | Accepted (2026-10-25, after TECH-15) | R0 week 2 |
 | ADR-015 | Mobile UI: NativeWind with shared tokens; core native libraries | Accepted (2026-10-25, after TECH-15) | R0 week 2 |
@@ -84,7 +84,7 @@
   - Cloud schedulers: vendor lock-in and harder local development.
 - **Consequences**:
   - **Gains**: one datastore to operate, transactional enqueueing, and enough throughput for Year 1 (NFR-SCALE-02). An event reaches its handlers about a second after its transaction commits.
-  - **Alerts** (dead letters, lag over 2 minutes, relay failures) are logged until TECH-10 sends them to Sentry.
+  - **Alerts** (dead letters, lag over 2 minutes, relay failures) are logged and reported to Sentry as issues, grouped per queue or source (TECH-10).
   - **Retiring an event handler** means deleting its queue, or pg-boss keeps filling it until retention drops the jobs.
   - **Shutdown**: the worker lets running jobs finish for up to 30 s, so the host's grace period must be longer (TECH-02).
   - **Watch on every upgrade**: pg-boss migrates its schema when the worker starts, so read the release notes for long migrations. Its `TestClock` also prints a `pg` deprecation warning in tests.
@@ -167,9 +167,15 @@
 - **Decision**: host the API, worker and database in a São Paulo region. Web pages are served from Vercel's edge network. Confirm availability with each chosen provider.
 - **Consequences**: lower latency for target users. Check the data-transfer clauses in the privacy policy (data stored outside Uruguay and Argentina; adequacy and contractual safeguards to confirm with counsel).
 
-## ADR-012 · Observability and product analytics
-- **Decision**: Sentry for errors and performance in all apps (`@sentry/react-native`, `@sentry/nextjs`, `@sentry/nestjs`), Pino structured logs with redaction, and PostHog for product analytics and feature flags.
-- **Constraints**: no health data, no free text and no tokens are sent to any of them (NFR-OBS-02, NFR-OBS-05).
+## ADR-012 · Observability and product analytics (Accepted)
+- **Decision**: Sentry for errors and performance in all apps (`@sentry/react-native`, `@sentry/nextjs`, `@sentry/nestjs`), Pino structured logs with redaction, and PostHog for product analytics. TECH-10 (2026-11-03) built it on every surface, each part off until its key is set:
+  - **Logs** (`nestjs-pino`, API and worker): JSON lines carrying `request_id`, `user_id` and `club_id`, or `job_id` and `queue` in the worker, read from the request context when the line is written. Each request gets a new ID, returned as `X-Request-Id`. One line per finished request with method, path, status and duration; query strings and headers stay out, since OAuth callbacks put codes in the URL and headers carry the session. Tokens, codes and emails are redacted from any logged object. `LOG_LEVEL` and `LOG_FORMAT` (`json`, or `pretty` locally).
+  - **Sentry**: version 11 collects request bodies, cookies, headers, query strings, query parameters, job arguments and local variables by default; all of that is off. Every event keeps the method, the path and a few harmless headers, the user ID, and errors' type and frames **without their message**, because messages can carry request data. Events carry the request ID and club, or the job and queue, as tags. The API's problem+json filter reports what it logs as unhandled (5xx that aren't an `HttpException`); `@SentryExceptionCaptured()` isn't used because it would also report every `DomainError`. Job alerts become issues grouped per queue or source. The API starts Sentry with `--import ./dist/instrument.js`, which ESM needs for tracing. On the web, the server reports through `onRequestError` and the browser SDK loads after the page has loaded, as its own chunk (0.3 KB more on the first load); tokens in `/e`, `/j`, `/c` and `/consent` paths become `:token`. The app applies the same scrubbing and keeps the user ID across launches.
+  - **PostHog**: only the events the feature specs define, typed by the `AnalyticsEvents` catalog in `packages/contracts`. Autocapture, page and screen views, session replay, surveys and PostHog's feature flags are off, and URLs lose query strings and tokens. The distinct ID is the user ID, reset on sign-out. The web loads posthog-js after the page has loaded; the app keeps PostHog's ID in MMKV. `sign_in_completed` comes from the API, the only place that knows whether the account is new. The host defaults to PostHog's EU cloud.
+- **Constraints**: no health data, no free text and no tokens are sent to any of them (NFR-OBS-02, NFR-OBS-05). Production gets no PostHog key until users can opt out (AUTH-15). Feature flags stay server-side through `app-config` (Architecture § 6.12).
+- **Consequences**:
+  - Errors arrive without their message: the type, the stack and the request or job identify them.
+  - **Left for TECH-02**: uptime checks on `/health` and the public pages from two regions (NFR-OBS-04); the alert rules of NFR-OBS-03 (the 5xx rate and p95 latency need `SENTRY_TRACES_SAMPLE_RATE` above 0); 30-day log retention at the host; source-map upload tokens; the Sentry and PostHog data region, with the international transfers in the privacy doc; PostHog's project setting that discards client IPs.
 
 ## ADR-013 · ORM: Prisma (Accepted)
 - **Context**: the first draft chose Prisma for its migrations and developer experience, to be confirmed by an R0 spike on the RSVP and roll call slice plus one analytics query; switch only on a real problem. The spike (branch `spike/TECH-03-orm`, 2026-10-23) ran Prisma 7.10.1 with `@prisma/adapter-pg` against PostgreSQL 18.6 at Year-1 volume from the seed generator (NFR-SCALE-02: 200 clubs, 799 categories, 161,649 events, 3.3 M invitees, 2.6 M RSVP changes), on a laptop with a warm cache:

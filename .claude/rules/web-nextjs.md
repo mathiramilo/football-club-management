@@ -34,7 +34,7 @@ Route groups keep the surfaces apart: `app/(auth)/…` and `app/(player)/…` ex
 - Server-side API calls go through functions wrapped in `React.cache()`, so `generateMetadata`, the page and `opengraph-image` share one request. Start independent requests together (`Promise.all`) and wrap slow sections in `<Suspense>`.
 - Pass only the fields a client component needs across the server/client boundary.
 - Never keep per-request data in module-level variables.
-- Load heavy client libraries (Recharts, dnd-kit, Tiptap) with `next/dynamic`, load PostHog and Sentry replay after hydration, and use `optimizePackageImports` for icon libraries.
+- Load heavy client libraries (Recharts, dnd-kit, Tiptap) with `next/dynamic`, load PostHog and Sentry only after the page has loaded (`instrumentation-client.ts`), and use `optimizePackageImports` for icon libraries.
 - OG images use `next/og` with flexbox-only layout.
 
 ## Session and auth
@@ -51,7 +51,7 @@ Route groups keep the surfaces apart: `app/(auth)/…` and `app/(player)/…` ex
 - `shadcn add` writes `import { cn } from "cn"` and Tailwind's default sizes (`text-sm`, `rounded-lg`, `h-8`). Point the import at `@/lib/utils` (its `cn` knows the token scales) and restyle the component with the tokens: the default scales are reset, so those classes do nothing.
 - **TanStack Table** for directories and per-player tables, **Recharts** for charts, **dnd-kit** for the plan builder and reordering, **Tiptap** (R3) for rich text stored as JSON.
 - **next-intl** reading the catalogs in `packages/i18n`.
-- `@sentry/nextjs` and `posthog-js` with privacy filters: no input capture, replay masked or off.
+- `@sentry/nextjs` and `posthog-js` with privacy filters: no input capture, replay off. Send events with `track()` from `lib/analytics.ts`; every URL they carry goes through `lib/scrub-url.ts`, which drops query strings and the tokens in `/e`, `/j`, `/c` and `/consent`.
 
 ## Accessibility
 

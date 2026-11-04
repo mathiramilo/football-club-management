@@ -89,7 +89,7 @@ Requirements for [F07](../features/F07-player-wellness.md):
 | Access / portability | Request to support (email), fulfilled within 30 days with a JSON/CSV export | Self-service export (AUTH, Later) |
 | Rectification | Self-service profile editing; staff edit club data | – |
 | Erasure | Self-service account deletion (AUTH-13); wellness history deletion (WELL-12) | – |
-| Objection / consent withdrawal | Wellness revocation; notification preferences; analytics opt-out | – |
+| Objection / consent withdrawal | Wellness revocation; notification preferences; analytics opt-out (AUTH-15) | – |
 
 ⚖️ Response deadlines and identity verification per jurisdiction.
 

@@ -44,7 +44,7 @@ Shared across all three: `packages/contracts` (Zod), `packages/domain` (pure bus
 | Storage | **S3-compatible storage (e.g. Cloudflare R2)** via AWS SDK v3 presigned URLs | Direct uploads from the apps, cheap egress. |
 | Uploads security | Type and size checks, image re-encoding, ClamAV-based scanning in the worker | NFR-SEC-08. |
 | AI | **Official Anthropic TypeScript SDK** (`@anthropic-ai/sdk`) | Tool use and structured outputs for plan generation ([AI architecture](04-ai-architecture.md)). |
-| Logging / errors | **Pino** (`nestjs-pino`) with redaction · **Sentry** | Structured logs with request, club and user IDs. Sensitive fields are never logged (NFR-OBS-02). |
+| Logging / errors | **Pino** (`nestjs-pino`) with redaction · **Sentry** (`@sentry/nestjs`) · **PostHog** (`posthog-node`) | Structured logs with request, club and user IDs. Sensitive fields are never logged (NFR-OBS-02). Sentry starts from `instrument.ts` with `--import`; PostHog sends the events only the server knows, such as `sign_in_completed` (ADR-012). |
 | Backend tests | **Vitest** + **Supertest** + **Testcontainers** (real Postgres) | Mandatory backend tests for domain rules, endpoints, authorization and tenant isolation (NFR-MAINT-01). |
 | Hosting | API and worker containers in a **São Paulo** region | Lowest latency to Uruguay and Argentina (ADR-011). The API and worker are the same image run as two process types. |
 
@@ -63,7 +63,7 @@ Shared across all three: `packages/contracts` (Zod), `packages/domain` (pure bus
 | Rich text (R3) | **Tiptap** | Nutrition plans and long descriptions. Stored as JSON. |
 | i18n | **next-intl** reading the ICU catalogs in `packages/i18n` | Río de la Plata Spanish first, English in R3. |
 | Dates and time zones | **date-fns** + **@date-fns/tz** | Club time zone display (BR-EVT-26). |
-| Observability | `@sentry/nextjs`, `posthog-js` | With privacy filters (NFR-OBS-05). |
+| Observability | `@sentry/nextjs`, `posthog-js` | With privacy filters (NFR-OBS-05). Both load after the page has loaded, outside the first-load JS (ADR-012). |
 | Hosting | **Vercel** | Preview deployments per PR; edge caching for public pages. |
 
 ## 4. Mobile app
@@ -89,7 +89,7 @@ Shared across all three: `packages/contracts` (Zod), `packages/domain` (pure bus
 | Forms | React Hook Form + Zod | Shared schemas. |
 | i18n | **FormatJS** (`react-intl`) + `expo-localization`, ICU catalogs from `packages/i18n` | Intl polyfills where Hermes needs them. |
 | Dates | date-fns + @date-fns/tz | Same as web. |
-| Observability | `@sentry/react-native`, `posthog-react-native` | Crash-free target (NFR-OBS-01). |
+| Observability | `@sentry/react-native`, `posthog-react-native` | Crash-free target (NFR-OBS-01). PostHog keeps its ID in MMKV, so it adds no native module (ADR-012). |
 | Builds and releases | **EAS Build**, **EAS Submit**, **EAS Update** with channels (`preview`, `staging`, `production`) and the **fingerprint** runtime-version policy | OTA updates only reach compatible binaries. Minimum-version enforcement via `app-config` (TECH-14). |
 
 ## 5. Shared packages and contract flow
