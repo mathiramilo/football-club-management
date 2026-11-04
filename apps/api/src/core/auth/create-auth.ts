@@ -13,6 +13,7 @@ import type { EmailSender } from '../email/email-sender.js';
 import { formatMessage } from '../i18n/messages.js';
 import { type AppleSigningKey, signAppleClientSecret } from './apple-client-secret.js';
 import type { EmailCodeRequestsRepository } from './email-code-requests.repository.js';
+import { type SignInAnalytics, signInMethodOf } from './sign-in-analytics.js';
 
 export const AUTH_BASE_PATH = '/v1/auth';
 
@@ -74,6 +75,7 @@ export interface AuthDependencies {
   emailCodeRequests: EmailCodeRequestsRepository;
   clock: Clock;
   logger: LoggerService;
+  signIns: SignInAnalytics;
 }
 
 const withoutProviderSecrets = <T extends object>(account: T) =>
@@ -100,7 +102,7 @@ function appleProvider(clientIds: string[], signingKey: AppleSigningKey | undefi
 
 export function createAuth(
   options: AuthOptions,
-  { prisma, emailSender, emailCodeRequests, clock, logger }: AuthDependencies,
+  { prisma, emailSender, emailCodeRequests, clock, logger, signIns }: AuthDependencies,
 ) {
   const hashEmail = (email: string) =>
     createHmac('sha256', options.secret).update(`email-code:${email}`).digest('base64url');
@@ -164,6 +166,12 @@ export function createAuth(
           );
         }
       }),
+      after: createAuthMiddleware((ctx) => {
+        const userId = ctx.context.newSession?.user.id;
+        const method = signInMethodOf(ctx);
+        if (userId && method) signIns.signedIn(userId, method);
+        return Promise.resolve();
+      }),
     },
     rateLimit: {
       enabled: options.rateLimitEnabled,
@@ -172,6 +180,14 @@ export function createAuth(
       customRules: { [SEND_CODE_PATH]: { window: 3600, max: CODE_REQUESTS_PER_IP_PER_HOUR } },
     },
     databaseHooks: {
+      user: {
+        create: {
+          after: () => {
+            signIns.accountCreated();
+            return Promise.resolve();
+          },
+        },
+      },
       account: {
         create: { before: withoutProviderSecrets },
         update: { before: withoutProviderSecrets },

@@ -45,6 +45,8 @@ export const envSchema = z
     APPLE_PRIVATE_KEY: optional(z.string().transform((pem) => pem.replaceAll('\\n', '\n'))),
     AUTH_RATE_LIMIT_ENABLED: z.stringbool().default(true),
     AUTH_TRUSTED_PROXIES: commaSeparated,
+    POSTHOG_API_KEY: optional(z.string()),
+    POSTHOG_HOST: z.url().default('https://eu.i.posthog.com'),
   })
   .refine(
     (env) =>
