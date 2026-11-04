@@ -7,6 +7,7 @@ import {
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Crypto from 'expo-crypto';
 
+import { track } from '@/lib/analytics';
 import { attempt, type AuthResult, authClient } from '@/lib/auth-client';
 
 export { isGoogleSignInAvailable } from '@/lib/google-sign-in';
@@ -19,6 +20,7 @@ const signInWithIdToken = async (request: Parameters<typeof attempt>[0]) => {
 };
 
 export async function signInWithGoogle(): Promise<AuthResult | null> {
+  track('sign_in_started', { method: 'google' });
   try {
     await GoogleSignin.hasPlayServices();
     const response = await GoogleSignin.signIn();
@@ -38,6 +40,7 @@ const isCancelled = (error: unknown) =>
   error instanceof Error && 'code' in error && error.code === 'ERR_REQUEST_CANCELED';
 
 export async function signInWithApple(): Promise<AuthResult | null> {
+  track('sign_in_started', { method: 'apple' });
   const nonce = Crypto.randomUUID();
   try {
     const credential = await AppleAuthentication.signInAsync({

@@ -4,7 +4,19 @@ import { emailOTPClient } from 'better-auth/client/plugins';
 import { apiUrl } from '@/lib/api-client';
 import { signOutOfGoogle } from '@/lib/google-sign-in';
 import { errorMessageKey, type MessageKey } from '@/lib/i18n';
+import { forgetUser, observeUser } from '@/lib/observed-user';
 import { endSession, getSessionToken, startSession } from '@/lib/session';
+
+const userIdOf = (data: unknown) =>
+  typeof data === 'object' &&
+  data !== null &&
+  'user' in data &&
+  typeof data.user === 'object' &&
+  data.user !== null &&
+  'id' in data.user &&
+  typeof data.user.id === 'string'
+    ? data.user.id
+    : undefined;
 
 export const authClient = createAuthClient({
   baseURL: apiUrl,
@@ -13,9 +25,12 @@ export const authClient = createAuthClient({
   fetchOptions: {
     credentials: 'omit',
     auth: { type: 'Bearer', token: () => getSessionToken() ?? undefined },
-    onSuccess: async ({ response }) => {
+    onSuccess: async ({ response, data }) => {
       const token = response.headers.get('set-auth-token');
-      if (token) await startSession(token);
+      if (!token) return;
+      await startSession(token);
+      const userId = userIdOf(data);
+      if (userId) observeUser(userId);
     },
   },
 });
@@ -23,6 +38,7 @@ export const authClient = createAuthClient({
 export async function signOut() {
   const token = getSessionToken() ?? undefined;
   await endSession();
+  forgetUser();
   void Promise.allSettled([
     authClient.signOut({ fetchOptions: { auth: { type: 'Bearer', token } } }),
     signOutOfGoogle(),
