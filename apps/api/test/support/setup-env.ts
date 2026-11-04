@@ -18,3 +18,4 @@ process.env.APPLE_TEAM_ID = TEST_APPLE_SIGNING_KEY.teamId;
 process.env.APPLE_KEY_ID = TEST_APPLE_SIGNING_KEY.keyId;
 process.env.APPLE_PRIVATE_KEY = TEST_APPLE_SIGNING_KEY.privateKey;
 process.env.AUTH_RATE_LIMIT_ENABLED = 'false';
+process.env.LOG_LEVEL = 'silent';

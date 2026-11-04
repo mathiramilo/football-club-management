@@ -10,6 +10,7 @@ import { ClsService } from 'nestjs-cls';
 import { type JobWithMetadata, PgBoss } from 'pg-boss';
 
 import { framesOf, nameOf } from '../errors/redacted-error.js';
+import type { RequestContext } from '../request-context.js';
 import { JobAlerts } from './job-alerts.js';
 import { HandlesQueue, type JobHandlerMethod, type JobQueue } from './job-queue.js';
 
@@ -40,7 +41,7 @@ export class JobWorkers implements OnModuleInit, OnApplicationBootstrap, BeforeA
   constructor(
     private readonly boss: PgBoss,
     private readonly alerts: JobAlerts,
-    private readonly cls: ClsService,
+    private readonly cls: ClsService<RequestContext>,
     private readonly discovery: DiscoveryService,
     private readonly scanner: MetadataScanner,
     private readonly reflector: Reflector,
@@ -156,7 +157,10 @@ export class JobWorkers implements OnModuleInit, OnApplicationBootstrap, BeforeA
   ): Promise<void> {
     try {
       const data = queue.data.parse(job.data);
-      await this.cls.run(() => handler(data, { id: job.id, signal: job.signal }));
+      await this.cls.run(() => {
+        this.cls.set('job', { id: job.id, queue: queue.name });
+        return handler(data, { id: job.id, signal: job.signal });
+      });
     } catch (error) {
       if (job.retryCount >= job.retryLimit) {
         this.alerts.deadLettered({ queue: queue.name, jobId: job.id }, error);

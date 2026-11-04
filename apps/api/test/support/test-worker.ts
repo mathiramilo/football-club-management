@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto';
 
 import type { Type } from '@nestjs/common';
-import { Test, type TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule, type TestingModuleBuilder } from '@nestjs/testing';
+import { Logger } from 'nestjs-pino';
 import { PgBoss, TestClock } from 'pg-boss';
 import { inject } from 'vitest';
 
@@ -57,6 +58,7 @@ export interface TestWorkerOptions {
   readonly clock?: TestClock;
   readonly boss?: PgBoss;
   readonly relayLoop?: boolean;
+  readonly customize?: (builder: TestingModuleBuilder) => TestingModuleBuilder;
 }
 
 // Jobs the outbox relay inserts through Prisma's connection get Postgres's real time, not the test
@@ -89,7 +91,8 @@ export async function startTestWorker(
     .overrideProvider(Clock)
     .useValue(new TestClockAdapter(clock));
   if (!options.relayLoop) builder = builder.overrideProvider(OutboxRelayLoop).useValue({});
-  const module = await builder.compile();
+  const module = await (options.customize?.(builder) ?? builder).compile();
+  module.useLogger(module.get(Logger));
   await module.init();
   return { module, boss, clock, alerts };
 }
