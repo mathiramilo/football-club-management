@@ -55,7 +55,7 @@ Shared across all three: `packages/contracts` (Zod), `packages/domain` (pure bus
 | Framework | **Next.js (App Router)** | Server Components and SSR for the **public pages** (event and invite landings with Open Graph tags for WhatsApp previews, generated OG images via `next/og`). Client components for the authenticated staff portal. Also serves the universal-link association files. |
 | Styling and components | **Tailwind CSS v4** + **shadcn/ui** (Radix primitives) · **Lucide** icons | Accessible primitives (NFR-A11Y-01), with components owned in the repo. The theme comes from `packages/ui-tokens/theme.css`, with club theming as CSS variables (ADR-014). |
 | Server state | **TanStack Query** with hooks from `packages/api-client` | Caching, optimistic updates (RSVP, roll call), refetch on focus (no realtime in R1). |
-| Session | httpOnly, Secure, SameSite cookies on the shared parent domain (`app.` / `api.` subdomains) | Final shape decided in the auth spike (TECH-04). No tokens in `localStorage`. |
+| Session | httpOnly, Secure, SameSite cookies on the shared parent domain (`app.` / `api.` subdomains) | Better Auth's cookie (ADR-007). The browser calls the API with it; the Next.js server never forwards it (ADR-003). No tokens in `localStorage`. |
 | Forms | **React Hook Form** + Zod resolver | The same Zod schemas as the API. |
 | Tables | **TanStack Table** | Member directory, per-player attendance table, wellness board. |
 | Charts | **Recharts** | Attendance trends and breakdowns. Always labelled with numerator and denominator (BR-ANL-04). |
@@ -163,7 +163,7 @@ Chosen at TECH-01 (2026-10-23). Lift a hold when its condition is met, in its ow
 |---|---|---|
 | Auth | Does a self-hosted library (e.g. Better Auth) cover native Google and Apple sign-in on Expo, email codes, refresh rotation, and cookie sessions for Next.js against a NestJS API? What would a managed provider cost at 25k MAU? | ADR-007, TECH-04 · **Done** (2026-10-23): Better Auth, with revocable sessions instead of refresh rotation |
 | Actionable push | Can "Voy" from a notification submit in the background (app killed or backgrounded) on iOS and Android with expo-notifications? | EVT-09, NOTIF-05 |
-| In-app browsers | Does WhatsApp open links in an in-app browser that blocks Google OAuth, on each OS? | NFR-COMP-04, AUTH-01 |
+| In-app browsers | Does WhatsApp open links in an in-app browser that blocks Google OAuth, on each OS? | NFR-COMP-04, AUTH-01 · TECH-09 hides Google in known webviews (WhatsApp, Facebook, Instagram, Line, TikTok, Android WebView, iOS without Safari) and offers the email code and "Abrí en tu navegador"; the device check is still to do |
 | Offline queue | Do TanStack Query paused mutations, persisted with MMKV, survive app restarts and replay idempotently? | NFR-OFF-01, EVT-15 · **Done** (2026-10-25, TECH-08): yes on the iOS simulator. A write queued offline survived killing the app, was sent once after the restart, and a retry with the same `Idempotency-Key` was replayed; Android not checked |
 | ORM | Prisma vs. Drizzle on the RSVP + roll call slice, plus one analytics query | ADR-013 · **Done** (2026-10-23): Prisma confirmed |
 | Shared tokens | Does one Tailwind preset drive both Tailwind (web) and NativeWind (mobile), including club theming? | ADR-014/015, TECH-15 · **Done** (2026-10-25): yes, one Tailwind v4 theme file with NativeWind 5 (release candidate, two workarounds); checked in an iOS development build (TECH-08); Android device check pending |

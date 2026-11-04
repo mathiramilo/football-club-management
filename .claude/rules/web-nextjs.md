@@ -27,7 +27,7 @@ Task skills: `next-bundle-optimizer` (bundle audits against the public-page budg
 | **Staff portal** | Client components with TanStack Query hooks | Optimized for ≥ 1280 px, usable from 768 px (NFR-COMP-02). |
 | **Player web fallback** | Mobile-first | The full player experience for players without the app. |
 
-Use route groups to keep the surfaces apart, e.g. `app/(public)/…`, `app/(portal)/…`, `app/(player)/…`.
+Route groups keep the surfaces apart: `app/(auth)/…` and `app/(player)/…` exist; `app/(public)/…` and `app/(portal)/…` come with their first pages. Providers that a surface needs (the query client, the API client, the update screen) go in its group layout, not the root layout, so other pages don't load them. Every page already ships about 173 KB of JS gzipped before its own code (ADR-003).
 
 ## Server rendering and data
 
@@ -39,9 +39,11 @@ Use route groups to keep the surfaces apart, e.g. `app/(public)/…`, `app/(port
 
 ## Session and auth
 
-- The session is Better Auth's httpOnly, Secure, SameSite cookie on the shared parent domain (`app.` / `api.`) (ADR-007). **Never put tokens in `localStorage`, `sessionStorage` or JS-readable cookies.** TECH-09 settles how server-rendered pages forward it to the API.
+- The session is Better Auth's httpOnly, Secure, SameSite cookie on the shared parent domain (`app.` / `api.`) (ADR-007). **Never put tokens in `localStorage`, `sessionStorage` or JS-readable cookies.**
+- **The Next.js server never sends the session to the API** (ADR-003). Server-rendered requests are anonymous and pages hold only public data; anything personal is a client component that calls the API with the cookie (`credentials: 'include'`). `proxy.ts` only checks that the cookie exists, to redirect to `/sign-in?next=…`.
+- Google and Apple use Better Auth's redirect flow through the API (`lib/auth-client.ts`), with `NEXT_PUBLIC_SOCIAL_SIGN_IN` picking the buttons. `?next=` only takes paths on this site (`lib/next-path.ts`).
 - Pages opened inside WhatsApp, Instagram or Facebook in-app browsers must work. Detect embedded webviews that block Google OAuth and offer email codes plus an "open in browser" hint (NFR-COMP-04).
-- Serve `/.well-known/apple-app-site-association` and `/.well-known/assetlinks.json` as JSON for universal links and App Links (NFR-COMP-03).
+- `/.well-known/apple-app-site-association` and `/.well-known/assetlinks.json` are route handlers fed by env (`lib/app-links.ts`) for universal links and App Links (NFR-COMP-03).
 
 ## Libraries
 
