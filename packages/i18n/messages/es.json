@@ -101,7 +101,15 @@
     "offline": "Necesitás conexión para entrar. Probá de nuevo cuando tengas señal.",
     "or": "o",
     "google": "Continuar con Google",
-    "providerFailed": "No pudimos entrar con esa cuenta. Probá de nuevo o usá tu email."
+    "providerFailed": "No pudimos entrar con esa cuenta. Probá de nuevo o usá tu email.",
+    "apple": "Continuar con Apple",
+    "inAppBrowser": {
+      "title": "Abrí en tu navegador",
+      "body": "Para entrar con Google, abrí esta página en Chrome o Safari. Con tu email podés entrar desde acá.",
+      "copyLink": "Copiar link",
+      "copied": "Link copiado. Pegalo en tu navegador.",
+      "copyFailed": "No pudimos copiar el link. Copialo desde el menú de esta pantalla."
+    }
   },
   "team": {
     "empty": {
