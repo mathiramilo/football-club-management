@@ -3,6 +3,19 @@ import prettier from 'eslint-config-prettier/flat';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 
+// eslint-config-expo and eslint-config-next register their own copy of the @typescript-eslint plugin, and ESLint
+// refuses two copies under one name. Theirs falls behind whenever typescript-eslint updates alone, so it's swapped
+// for ours.
+export function withOurTypescriptPlugin(configs) {
+  return [configs]
+    .flat(Infinity)
+    .map((config) =>
+      config.plugins?.['@typescript-eslint']
+        ? { ...config, plugins: { ...config.plugins, '@typescript-eslint': tseslint.plugin } }
+        : config,
+    );
+}
+
 export default defineConfig([
   globalIgnores(['**/dist/**', '**/coverage/**', '**/.turbo/**']),
   js.configs.recommended,
