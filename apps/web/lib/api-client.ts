@@ -2,6 +2,7 @@ import { configureApiClient } from '@repo/api-client';
 
 import { locale } from '@/i18n/locale';
 import { requireUpdate } from '@/lib/app-update';
+import { requireLegalAcceptance } from '@/lib/legal-acceptance';
 
 export function apiUrl() {
   const url = process.env.NEXT_PUBLIC_API_URL;
@@ -17,5 +18,6 @@ export function setUpApiClient() {
     locale,
     credentials: 'include',
     onUpdateRequired: requireUpdate,
+    onLegalAcceptanceRequired: requireLegalAcceptance,
   });
 }

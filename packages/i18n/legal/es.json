@@ -1,0 +1,78 @@
+{
+  "draftNotice": "Borrador para la prueba cerrada. Un abogado va a revisar este texto antes de que la app llegue a más clubes. Cuando cambie, te vamos a pedir que lo aceptes de nuevo.",
+  "terms": {
+    "title": "Términos y condiciones",
+    "inForceSince": "Vigentes desde el 9 de noviembre de 2026",
+    "sections": [
+      {
+        "heading": "Qué es la app",
+        "paragraphs": [
+          "Football Club Management ayuda a los clubes de fútbol a organizarse: actividades, confirmaciones, asistencia y plantel, por club y por categoría."
+        ]
+      },
+      {
+        "heading": "Tu cuenta",
+        "paragraphs": [
+          "Para usar la app tenés que tener 16 años o más.",
+          "Usá tus datos reales y cuidá el acceso a tu email: con él se entra a tu cuenta. Lo que hacés con tu cuenta es tu responsabilidad."
+        ]
+      },
+      {
+        "heading": "Cómo usarla",
+        "paragraphs": [
+          "Usala para organizar tu club y tu equipo. No subas contenido ofensivo ni contenido que no te pertenezca o que no tengas permiso para compartir.",
+          "Cada club decide quién entra a sus categorías y qué rol tiene cada integrante."
+        ]
+      },
+      {
+        "heading": "Prueba cerrada",
+        "paragraphs": [
+          "La app está en desarrollo: puede tener errores, cambiar o no estar disponible por momentos. Si algo no funciona, avisale a quien te invitó."
+        ]
+      },
+      {
+        "heading": "Si querés irte",
+        "paragraphs": ["Podés dejar de usar la app cuando quieras y pedir que borremos tu cuenta."]
+      }
+    ]
+  },
+  "privacy": {
+    "title": "Política de privacidad",
+    "inForceSince": "Vigente desde el 9 de noviembre de 2026",
+    "sections": [
+      {
+        "heading": "Qué datos guardamos",
+        "paragraphs": [
+          "Tu email, tu nombre, tu apodo, tu foto, tu fecha de nacimiento y tu teléfono si lo cargás; los clubes y las categorías a los que pertenecés; y tus confirmaciones, motivos de ausencia y asistencia."
+        ]
+      },
+      {
+        "heading": "Para qué",
+        "paragraphs": [
+          "Para que tu club organice sus actividades y vos sepas cuándo y dónde jugás. No vendemos tus datos ni mostramos publicidad.",
+          "Medimos qué funciones se usan para mejorar la app, sin nombres, mensajes ni datos de salud."
+        ]
+      },
+      {
+        "heading": "Quién los ve",
+        "paragraphs": [
+          "El cuerpo técnico de tu categoría y los administradores de tu club ven tus confirmaciones, tus motivos de ausencia y tu asistencia. Tus compañeros ven tu nombre, tu foto y si vas o no.",
+          "Si más adelante la app te pide datos de salud, como un check-in de estado físico, te vamos a pedir un consentimiento aparte, que vas a poder retirar cuando quieras."
+        ]
+      },
+      {
+        "heading": "Dónde y por cuánto tiempo",
+        "paragraphs": [
+          "Guardamos los datos en servidores en San Pablo, Brasil, mientras tu cuenta esté activa.",
+          "Si borrás tu cuenta, eliminamos tus datos personales a los 30 días. Tus confirmaciones y tu asistencia quedan anónimas, para que las estadísticas del equipo sigan siendo correctas."
+        ]
+      },
+      {
+        "heading": "Tus derechos",
+        "paragraphs": [
+          "Podés ver y corregir tus datos en tu perfil, y pedirnos una copia o que los borremos."
+        ]
+      }
+    ]
+  }
+}

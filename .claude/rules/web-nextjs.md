@@ -27,7 +27,7 @@ Task skills: `next-bundle-optimizer` (bundle audits against the public-page budg
 | **Staff portal** | Client components with TanStack Query hooks | Optimized for ≥ 1280 px, usable from 768 px (NFR-COMP-02). |
 | **Player web fallback** | Mobile-first | The full player experience for players without the app. |
 
-Route groups keep the surfaces apart: `app/(auth)/…` and `app/(player)/…` exist; `app/(public)/…` and `app/(portal)/…` come with their first pages. Providers that a surface needs (the query client, the API client, the update screen) go in its group layout, not the root layout, so other pages don't load them. Every page already ships about 173 KB of JS gzipped before its own code (ADR-003).
+Route groups keep the surfaces apart: `app/(auth)/…`, `app/(player)/…` and `app/(public)/…` (the legal pages) exist; `app/(portal)/…` comes with its first page. The player layout wraps its pages in `LegalGate`, which shows the acceptance screen (AUTH-04) until `legal-documents` says nothing is required; the portal layout will too. The legal texts are `packages/i18n/legal/es.json`, imported only by the server-rendered `/legal/*` pages so they don't ride along with the message catalog sent to every page. Providers that a surface needs (the query client, the API client, the update screen) go in its group layout, not the root layout, so other pages don't load them. Every page already ships about 173 KB of JS gzipped before its own code (ADR-003).
 
 ## Server rendering and data
 
