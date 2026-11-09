@@ -79,7 +79,8 @@
       "privacy": "Política de privacidad"
     },
     "accept": "Acepto",
-    "signOut": "Salir"
+    "signOut": "Salir",
+    "offline": "Necesitás conexión para aceptar. Probá de nuevo cuando tengas señal."
   },
   "nav": {
     "tabs": {
