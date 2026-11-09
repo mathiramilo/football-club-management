@@ -15,7 +15,7 @@
   "dependencies": {
     "@formatjs/intl-locale": "5.3.12",
     "@formatjs/intl-pluralrules": "6.3.16",
-    "@formatjs/intl-relativetimeformat": "12.3.16",
+    "@formatjs/intl-relativetimeformat": "13.0.1",
     "@react-native-google-signin/google-signin": "16.2.0",
     "@repo/api-client": "workspace:*",
     "@repo/contracts": "workspace:*",
