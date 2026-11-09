@@ -19,9 +19,9 @@
   },
   "devDependencies": {
     "@repo/config": "workspace:*",
-    "@tanstack/react-query": "5.105.0",
+    "@tanstack/react-query": "5.105.1",
     "eslint": "catalog:",
-    "orval": "8.45.0",
+    "orval": "8.46.0",
     "prettier": "catalog:",
     "typescript": "catalog:"
   }
