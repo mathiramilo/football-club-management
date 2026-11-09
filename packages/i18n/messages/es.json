@@ -69,6 +69,18 @@
       "body": "Pedile a tu DT el link de invitación y abrilo en este teléfono."
     }
   },
+  "legalAcceptance": {
+    "title": "Antes de empezar",
+    "body": "Para usar la app, leé y aceptá los términos y condiciones y la política de privacidad.",
+    "updatedTitle": "Actualizamos los términos",
+    "updatedBody": "Cambiamos {changed, select, terms {los términos y condiciones} privacy {la política de privacidad} other {los términos y condiciones y la política de privacidad}}. Leé los cambios y aceptalos para seguir.",
+    "documents": {
+      "terms": "Términos y condiciones",
+      "privacy": "Política de privacidad"
+    },
+    "accept": "Acepto",
+    "signOut": "Salir"
+  },
   "nav": {
     "tabs": {
       "home": "Inicio",

@@ -14,6 +14,7 @@ Specs: `docs/product/03-glossary.md`, `docs/ux/01-information-architecture-and-f
 
 - Every user-facing string (UI, push, email, error messages) lives in `packages/i18n` as **ICU MessageFormat**, with plural and gender support. No hard-coded copy anywhere.
 - Spanish (`es`, Río de la Plata) is the source locale. English arrives in R3 (AUTH-14); don't add `en` strings before then unless asked.
+- The legal texts are plain sections in `packages/i18n/legal/<locale>.json`, apart from the message catalog, since only the `/legal/*` pages need them. Changing one also changes its version (architecture § 6.1).
 - Keys are dot-separated by area: `events.rsvp.going`, `wellness.checkin.loadQuestion`, `errors.RSVP_LOCKED`, `notifications.N-03.push.body`.
 - Interpolate values with ICU placeholders. Never build sentences by concatenating strings.
 - Format dates, times and numbers with the i18n library in the club time zone, 24-hour format, weeks starting Monday.

@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./messages/es.json": "./messages/es.json"
+    "./messages/es.json": "./messages/es.json",
+    "./legal/es.json": "./legal/es.json"
   }
 }

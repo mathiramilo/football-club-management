@@ -63,7 +63,7 @@ Left sidebar: **Inicio** · **Calendario** · **Plantel** (categories, members, 
 Top bar: club switcher, category filter, inbox, profile.
 
 ### 3.4 Web: public and player pages
-- Public: `/e/{token}` (event landing), `/j/{code}` (invite), `/c/{token}` (claim), `/consent/{token}` (guardian), `/delete-account`, legal pages.
+- Public: `/e/{token}` (event landing), `/j/{code}` (invite), `/c/{token}` (claim), `/consent/{token}` (guardian), `/delete-account`, legal pages (`/legal/terms`, `/legal/privacy`).
 - Player web: a responsive equivalent of the mobile player tabs, with a persistent "Descargá la app para recibir recordatorios" banner.
 
 ## 4. Screen inventory
@@ -111,6 +111,7 @@ Top bar: club switcher, category filter, inbox, profile.
 1. The DT shares the category invite link in the team WhatsApp group (CLUB-05).
 2. The player taps it, and the web invite landing opens: "Te invitan a **Primera** de **Club X**".
 3. Sign-in: Google, Apple or email code. In in-app browsers, the email code is offered first (NFR-COMP-04).
+   Then, once per account and again after a material change, the terms step (S-01, AUTH-04): "Antes de empezar", links to the terms and the privacy policy, "Acepto", and "Salir" to sign out instead.
 4. Profile: name, birthdate, nickname and photo (optional), then position (AUTH-05, AUTH-10).
 5. Pending approval (AUTH-08) or joined. The page offers the app download.
 6. The player installs the app and signs in: the membership is already there, with upcoming events listed.
@@ -215,7 +216,7 @@ The [design canvas](https://claude.ai/artifact/ECyWZ11AxR27YMNSHanDNX) is the si
 
 | Screen | Canvas page | Boards |
 |---|---|---|
-| S-01 | 1 · Ingreso | S-01 · Ingresar · S-01 · Código por email |
+| S-01 | 1 · Ingreso | S-01 · Ingresar · S-01 · Código por email · S-01 · Antes de empezar |
 | S-02 | 1 · Ingreso | S-02 · Completá tu perfil · S-02 · Tu posición |
 | S-03 | 1 · Ingreso | S-03 · Invitación (web /j) · S-03 · Esperando aprobación · S-03 · Reclamar perfil (web /c) |
 | S-04 | 2 · Jugador | S-04 · Inicio · EVT-09 · No voy: motivo |

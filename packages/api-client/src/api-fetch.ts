@@ -15,6 +15,7 @@ export interface ApiClientConfig {
   credentials?: RequestCredentials;
   getAuthHeaders?: () => Record<string, string> | Promise<Record<string, string>>;
   onUpdateRequired?: () => void;
+  onLegalAcceptanceRequired?: () => void;
 }
 
 export class ApiError extends Error {
@@ -35,6 +36,7 @@ export type BodyType<Body> = Body;
 
 const UPDATE_REQUIRED: ErrorCode = 'APP_UPDATE_REQUIRED';
 const UPDATE_REQUIRED_STATUS = 426;
+const LEGAL_ACCEPTANCE_REQUIRED: ErrorCode = 'LEGAL_ACCEPTANCE_REQUIRED';
 
 let clientConfig: ApiClientConfig | undefined;
 
@@ -52,8 +54,16 @@ async function readBody(response: Response): Promise<unknown> {
 
 export async function apiFetch<T>(url: string, init: RequestInit = {}): Promise<T> {
   if (!clientConfig) throw new Error('Call configureApiClient before the first request');
-  const { baseUrl, appVersion, platform, locale, credentials, getAuthHeaders, onUpdateRequired } =
-    clientConfig;
+  const {
+    baseUrl,
+    appVersion,
+    platform,
+    locale,
+    credentials,
+    getAuthHeaders,
+    onUpdateRequired,
+    onLegalAcceptanceRequired,
+  } = clientConfig;
 
   const headers = new Headers(init.headers);
   headers.set(APP_VERSION_HEADER, appVersion);
@@ -72,6 +82,7 @@ export async function apiFetch<T>(url: string, init: RequestInit = {}): Promise<
     if (response.status === UPDATE_REQUIRED_STATUS || error.code === UPDATE_REQUIRED) {
       onUpdateRequired?.();
     }
+    if (error.code === LEGAL_ACCEPTANCE_REQUIRED) onLegalAcceptanceRequired?.();
     throw error;
   }
   return (await readBody(response)) as T;
