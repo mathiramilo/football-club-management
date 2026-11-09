@@ -32,6 +32,78 @@
         ],
         "security": []
       }
+    },
+    "/v1/me/legal-documents": {
+      "get": {
+        "operationId": "legalDocumentsGet",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegalDocumentsResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Problem details (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/v1/me/legal-acceptances": {
+      "post": {
+        "operationId": "legalDocumentsAccept",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptLegalDocumentsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegalDocumentsResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Problem details (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "identity"
+        ]
+      }
     }
   },
   "info": {
@@ -122,6 +194,97 @@
         ],
         "additionalProperties": false
       },
+      "LegalDocumentsResponse": {
+        "type": "object",
+        "properties": {
+          "acceptanceRequired": {
+            "type": "boolean",
+            "description": "Whether any document must be accepted before anything else can be done"
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalDocumentStatus"
+            }
+          }
+        },
+        "required": [
+          "acceptanceRequired",
+          "documents"
+        ],
+        "additionalProperties": false
+      },
+      "LegalDocumentStatus": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "type": "string",
+            "x-extensible-enum": [
+              "terms",
+              "privacy"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "The version in force: the one to accept"
+          },
+          "acceptedVersion": {
+            "nullable": true,
+            "description": "The latest version this user accepted; null when none",
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          },
+          "acceptanceRequired": {
+            "type": "boolean",
+            "description": "Whether this user must accept the version in force (BR-AUTH-08)"
+          }
+        },
+        "required": [
+          "document",
+          "version",
+          "acceptedVersion",
+          "acceptanceRequired"
+        ],
+        "additionalProperties": false
+      },
+      "AcceptLegalDocumentsBody": {
+        "type": "object",
+        "properties": {
+          "documents": {
+            "minItems": 1,
+            "maxItems": 2,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "document": {
+                  "type": "string",
+                  "enum": [
+                    "terms",
+                    "privacy"
+                  ]
+                },
+                "version": {
+                  "type": "string",
+                  "format": "date",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                  "description": "The date the text came into force (YYYY-MM-DD)"
+                }
+              },
+              "required": [
+                "document",
+                "version"
+              ]
+            }
+          }
+        },
+        "required": [
+          "documents"
+        ]
+      },
       "ProblemDetails": {
         "type": "object",
         "properties": {
@@ -152,7 +315,9 @@
               "IDEMPOTENCY_KEY_REQUIRED",
               "IDEMPOTENCY_KEY_REUSED",
               "IDEMPOTENCY_REQUEST_IN_PROGRESS",
-              "APP_UPDATE_REQUIRED"
+              "APP_UPDATE_REQUIRED",
+              "LEGAL_ACCEPTANCE_REQUIRED",
+              "LEGAL_DOCUMENT_OUTDATED"
             ]
           },
           "detail": {

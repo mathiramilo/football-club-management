@@ -28,6 +28,7 @@ import {
   signInWithEmailCode,
   uniqueEmail,
 } from '../support/auth-fixtures.js';
+import { acceptLegalDocuments } from '../support/factories.js';
 import { createTestApp } from '../support/create-test-app.js';
 import { SIGNED_IN_TEST_ACTION, signedInTestPolicies } from '../support/test-policies.js';
 import { FakeClock } from '../support/fake-clock.js';
@@ -156,6 +157,8 @@ describe('Idempotency-Key (TECH-06, NFR-OFF-01)', () => {
     gate = app.get(Gate);
     ana = await signInWithEmailCode(app, email, uniqueEmail('ana'));
     bruno = await signInWithEmailCode(app, email, uniqueEmail('bruno'));
+    await acceptLegalDocuments(app.get(PrismaService), ana.userId);
+    await acceptLegalDocuments(app.get(PrismaService), bruno.userId);
   });
 
   beforeEach(() => {

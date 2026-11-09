@@ -14,6 +14,7 @@ import { IdempotencyModule } from './core/idempotency/idempotency.module.js';
 import { LoggingModule } from './core/logging/logging.module.js';
 import { ObservabilityModule } from './core/observability/observability.module.js';
 import { requestContextOptions } from './core/request-context.js';
+import { IdentityModule } from './modules/identity/identity.module.js';
 
 @Module({
   imports: [
@@ -29,6 +30,9 @@ import { requestContextOptions } from './core/request-context.js';
     // Before AuthModule, so an outdated app is told to update rather than to sign in again.
     AppConfigModule,
     AuthModule,
+    // After AuthModule: global guards run in registration order, and its legal gate needs the actor.
+    // Before AuthorizationModule: nothing else is checked until the documents are accepted (BR-AUTH-08).
+    IdentityModule,
     // After AuthModule: global guards run in registration order, and this one needs the actor.
     AuthorizationModule,
     HealthModule,

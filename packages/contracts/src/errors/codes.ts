@@ -17,6 +17,8 @@ export const errorCode = extensibleEnum([
   'IDEMPOTENCY_KEY_REUSED',
   'IDEMPOTENCY_REQUEST_IN_PROGRESS',
   'APP_UPDATE_REQUIRED',
+  'LEGAL_ACCEPTANCE_REQUIRED',
+  'LEGAL_DOCUMENT_OUTDATED',
 ]);
 
 export type ErrorCode = z.infer<typeof errorCode>;
@@ -41,6 +43,8 @@ export const errorCatalog: Record<ErrorCode, ErrorDefinition> = {
   IDEMPOTENCY_KEY_REUSED: { status: 422, title: 'Idempotency key reused' },
   IDEMPOTENCY_REQUEST_IN_PROGRESS: { status: 409, title: 'Request in progress' },
   APP_UPDATE_REQUIRED: { status: 426, title: 'App update required' },
+  LEGAL_ACCEPTANCE_REQUIRED: { status: 403, title: 'Legal documents not accepted' },
+  LEGAL_DOCUMENT_OUTDATED: { status: 409, title: 'Legal document outdated' },
 };
 
 // Better Auth answers /v1/auth/* with { code, message } instead of problem+json (ADR-007).

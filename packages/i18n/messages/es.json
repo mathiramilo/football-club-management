@@ -52,6 +52,8 @@
     "IDEMPOTENCY_REQUEST_IN_PROGRESS": "Todavía estamos procesando tu pedido. Esperá un momento.",
     "INTERNAL_ERROR": "Algo falló de nuestro lado. Probá de nuevo en un rato.",
     "INVALID_OTP": "El código es incorrecto. Revisalo y probá de nuevo.",
+    "LEGAL_ACCEPTANCE_REQUIRED": "Para seguir, aceptá los términos y la política de privacidad.",
+    "LEGAL_DOCUMENT_OUTDATED": "Actualizamos los términos mientras los leías. Revisá la versión nueva y aceptala.",
     "NOT_FOUND": "No encontramos lo que buscás.",
     "OTP_EXPIRED": "El código venció. Pedí uno nuevo.",
     "PAYLOAD_TOO_LARGE": "Es demasiado grande para enviarlo. Achicalo y probá de nuevo.",

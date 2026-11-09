@@ -85,7 +85,7 @@ Auth tables are Better Auth's models mapped to our names (ADR-007). It refuses t
 
 **devices**: `user_id`, `platform` (`ios`, `android`, `web`), `push_token` (unique when not null), `app_version`, `locale`, `last_seen_at`, `disabled_at`.
 
-**legal_acceptances**: `user_id`, `document` (`terms`, `privacy`), `version`, `accepted_at`, `platform`.
+**legal_acceptances**: `user_id`, `document` (`terms`, `privacy`), `version` (`date`: the date the text came into force), `accepted_at`, `platform` (`ios`, `android`, `web`). Unique (`user_id`, `document`, `version`): accepting the same version again keeps the first row. The versions in force live in code, not in a table (architecture § 6.1).
 
 **consents** [H][M]: `club_membership_id`, `type` (`wellness_health_data`), `version`, `granted_by` (`self`, `guardian`), `guardian_name`, `guardian_email`, `granted_at`, `revoked_at`, `evidence` (jsonb: IP, user agent, channel). The current consent is the latest non-revoked row for its type.
 
