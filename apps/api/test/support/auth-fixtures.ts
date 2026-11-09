@@ -9,6 +9,7 @@ import { vi } from 'vitest';
 import { type Actor, CurrentActor } from '../../src/core/auth/actor.js';
 import { Can, Policies } from '../../src/core/authorization/policy.js';
 import { EmailSender, type EmailMessage } from '../../src/core/email/email-sender.js';
+import { BeforeLegalAcceptance } from '../../src/modules/identity/before-legal-acceptance.decorator.js';
 import { SIGNED_IN_TEST_ACTION, signedInTestPolicies } from './test-policies.js';
 
 export const TEST_WEB_ORIGIN = 'http://localhost:3000';
@@ -93,7 +94,9 @@ export async function fakeGoogleAndApple(): Promise<{
   return { google: google.provider, apple: apple.provider };
 }
 
+// Probes the session alone; a new account has accepted nothing yet (AUTH-04).
 @Policies(signedInTestPolicies)
+@BeforeLegalAcceptance()
 @Controller('test/whoami')
 class WhoAmIController {
   @Can(SIGNED_IN_TEST_ACTION)

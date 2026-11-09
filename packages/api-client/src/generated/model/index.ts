@@ -5,8 +5,13 @@
  * OpenAPI spec version: 1
  */
 
+export * from './acceptLegalDocumentsBody';
+export * from './acceptLegalDocumentsBodyDocumentsItem';
+export * from './acceptLegalDocumentsBodyDocumentsItemDocument';
 export * from './appConfigResponse';
 export * from './appConfigResponseMinimumVersions';
 export * from './appConfigResponseStoreUrls';
+export * from './legalDocumentsResponse';
+export * from './legalDocumentStatus';
 export * from './problemDetails';
 export * from './problemDetailsErrorsItem';

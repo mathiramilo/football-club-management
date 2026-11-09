@@ -29,10 +29,11 @@ model User {
   createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  clubMemberships ClubMembership[]
-  authIdentities  AuthIdentity[]
-  authSessions    AuthSession[]
-  idempotencyKeys IdempotencyKey[]
+  clubMemberships  ClubMembership[]
+  authIdentities   AuthIdentity[]
+  authSessions     AuthSession[]
+  idempotencyKeys  IdempotencyKey[]
+  legalAcceptances LegalAcceptance[]
 
   @@map("users")
 }
@@ -107,6 +108,22 @@ model EmailCodeRequest {
 
   @@index([emailHash, requestedAt])
   @@map("email_code_requests")
+}
+
+model LegalAcceptance {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  document   String
+  version    DateTime @db.Date
+  acceptedAt DateTime @map("accepted_at") @db.Timestamptz(6)
+  platform   String
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, document, version])
+  @@map("legal_acceptances")
 }
 
 model IdempotencyKey {

@@ -1,7 +1,10 @@
 import { randomUUID } from 'node:crypto';
 
+import { legalDocument } from '@repo/contracts';
+
 import type { PrismaService } from '../../src/core/database/prisma.service.js';
 import type { Prisma } from '../../src/generated/prisma/client.js';
+import { LEGAL_DOCUMENTS_IN_FORCE } from '../../src/modules/identity/legal-documents.js';
 
 interface ClubRef {
   id: string;
@@ -14,6 +17,22 @@ interface ClubScopedRef {
 
 const uniqueSuffix = () => randomUUID().slice(0, 8);
 
+const acceptancesInForce = () =>
+  legalDocument.options.map((document) => ({
+    document,
+    version: new Date(LEGAL_DOCUMENTS_IN_FORCE[document].version),
+    acceptedAt: new Date('2026-10-01T12:00:00Z'),
+    platform: 'ios',
+  }));
+
+export async function acceptLegalDocuments(db: PrismaService, userId: string): Promise<void> {
+  await db.legalAcceptance.createMany({
+    data: acceptancesInForce().map((acceptance) => ({ userId, ...acceptance })),
+    skipDuplicates: true,
+  });
+}
+
+// Users have accepted the documents in force unless a test passes `legalAcceptances: undefined`.
 export function createUser(db: PrismaService, data: Partial<Prisma.UserUncheckedCreateInput> = {}) {
   return db.user.create({
     data: {
@@ -21,6 +40,7 @@ export function createUser(db: PrismaService, data: Partial<Prisma.UserUnchecked
       firstName: 'Lucía',
       lastName: 'Prueba',
       birthdate: new Date('2001-05-10'),
+      legalAcceptances: { create: acceptancesInForce() },
       ...data,
     },
   });

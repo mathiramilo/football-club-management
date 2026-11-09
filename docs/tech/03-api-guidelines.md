@@ -84,7 +84,8 @@ Code requests answer `429` in two cases (BR-AUTH-03, NFR-SEC-05):
 | POST | `/v1/auth/revoke-sessions` | Sign out of all devices (AUTH-12). |
 | GET / PATCH | `/v1/me` | Profile (AUTH-05). |
 | DELETE | `/v1/me` | Request account deletion (AUTH-13). |
-| POST | `/v1/me/legal-acceptances` | AUTH-04 |
+| GET | `/v1/me/legal-documents` | The terms and privacy policy in force, the versions the user accepted, and whether they must accept (AUTH-04, BR-AUTH-08). |
+| POST | `/v1/me/legal-acceptances` | Accept the versions in force; records the platform from `X-Platform`. `409` `LEGAL_DOCUMENT_OUTDATED` for a version no longer in force (AUTH-04). |
 | GET | `/v1/me/clubs` | Memberships with pending-action counts (AUTH-11). |
 | GET | `/v1/me/agenda?from&to&clubId?` | Unified agenda (EVT-17). |
 | GET | `/v1/me/week` | "Tu semana" (EVT-18). |
