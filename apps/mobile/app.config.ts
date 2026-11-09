@@ -24,7 +24,8 @@ const applicationId = `com.footballclubmanagement.app${variant.suffix}`;
 const appleTeamId = process.env.APPLE_TEAM_ID;
 const easProjectId = process.env.EAS_PROJECT_ID;
 const webUrl = process.env.EXPO_PUBLIC_WEB_URL;
-const linkHost = webUrl ? new URL(webUrl).host : undefined;
+// Universal links and App Links need https, so a local http origin only serves the legal pages.
+const linkHost = webUrl?.startsWith('https://') ? new URL(webUrl).host : undefined;
 const linkPathPrefixes = ['/e/', '/j/', '/c/'];
 const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
 const googleIosUrlScheme =
