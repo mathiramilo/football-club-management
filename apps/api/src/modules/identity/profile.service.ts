@@ -7,6 +7,7 @@ import { localDate } from '../../core/authorization/club-actor.js';
 import { Clock } from '../../core/clock/clock.js';
 import { DomainError } from '../../core/errors/domain-error.js';
 import { type ProfileRecord, ProfileRepository } from './profile.repository.js';
+import { ProfilePhotoService } from './profile-photo.service.js';
 import { isProfileComplete, serializeProfile } from './profile.serializer.js';
 
 // BR-AUTH-05: accounts have no time zone, so ages are counted on the calendar day in Uruguay,
@@ -19,10 +20,11 @@ export class ProfileService {
     private readonly repository: ProfileRepository,
     private readonly clock: Clock,
     private readonly analytics: Analytics,
+    private readonly photos: ProfilePhotoService,
   ) {}
 
   async get(userId: string): Promise<ProfileResponse> {
-    return serializeProfile(await this.repository.find(userId), this.today());
+    return this.serialize(await this.repository.find(userId), this.today());
   }
 
   async update(userId: string, body: UpdateProfileBody): Promise<ProfileResponse> {
@@ -46,7 +48,11 @@ export class ProfileService {
 
     const after = await this.repository.find(userId);
     if (!isProfileComplete(before) && isProfileComplete(after)) this.trackCompletion(after, today);
-    return serializeProfile(after, today);
+    return this.serialize(after, today);
+  }
+
+  private async serialize(profile: ProfileRecord, today: string): Promise<ProfileResponse> {
+    return serializeProfile(profile, await this.photos.photoOf(profile.photoKey), today);
   }
 
   private trackCompletion(profile: ProfileRecord, today: string): void {

@@ -4,6 +4,7 @@
  * Football Club Management API
  * OpenAPI spec version: 1
  */
+import type { ProfilePhoto } from './profilePhoto';
 import type { ProfileResponseSuggestedName } from './profileResponseSuggestedName';
 
 export interface ProfileResponse {
@@ -41,6 +42,7 @@ export interface ProfileResponse {
   isMinor: boolean | null;
   /** Whether the first name, last name and birthdate are set (AUTH-05) */
   profileComplete: boolean;
+  photo: ProfilePhoto | null;
   /**
    * The name from Google or Apple, to prefill the form; null when there is none
    * @nullable

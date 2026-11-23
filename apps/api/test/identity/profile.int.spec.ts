@@ -77,6 +77,7 @@ describe('/v1/me profile (AUTH-05)', () => {
         displayName: null,
         isMinor: null,
         profileComplete: false,
+        photo: null,
         suggestedName: { firstName: 'Nicolás', lastName: 'Pérez' },
       });
     });

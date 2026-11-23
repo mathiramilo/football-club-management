@@ -2,11 +2,13 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import type { Env } from '../../core/config/env.js';
+import { ImageProcessor } from './image-processor.js';
 import { ObjectStorage } from './object-storage.js';
 import { createS3Client, S3ObjectStorage } from './s3-object-storage.js';
 
 @Module({
   providers: [
+    ImageProcessor,
     {
       provide: ObjectStorage,
       inject: [ConfigService],
@@ -23,6 +25,6 @@ import { createS3Client, S3ObjectStorage } from './s3-object-storage.js';
       },
     },
   ],
-  exports: [ObjectStorage],
+  exports: [ImageProcessor, ObjectStorage],
 })
 export class MediaModule {}

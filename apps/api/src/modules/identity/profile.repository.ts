@@ -10,6 +10,7 @@ export interface ProfileRecord {
   lastName: string | null;
   nickname: string | null;
   birthdate: string | null;
+  photoKey: string | null;
 }
 
 export interface ProfileChanges {
@@ -27,6 +28,7 @@ const profileColumns = {
   lastName: true,
   nickname: true,
   birthdate: true,
+  photoKey: true,
 } as const;
 
 const isoDateOf = (date: Date) => date.toISOString().slice(0, 10);
@@ -51,5 +53,19 @@ export class ProfileRepository {
       data: { ...changes, ...(birthdate && { birthdate: new Date(birthdate) }) },
     });
     return count === 1;
+  }
+
+  async replacePhotoKey(
+    userId: string,
+    photoKey: string | null,
+    updatedAt: Date,
+  ): Promise<string | null> {
+    const rows = await this.prisma.$queryRaw<{ previous: string | null }[]>`
+      UPDATE users AS u
+      SET photo_key = ${photoKey}, updated_at = ${updatedAt}
+      FROM (SELECT id, photo_key FROM users WHERE id = ${userId}::uuid FOR UPDATE) AS old
+      WHERE u.id = old.id
+      RETURNING old.photo_key AS previous`;
+    return rows[0]?.previous ?? null;
   }
 }

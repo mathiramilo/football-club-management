@@ -155,6 +155,8 @@ flowchart LR
 3. A storage or provider callback, or client confirmation, triggers verification (type, size), malware scan for documents, and variant generation (thumbnails, WebP).
 4. The media record becomes `ready`. Clients receive signed URLs (short TTL) to read it.
 
+Profile photos (AUTH-05) take the short path: the client confirms with `PUT /v1/me/photo`, and the API re-encodes the upload into square WebP variants in the same request, since a photo is at most 300 KB. Unconfirmed uploads live under `uploads/`, where a bucket lifecycle rule expires them (TECH-02).
+
 ### 6.8 Offline and sync (mobile)
 - **Read**: a persisted query cache for the agenda, upcoming events, published plans, assigned routines and nutrition plans (BR-CONT-09).
 - **Write**: an offline mutation queue for RSVP, roll call, wellness check-ins and routine logs. Every queued mutation carries an `Idempotency-Key`. Conflicts resolve last-write-wins by server receipt time; roll call is per invitee (BR-EVT-21).

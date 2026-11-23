@@ -83,6 +83,8 @@ Code requests answer `429` in two cases (BR-AUTH-03, NFR-SEC-05):
 | POST | `/v1/auth/sign-out` | Sign out this device (AUTH-12). |
 | POST | `/v1/auth/revoke-sessions` | Sign out of all devices (AUTH-12). |
 | GET / PATCH | `/v1/me` | Profile (AUTH-05): names, nickname, birthdate, the display name, the minor flag and whether the profile is complete. `422` `UNDER_MINIMUM_AGE` saves nothing (BR-AUTH-05); `409` `BIRTHDATE_LOCKED` once a birthdate is saved. |
+| POST | `/v1/me/photo/uploads` | Presigned upload for a profile photo: `{ mimeType, sizeBytes }` (JPEG, PNG or WebP, at most 300 KB), valid for 10 minutes (AUTH-05). |
+| PUT / DELETE | `/v1/me/photo` | Set the photo from a finished upload (`{ uploadKey }`), re-encoded into 512 and 128 px square WebP, or remove it. Both answer the profile. `404` `UPLOAD_NOT_FOUND`, `422` `UPLOAD_INVALID` (AUTH-05, NFR-SEC-08). |
 | DELETE | `/v1/me` | Request account deletion (AUTH-13). |
 | GET | `/v1/me/legal-documents` | The terms and privacy policy in force, the versions the user accepted, and whether they must accept (AUTH-04, BR-AUTH-08). |
 | POST | `/v1/me/legal-acceptances` | Accept the versions in force; records the platform from `X-Platform`. `409` `LEGAL_DOCUMENT_OUTDATED` for a version no longer in force (AUTH-04). |

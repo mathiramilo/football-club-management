@@ -22,9 +22,12 @@ import type {
 
 import type {
   AcceptLegalDocumentsBody,
+  CreateProfilePhotoUploadBody,
   LegalDocumentsResponse,
   ProblemDetails,
+  ProfilePhotoUploadResponse,
   ProfileResponse,
+  SetProfilePhotoBody,
   UpdateProfileBody,
 } from '../model';
 
@@ -459,4 +462,265 @@ export const useProfileUpdate = <TError = ErrorType<ProblemDetails>, TContext = 
   TContext
 > => {
   return useMutation(getProfileUpdateMutationOptions(options), queryClient);
+};
+export const getProfilePhotoCreateUploadUrl = () => {
+  return `/v1/me/photo/uploads`;
+};
+
+export const profilePhotoCreateUpload = async (
+  createProfilePhotoUploadBody: CreateProfilePhotoUploadBody,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<ProfilePhotoUploadResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit['headers']>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+  return apiFetch<ProfilePhotoUploadResponse>(getProfilePhotoCreateUploadUrl(), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(createProfilePhotoUploadBody),
+  });
+};
+
+export const getProfilePhotoCreateUploadMutationKey = () => ['profilePhotoCreateUpload'] as const;
+
+export const getProfilePhotoCreateUploadMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof profilePhotoCreateUpload>>,
+    TError,
+    ProfilePhotoCreateUploadMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof profilePhotoCreateUpload>>,
+  TError,
+  ProfilePhotoCreateUploadMutationVariables,
+  TContext
+> => {
+  const mutationKey = getProfilePhotoCreateUploadMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof profilePhotoCreateUpload>>,
+    ProfilePhotoCreateUploadMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return profilePhotoCreateUpload(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ProfilePhotoCreateUploadMutationResult = NonNullable<
+  Awaited<ReturnType<typeof profilePhotoCreateUpload>>
+>;
+export type ProfilePhotoCreateUploadMutationBody = BodyType<CreateProfilePhotoUploadBody>;
+export type ProfilePhotoCreateUploadMutationError = ErrorType<ProblemDetails>;
+export type ProfilePhotoCreateUploadMutationVariables = {
+  data: BodyType<CreateProfilePhotoUploadBody>;
+};
+
+export const useProfilePhotoCreateUpload = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof profilePhotoCreateUpload>>,
+      TError,
+      ProfilePhotoCreateUploadMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof profilePhotoCreateUpload>>,
+  TError,
+  ProfilePhotoCreateUploadMutationVariables,
+  TContext
+> => {
+  return useMutation(getProfilePhotoCreateUploadMutationOptions(options), queryClient);
+};
+export const getProfilePhotoSetUrl = () => {
+  return `/v1/me/photo`;
+};
+
+export const profilePhotoSet = async (
+  setProfilePhotoBody: SetProfilePhotoBody,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<ProfileResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit['headers']>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+  return apiFetch<ProfileResponse>(getProfilePhotoSetUrl(), {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(setProfilePhotoBody),
+  });
+};
+
+export const getProfilePhotoSetMutationKey = () => ['profilePhotoSet'] as const;
+
+export const getProfilePhotoSetMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof profilePhotoSet>>,
+    TError,
+    ProfilePhotoSetMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof profilePhotoSet>>,
+  TError,
+  ProfilePhotoSetMutationVariables,
+  TContext
+> => {
+  const mutationKey = getProfilePhotoSetMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof profilePhotoSet>>,
+    ProfilePhotoSetMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return profilePhotoSet(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ProfilePhotoSetMutationResult = NonNullable<
+  Awaited<ReturnType<typeof profilePhotoSet>>
+>;
+export type ProfilePhotoSetMutationBody = BodyType<SetProfilePhotoBody>;
+export type ProfilePhotoSetMutationError = ErrorType<ProblemDetails>;
+export type ProfilePhotoSetMutationVariables = { data: BodyType<SetProfilePhotoBody> };
+
+export const useProfilePhotoSet = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof profilePhotoSet>>,
+      TError,
+      ProfilePhotoSetMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof profilePhotoSet>>,
+  TError,
+  ProfilePhotoSetMutationVariables,
+  TContext
+> => {
+  return useMutation(getProfilePhotoSetMutationOptions(options), queryClient);
+};
+export const getProfilePhotoRemoveUrl = () => {
+  return `/v1/me/photo`;
+};
+
+export const profilePhotoRemove = async (
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<ProfileResponse> => {
+  return apiFetch<ProfileResponse>(getProfilePhotoRemoveUrl(), {
+    ...options,
+    method: 'DELETE',
+  });
+};
+
+export const getProfilePhotoRemoveMutationKey = () => ['profilePhotoRemove'] as const;
+
+export const getProfilePhotoRemoveMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof profilePhotoRemove>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<Awaited<ReturnType<typeof profilePhotoRemove>>, TError, void, TContext> => {
+  const mutationKey = getProfilePhotoRemoveMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof profilePhotoRemove>>, void> = () => {
+    return profilePhotoRemove(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ProfilePhotoRemoveMutationResult = NonNullable<
+  Awaited<ReturnType<typeof profilePhotoRemove>>
+>;
+
+export type ProfilePhotoRemoveMutationError = ErrorType<ProblemDetails>;
+
+export const useProfilePhotoRemove = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof profilePhotoRemove>>,
+      TError,
+      void,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<Awaited<ReturnType<typeof profilePhotoRemove>>, TError, void, TContext> => {
+  return useMutation(getProfilePhotoRemoveMutationOptions(options), queryClient);
 };

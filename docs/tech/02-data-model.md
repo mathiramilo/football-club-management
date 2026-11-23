@@ -66,7 +66,7 @@ erDiagram
 | first_name, last_name | text null | Required at profile completion (AUTH-05); null between first sign-in and completion. |
 | nickname | text null | Display name source (BR-AUTH-07). |
 | birthdate | date null | Required at profile completion, like the names. Minor status is derived from it (BR-AUTH-05). [M] |
-| photo_key | text null | Object storage key. |
+| photo_key | text null | Object storage prefix of the profile photo: `<photo_key>/512.webp` and `/128.webp` (AUTH-05). Each new photo gets a new prefix and the old files are deleted. |
 | phone | text null | E.164. |
 | locale | text | Default `es`. |
 | deletion_requested_at, purge_at | timestamptz null | BR-AUTH-12. |

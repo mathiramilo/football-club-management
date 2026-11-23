@@ -63,6 +63,8 @@
     "TOO_MANY_ATTEMPTS": "Ese código ya no sirve. Pedí uno nuevo.",
     "UNAUTHENTICATED": "Tu sesión se cerró. Entrá de nuevo.",
     "UNDER_MINIMUM_AGE": "Para usar la app tenés que tener 16 años o más.",
+    "UPLOAD_INVALID": "No pudimos usar esa imagen. Probá con otra foto.",
+    "UPLOAD_NOT_FOUND": "No encontramos el archivo que subiste. Probá subirlo de nuevo.",
     "VALIDATION_FAILED": "Revisá los datos y probá de nuevo."
   },
   "home": {
