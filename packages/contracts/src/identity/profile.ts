@@ -1,11 +1,13 @@
 import { z } from 'zod';
 
+import { imageMimeType } from '../media/images.js';
+
 const personName = z.string().trim().min(1).max(50);
 const nickname = z.string().trim().max(30);
 const birthdate = z.iso.date().describe('YYYY-MM-DD (BR-AUTH-05)');
 
 export const PROFILE_PHOTO_MAX_BYTES = 300 * 1024;
-export const profilePhotoMimeType = z.enum(['image/jpeg', 'image/png', 'image/webp']);
+export const profilePhotoMimeType = imageMimeType;
 
 export const profilePhoto = z
   .object({

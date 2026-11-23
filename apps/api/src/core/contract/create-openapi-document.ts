@@ -30,6 +30,32 @@ function openPublicOperations(document: OpenAPIObject): void {
   }
 }
 
+// Club routes read :clubId in the club context guard, not through @Param, so Swagger never sees it.
+// Every route ID is a UUID (API guidelines § 2).
+function declarePathParameters(document: OpenAPIObject): void {
+  for (const [route, path] of Object.entries(document.paths)) {
+    const names = [...route.matchAll(/\{(\w+)\}/g)].flatMap(([, name]) => name ?? []);
+    for (const method of HTTP_METHODS) {
+      const operation = path[method];
+      if (!operation) continue;
+      const parameters = (operation.parameters ??= []);
+      for (const name of names) {
+        const declared = parameters.some(
+          (parameter) => 'in' in parameter && parameter.in === 'path' && parameter.name === name,
+        );
+        if (!declared) {
+          parameters.push({
+            name,
+            in: 'path',
+            required: true,
+            schema: { type: 'string', format: 'uuid' },
+          });
+        }
+      }
+    }
+  }
+}
+
 function listExtensibleEnums(node: unknown): void {
   if (typeof node !== 'object' || node === null) return;
   if (Array.isArray(node)) {
@@ -76,6 +102,7 @@ export function createOpenApiDocument(app: INestApplication): OpenAPIObject {
 
   const document = SwaggerModule.createDocument(app, config, { operationIdFactory: operationIdOf });
   openPublicOperations(document);
+  declarePathParameters(document);
   document.components = {
     ...document.components,
     schemas: {

@@ -1,5 +1,3 @@
-import { randomUUID } from 'node:crypto';
-
 import { Injectable } from '@nestjs/common';
 import {
   type CreateProfilePhotoUploadBody,
@@ -9,93 +7,42 @@ import {
 } from '@repo/contracts';
 
 import { Clock } from '../../core/clock/clock.js';
-import { DomainError } from '../../core/errors/domain-error.js';
-import { ImageProcessor } from '../media/image-processor.js';
-import { ObjectStorage } from '../media/object-storage.js';
+import { type SquareImageLocation, SquareImages } from '../media/square-images.js';
 import { ProfileRepository } from './profile.repository.js';
 
-const UPLOAD_TTL_SECONDS = 10 * 60;
-const READ_TTL_SECONDS = 60 * 60;
-const PHOTO_SIZE = 512;
-const THUMBNAIL_SIZE = 128;
-const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
-
-const uploadPrefix = (userId: string) => `uploads/profile-photos/${userId}/`;
-const variantKey = (photoKey: string, size: number) => `${photoKey}/${String(size)}.webp`;
-const variantKeys = (photoKey: string) =>
-  [PHOTO_SIZE, THUMBNAIL_SIZE].map((size) => variantKey(photoKey, size));
-const photoIdOf = (photoKey: string) => photoKey.slice(photoKey.lastIndexOf('/') + 1);
+const photosOf = (userId: string): SquareImageLocation => ({
+  folder: 'profile-photos',
+  ownerId: userId,
+  maxBytes: PROFILE_PHOTO_MAX_BYTES,
+});
 
 @Injectable()
 export class ProfilePhotoService {
   constructor(
-    private readonly storage: ObjectStorage,
-    private readonly images: ImageProcessor,
+    private readonly images: SquareImages,
     private readonly repository: ProfileRepository,
     private readonly clock: Clock,
   ) {}
 
-  async createUpload(
+  createUpload(
     userId: string,
-    { mimeType, sizeBytes }: CreateProfilePhotoUploadBody,
+    body: CreateProfilePhotoUploadBody,
   ): Promise<ProfilePhotoUploadResponse> {
-    const uploadKey = `${uploadPrefix(userId)}${randomUUID()}`;
-    const upload = await this.storage.presignUpload({
-      key: uploadKey,
-      contentType: mimeType,
-      sizeBytes,
-      expiresInSeconds: UPLOAD_TTL_SECONDS,
-    });
-    return { uploadKey, ...upload, expiresAt: this.inSeconds(UPLOAD_TTL_SECONDS) };
+    return this.images.createUpload(photosOf(userId), body);
   }
 
   async set(userId: string, uploadKey: string): Promise<void> {
-    if (!new RegExp(`^${uploadPrefix(userId)}${UUID}$`).test(uploadKey)) {
-      throw new DomainError('UPLOAD_NOT_FOUND');
-    }
-    const upload = await this.storage.read(uploadKey, PROFILE_PHOTO_MAX_BYTES);
-    if (upload.status === 'missing') throw new DomainError('UPLOAD_NOT_FOUND');
-    const processed =
-      upload.status === 'found'
-        ? await this.images.squareWebpVariants(upload.object.body, [PHOTO_SIZE, THUMBNAIL_SIZE])
-        : ({ status: 'invalid' } as const);
-    if (processed.status === 'invalid') {
-      await this.storage.delete([uploadKey]);
-      throw new DomainError('UPLOAD_INVALID');
-    }
-
-    const photoKey = `profile-photos/${userId}/${randomUUID()}`;
-    await Promise.all(
-      processed.variants.map(({ size, body }) =>
-        this.storage.write(variantKey(photoKey, size), body, 'image/webp'),
-      ),
-    );
+    const photoKey = await this.images.store(photosOf(userId), uploadKey);
     const previous = await this.repository.replacePhotoKey(userId, photoKey, this.clock.now());
-    await this.storage.delete([uploadKey, ...(previous ? variantKeys(previous) : [])]);
+    await this.images.discard({ uploadKey, imageKey: previous });
   }
 
   async remove(userId: string): Promise<void> {
     const previous = await this.repository.replacePhotoKey(userId, null, this.clock.now());
-    if (previous) await this.storage.delete(variantKeys(previous));
+    await this.images.discard({ imageKey: previous });
   }
 
-  async photoOf(photoKey: string | null): Promise<ProfilePhoto | null> {
-    if (!photoKey) return null;
-    const [url, thumbnailUrl] = await Promise.all(
-      [PHOTO_SIZE, THUMBNAIL_SIZE].map((size) =>
-        this.storage.presignDownload(variantKey(photoKey, size), READ_TTL_SECONDS),
-      ),
-    );
-    if (!url || !thumbnailUrl) return null;
-    return {
-      id: photoIdOf(photoKey),
-      url,
-      thumbnailUrl,
-      expiresAt: this.inSeconds(READ_TTL_SECONDS),
-    };
-  }
-
-  private inSeconds(seconds: number): string {
-    return new Date(this.clock.now().getTime() + seconds * 1000).toISOString();
+  photoOf(photoKey: string | null): Promise<ProfilePhoto | null> {
+    return this.images.view(photoKey);
   }
 }

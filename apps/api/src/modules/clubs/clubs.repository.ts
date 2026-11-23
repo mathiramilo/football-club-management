@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { categoryFormat, type CategoryFormat, staffRole, type StaffRole } from '@repo/contracts';
 
+import type { ClubContext } from '../../core/database/club-scope.js';
 import { PrismaService } from '../../core/database/prisma.service.js';
 
 export interface ClubRecord {
@@ -11,6 +12,7 @@ export interface ClubRecord {
   timezone: string;
   primaryColor: string | null;
   secondaryColor: string | null;
+  crestKey: string | null;
 }
 
 export interface CategoryMembershipOfUser {
@@ -54,6 +56,7 @@ const clubColumns = {
   timezone: true,
   primaryColor: true,
   secondaryColor: true,
+  crestKey: true,
 } as const;
 
 const calendarDay = (date: Date) => date.toISOString().slice(0, 10);
@@ -148,5 +151,23 @@ export class ClubsRepository {
         endsOn: categoryMembership.endsOn && calendarDay(categoryMembership.endsOn),
       })),
     }));
+  }
+
+  async findClub(club: ClubContext): Promise<ClubRecord> {
+    return this.prisma.forClub(club).club.findFirstOrThrow({ select: clubColumns });
+  }
+
+  async replaceCrestKey(
+    club: ClubContext,
+    crestKey: string | null,
+    updatedAt: Date,
+  ): Promise<string | null> {
+    const rows = await this.prisma.$queryRaw<{ previous: string | null }[]>`
+      UPDATE clubs AS c
+      SET crest_key = ${crestKey}, updated_at = ${updatedAt}
+      FROM (SELECT id, crest_key FROM clubs WHERE id = ${club.clubId}::uuid FOR UPDATE) AS old
+      WHERE c.id = old.id
+      RETURNING old.crest_key AS previous`;
+    return rows[0]?.previous ?? null;
   }
 }

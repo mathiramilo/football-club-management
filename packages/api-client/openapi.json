@@ -357,6 +357,147 @@
           "clubs"
         ]
       }
+    },
+    "/v1/clubs/{clubId}/uploads": {
+      "post": {
+        "operationId": "clubCrestCreateUpload",
+        "parameters": [
+          {
+            "name": "clubId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateClubUploadBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubUploadResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Problem details (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "clubs"
+        ]
+      }
+    },
+    "/v1/clubs/{clubId}/crest": {
+      "put": {
+        "operationId": "clubCrestSet",
+        "parameters": [
+          {
+            "name": "clubId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetClubCrestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubSummary"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Problem details (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "clubs"
+        ]
+      },
+      "delete": {
+        "operationId": "clubCrestRemove",
+        "parameters": [
+          {
+            "name": "clubId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubSummary"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Problem details (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "clubs"
+        ]
+      }
     }
   },
   "info": {
@@ -894,6 +1035,14 @@
           "secondaryColor": {
             "nullable": true,
             "type": "string"
+          },
+          "crest": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ClubCrest"
+              }
+            ]
           }
         },
         "required": [
@@ -903,7 +1052,39 @@
           "countryCode",
           "timezone",
           "primaryColor",
-          "secondaryColor"
+          "secondaryColor",
+          "crest"
+        ],
+        "additionalProperties": false
+      },
+      "ClubCrest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Changes with every new image: a cache key for it"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "512 × 512 WebP, signed; valid until expiresAt"
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "128 × 128 WebP, signed; valid until expiresAt"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "thumbnailUrl",
+          "expiresAt"
         ],
         "additionalProperties": false
       },
@@ -965,6 +1146,92 @@
           "items"
         ],
         "additionalProperties": false
+      },
+      "CreateClubUploadBody": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "purpose": {
+                "type": "string",
+                "enum": [
+                  "club_crest"
+                ]
+              },
+              "mimeType": {
+                "type": "string",
+                "enum": [
+                  "image/jpeg",
+                  "image/png",
+                  "image/webp"
+                ]
+              },
+              "sizeBytes": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 512000,
+                "description": "The exact size of the file; compressed on the device first (BR-CLUB-01)"
+              }
+            },
+            "required": [
+              "purpose",
+              "mimeType",
+              "sizeBytes"
+            ]
+          }
+        ]
+      },
+      "ClubUploadResponse": {
+        "type": "object",
+        "properties": {
+          "uploadKey": {
+            "type": "string",
+            "description": "Send it back once the upload succeeds"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "PUT"
+            ]
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Send these headers with the upload"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "uploadKey",
+          "url",
+          "method",
+          "headers",
+          "expiresAt"
+        ],
+        "additionalProperties": false
+      },
+      "SetClubCrestBody": {
+        "type": "object",
+        "properties": {
+          "uploadKey": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "uploadKey"
+        ]
       },
       "ProblemDetails": {
         "type": "object",

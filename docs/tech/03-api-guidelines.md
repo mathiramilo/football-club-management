@@ -109,6 +109,8 @@ Code requests answer `429` in two cases (BR-AUTH-03, NFR-SEC-05):
 |---|---|---|
 | POST | `/v1/clubs` | Create a club: name, country, time zone, and optional short name and colors (BR-CLUB-01). The creator becomes Owner and Club Admin; with `firstCategory` they also become its DT from today in the club time zone (BR-ROLE-06). Answers `201` with the same entry as `GET /v1/me/clubs` (CLUB-01). |
 | GET / PATCH / DELETE | `/v1/clubs/{clubId}` | CLUB-02, CLUB-17 |
+| POST | `/v1/clubs/{clubId}/uploads` | Presigned upload, one `purpose` per kind of file, valid for 10 minutes. R1 has `club_crest`: `{ purpose, mimeType, sizeBytes }`, JPEG, PNG or WebP, at most 500 KB (BR-CLUB-01). Owner and Club Admin (CLUB-01). |
+| PUT / DELETE | `/v1/clubs/{clubId}/crest` | Set the crest from a finished upload (`{ uploadKey }`), re-encoded into 512 and 128 px square WebP, or remove it. Both answer the club. `404` `UPLOAD_NOT_FOUND`, `422` `UPLOAD_INVALID`. Owner and Club Admin (CLUB-01, NFR-SEC-08). |
 | GET / POST | `/v1/clubs/{clubId}/categories` | CLUB-03 |
 | PATCH | `/v1/clubs/{clubId}/categories/{categoryId}` | Includes `settings` (CLUB-14). |
 | POST | `/v1/clubs/{clubId}/categories/{categoryId}/archive` · `/restore` | CLUB-04 |
@@ -164,7 +166,7 @@ Code requests answer `429` in two cases (BR-AUTH-03, NFR-SEC-05):
 | GET / PATCH | `/v1/clubs/{clubId}/exercises/{exerciseId}` |
 | POST | `/v1/clubs/{clubId}/exercises/{exerciseId}/archive` · `/restore` · `/duplicate` |
 | POST / DELETE | `/v1/clubs/{clubId}/exercises/{exerciseId}/media[/{mediaId}]` |
-| POST | `/v1/clubs/{clubId}/uploads` (presign: `{ purpose, mimeType, sizeBytes }`) |
+| POST | `/v1/clubs/{clubId}/uploads` (presign: `{ purpose, mimeType, sizeBytes }`; R2 adds exercise media purposes) |
 | GET | `/v1/starter/exercises?…` · POST `/v1/clubs/{clubId}/exercises/copy-from-starter` |
 | GET / PUT | `/v1/clubs/{clubId}/events/{eventId}/plan` (`If-Match`) |
 | POST | `/v1/clubs/{clubId}/events/{eventId}/plan/publish` · `/unpublish` · `/copy-from` |

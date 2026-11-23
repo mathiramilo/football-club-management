@@ -118,6 +118,19 @@ describe('OpenAPI document and response schemas (TECH-06, NFR-MAINT-03)', () => 
     ]);
   });
 
+  it('declares the path parameters that only the club context guard reads', () => {
+    for (const method of ['post'] as const) {
+      expect(document.paths['/v1/clubs/{clubId}/uploads']?.[method]?.parameters).toEqual([
+        { name: 'clubId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+      ]);
+    }
+    for (const method of ['put', 'delete'] as const) {
+      expect(document.paths['/v1/clubs/{clubId}/crest']?.[method]?.parameters).toContainEqual(
+        expect.objectContaining({ name: 'clubId', in: 'path', required: true }),
+      );
+    }
+  });
+
   it('documents every error as problem+json', () => {
     for (const operation of operations()) {
       expect(operation.responses.default).toMatchObject({

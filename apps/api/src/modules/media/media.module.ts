@@ -1,14 +1,18 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+import { ClockModule } from '../../core/clock/clock.js';
 import type { Env } from '../../core/config/env.js';
 import { ImageProcessor } from './image-processor.js';
 import { ObjectStorage } from './object-storage.js';
 import { createS3Client, S3ObjectStorage } from './s3-object-storage.js';
+import { SquareImages } from './square-images.js';
 
 @Module({
+  imports: [ClockModule],
   providers: [
     ImageProcessor,
+    SquareImages,
     {
       provide: ObjectStorage,
       inject: [ConfigService],
@@ -25,6 +29,6 @@ import { createS3Client, S3ObjectStorage } from './s3-object-storage.js';
       },
     },
   ],
-  exports: [ImageProcessor, ObjectStorage],
+  exports: [ImageProcessor, ObjectStorage, SquareImages],
 })
 export class MediaModule {}

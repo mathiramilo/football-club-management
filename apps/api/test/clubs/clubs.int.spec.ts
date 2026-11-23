@@ -75,6 +75,7 @@ describe('clubs (CLUB-01)', () => {
           timezone: 'America/Montevideo',
           primaryColor: null,
           secondaryColor: null,
+          crest: null,
         },
         membershipId: expect.any(String) as string,
         isOwner: true,

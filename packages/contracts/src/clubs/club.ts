@@ -1,6 +1,12 @@
 import { z } from 'zod';
 
 import { extensibleEnum } from '../extensible-enum.js';
+import {
+  imageMimeType,
+  presignedUploadFields,
+  squareImageFields,
+  uploadKeyField,
+} from '../media/images.js';
 
 export const categoryFormats = ['f11', 'f9', 'f8', 'f7', 'f5', 'futsal'] as const;
 export const categoryFormat = z.enum(categoryFormats);
@@ -37,6 +43,10 @@ const color = z
   .describe('#rrggbb; clients keep text readable on it (UX § 7.1)');
 const categoryName = z.string().trim().min(2).max(40);
 
+export const CLUB_CREST_MAX_BYTES = 500 * 1024;
+
+export const clubCrest = z.object(squareImageFields).meta({ id: 'ClubCrest' });
+
 export const clubSummary = z
   .object({
     id: z.uuid(),
@@ -46,6 +56,7 @@ export const clubSummary = z
     timezone: z.string(),
     primaryColor: z.string().nullable(),
     secondaryColor: z.string().nullable(),
+    crest: clubCrest.nullable(),
   })
   .meta({ id: 'ClubSummary' });
 
@@ -93,6 +104,32 @@ export const createClubBody = z
   })
   .meta({ id: 'CreateClubBody' });
 
+export const createClubUploadBody = z
+  .discriminatedUnion('purpose', [
+    z.object({
+      purpose: z.literal('club_crest'),
+      mimeType: imageMimeType,
+      sizeBytes: z
+        .int()
+        .min(1)
+        .max(CLUB_CREST_MAX_BYTES)
+        .describe('The exact size of the file; compressed on the device first (BR-CLUB-01)'),
+    }),
+  ])
+  .meta({ id: 'CreateClubUploadBody' });
+
+export const clubUploadResponse = z
+  .object(presignedUploadFields)
+  .meta({ id: 'ClubUploadResponse' });
+
+export const setClubCrestBody = z
+  .object({ uploadKey: uploadKeyField })
+  .meta({ id: 'SetClubCrestBody' });
+
+export type ClubCrest = z.infer<typeof clubCrest>;
+export type CreateClubUploadBody = z.infer<typeof createClubUploadBody>;
+export type ClubUploadResponse = z.infer<typeof clubUploadResponse>;
+export type SetClubCrestBody = z.infer<typeof setClubCrestBody>;
 export type ClubSummary = z.infer<typeof clubSummary>;
 export type MyCategoryRole = z.infer<typeof myCategoryRole>;
 export type MyClub = z.infer<typeof myClub>;

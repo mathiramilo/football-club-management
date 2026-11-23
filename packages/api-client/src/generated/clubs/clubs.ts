@@ -20,7 +20,16 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import type { CreateClubBody, MyClub, MyClubsResponse, ProblemDetails } from '../model';
+import type {
+  ClubSummary,
+  ClubUploadResponse,
+  CreateClubBody,
+  CreateClubUploadBody,
+  MyClub,
+  MyClubsResponse,
+  ProblemDetails,
+  SetClubCrestBody,
+} from '../model';
 
 import { apiFetch } from '../../api-fetch';
 import type { ErrorType, BodyType } from '../../api-fetch';
@@ -245,3 +254,283 @@ export function useMyClubsList<
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+export const getClubCrestCreateUploadUrl = (clubId: string) => {
+  return `/v1/clubs/${clubId}/uploads`;
+};
+
+export const clubCrestCreateUpload = async (
+  clubId: string,
+  createClubUploadBody: CreateClubUploadBody,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<ClubUploadResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit['headers']>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+  return apiFetch<ClubUploadResponse>(getClubCrestCreateUploadUrl(clubId), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(createClubUploadBody),
+  });
+};
+
+export const getClubCrestCreateUploadMutationKey = () => ['clubCrestCreateUpload'] as const;
+
+export const getClubCrestCreateUploadMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof clubCrestCreateUpload>>,
+    TError,
+    ClubCrestCreateUploadMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof clubCrestCreateUpload>>,
+  TError,
+  ClubCrestCreateUploadMutationVariables,
+  TContext
+> => {
+  const mutationKey = getClubCrestCreateUploadMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof clubCrestCreateUpload>>,
+    ClubCrestCreateUploadMutationVariables
+  > = (props) => {
+    const { clubId, data } = props ?? {};
+
+    return clubCrestCreateUpload(clubId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ClubCrestCreateUploadMutationResult = NonNullable<
+  Awaited<ReturnType<typeof clubCrestCreateUpload>>
+>;
+export type ClubCrestCreateUploadMutationBody = BodyType<CreateClubUploadBody>;
+export type ClubCrestCreateUploadMutationError = ErrorType<ProblemDetails>;
+export type ClubCrestCreateUploadMutationVariables = {
+  clubId: string;
+  data: BodyType<CreateClubUploadBody>;
+};
+
+export const useClubCrestCreateUpload = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof clubCrestCreateUpload>>,
+      TError,
+      ClubCrestCreateUploadMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof clubCrestCreateUpload>>,
+  TError,
+  ClubCrestCreateUploadMutationVariables,
+  TContext
+> => {
+  return useMutation(getClubCrestCreateUploadMutationOptions(options), queryClient);
+};
+export const getClubCrestSetUrl = (clubId: string) => {
+  return `/v1/clubs/${clubId}/crest`;
+};
+
+export const clubCrestSet = async (
+  clubId: string,
+  setClubCrestBody: SetClubCrestBody,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<ClubSummary> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit['headers']>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+  return apiFetch<ClubSummary>(getClubCrestSetUrl(clubId), {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(setClubCrestBody),
+  });
+};
+
+export const getClubCrestSetMutationKey = () => ['clubCrestSet'] as const;
+
+export const getClubCrestSetMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof clubCrestSet>>,
+    TError,
+    ClubCrestSetMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof clubCrestSet>>,
+  TError,
+  ClubCrestSetMutationVariables,
+  TContext
+> => {
+  const mutationKey = getClubCrestSetMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof clubCrestSet>>,
+    ClubCrestSetMutationVariables
+  > = (props) => {
+    const { clubId, data } = props ?? {};
+
+    return clubCrestSet(clubId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ClubCrestSetMutationResult = NonNullable<Awaited<ReturnType<typeof clubCrestSet>>>;
+export type ClubCrestSetMutationBody = BodyType<SetClubCrestBody>;
+export type ClubCrestSetMutationError = ErrorType<ProblemDetails>;
+export type ClubCrestSetMutationVariables = { clubId: string; data: BodyType<SetClubCrestBody> };
+
+export const useClubCrestSet = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof clubCrestSet>>,
+      TError,
+      ClubCrestSetMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof clubCrestSet>>,
+  TError,
+  ClubCrestSetMutationVariables,
+  TContext
+> => {
+  return useMutation(getClubCrestSetMutationOptions(options), queryClient);
+};
+export const getClubCrestRemoveUrl = (clubId: string) => {
+  return `/v1/clubs/${clubId}/crest`;
+};
+
+export const clubCrestRemove = async (
+  clubId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<ClubSummary> => {
+  return apiFetch<ClubSummary>(getClubCrestRemoveUrl(clubId), {
+    ...options,
+    method: 'DELETE',
+  });
+};
+
+export const getClubCrestRemoveMutationKey = () => ['clubCrestRemove'] as const;
+
+export const getClubCrestRemoveMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof clubCrestRemove>>,
+    TError,
+    ClubCrestRemoveMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof clubCrestRemove>>,
+  TError,
+  ClubCrestRemoveMutationVariables,
+  TContext
+> => {
+  const mutationKey = getClubCrestRemoveMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof clubCrestRemove>>,
+    ClubCrestRemoveMutationVariables
+  > = (props) => {
+    const { clubId } = props ?? {};
+
+    return clubCrestRemove(clubId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ClubCrestRemoveMutationResult = NonNullable<
+  Awaited<ReturnType<typeof clubCrestRemove>>
+>;
+
+export type ClubCrestRemoveMutationError = ErrorType<ProblemDetails>;
+export type ClubCrestRemoveMutationVariables = { clubId: string };
+
+export const useClubCrestRemove = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof clubCrestRemove>>,
+      TError,
+      ClubCrestRemoveMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof clubCrestRemove>>,
+  TError,
+  ClubCrestRemoveMutationVariables,
+  TContext
+> => {
+  return useMutation(getClubCrestRemoveMutationOptions(options), queryClient);
+};

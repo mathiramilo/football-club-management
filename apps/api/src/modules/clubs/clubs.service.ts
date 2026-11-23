@@ -4,7 +4,8 @@ import type { CreateClubBody, MyClub, MyClubsResponse } from '@repo/contracts';
 import { Analytics } from '../../core/analytics/analytics.js';
 import { localDate } from '../../core/authorization/club-actor.js';
 import { Clock } from '../../core/clock/clock.js';
-import { ClubsRepository } from './clubs.repository.js';
+import { SquareImages } from '../media/square-images.js';
+import { type ClubMembershipOfUser, ClubsRepository } from './clubs.repository.js';
 import { serializeMyClub } from './clubs.serializer.js';
 
 @Injectable()
@@ -13,12 +14,15 @@ export class ClubsService {
     private readonly repository: ClubsRepository,
     private readonly clock: Clock,
     private readonly analytics: Analytics,
+    private readonly images: SquareImages,
   ) {}
 
   async listMine(userId: string): Promise<MyClubsResponse> {
     const now = this.clock.now();
     const memberships = await this.repository.findActiveOfUser(userId);
-    return { items: memberships.map((membership) => serializeMyClub(membership, now)) };
+    return {
+      items: await Promise.all(memberships.map((membership) => this.serialize(membership, now))),
+    };
   }
 
   // BR-ROLE-06: the creator becomes Owner and Club Admin, and the DT of the category they coach.
@@ -49,6 +53,10 @@ export class ClubsService {
     for (const { format } of membership.categoryMemberships) {
       this.analytics.capture(userId, 'category_created', { format, from_template: false });
     }
-    return serializeMyClub(membership, now);
+    return this.serialize(membership, now);
+  }
+
+  private async serialize(membership: ClubMembershipOfUser, now: Date): Promise<MyClub> {
+    return serializeMyClub(membership, await this.images.view(membership.club.crestKey), now);
   }
 }
