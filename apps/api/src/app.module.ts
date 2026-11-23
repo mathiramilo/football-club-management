@@ -15,6 +15,7 @@ import { LoggingModule } from './core/logging/logging.module.js';
 import { ObservabilityModule } from './core/observability/observability.module.js';
 import { requestContextOptions } from './core/request-context.js';
 import { IdentityModule } from './modules/identity/identity.module.js';
+import { MediaModule } from './modules/media/media.module.js';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { IdentityModule } from './modules/identity/identity.module.js';
     // After AuthModule: global guards run in registration order, and this one needs the actor.
     AuthorizationModule,
     HealthModule,
+    MediaModule,
   ],
 })
 export class AppModule {}

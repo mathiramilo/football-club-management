@@ -47,6 +47,11 @@ export const envSchema = z
     AUTH_TRUSTED_PROXIES: commaSeparated,
     POSTHOG_API_KEY: optional(z.string()),
     POSTHOG_HOST: z.url().default('https://eu.i.posthog.com'),
+    STORAGE_ENDPOINT: z.url().default('http://localhost:8333'),
+    STORAGE_REGION: z.string().min(1).default('auto'),
+    STORAGE_BUCKET: z.string().min(3).default('football-club-management'),
+    STORAGE_ACCESS_KEY_ID: z.string().min(1).default('local-storage'),
+    STORAGE_SECRET_ACCESS_KEY: z.string().min(1).default('local-storage-secret'),
   })
   .refine(
     (env) =>

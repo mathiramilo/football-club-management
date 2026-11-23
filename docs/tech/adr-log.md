@@ -21,7 +21,7 @@
 | ADR-014 | Web UI: Tailwind CSS + shadcn/ui with shared design tokens | Accepted (2026-10-25, after TECH-15) | R0 week 2 |
 | ADR-015 | Mobile UI: NativeWind with shared tokens; core native libraries | Accepted (2026-10-25, after TECH-15) | R0 week 2 |
 | ADR-016 | Client data layer: generated client (Orval) + TanStack Query + offline persistence | Accepted (2026-10-26, after TECH-08) | R0 week 2 |
-| ADR-017 | Supporting providers: email (Postmark or Resend) and object storage (Cloudflare R2) | Proposed | R0 week 3 |
+| ADR-017 | Supporting providers: email (Postmark or Resend) and object storage (Cloudflare R2) | Storage Accepted (2026-11-22, with AUTH-05); email Proposed | R0 week 3 |
 
 ---
 
@@ -242,7 +242,11 @@
 - **Consequences**: no hand-written API types, and offline behavior comes from a well-known library. Generated code is never edited by hand. A store update changes the app version and drops writes still queued; a mutation's variables must stay compatible across OTA updates on the same version, since queued ones are replayed by the new code. Check the queue on Android before R1.
 
 ## ADR-017 · Supporting providers: email and object storage
+- **Status**: object storage **Accepted** (2026-11-22, built with AUTH-05); email **Proposed** until TECH-02 picks the provider.
+- **Context**: AUTH-05's profile photo is the first upload. Uploads never pass through the API ([API guidelines § 1](03-api-guidelines.md)), and reads go through signed URLs with short TTLs (NFR-SEC-08).
 - **Decision**:
   - Transactional email through **Postmark or Resend** (choose by LatAm deliverability and price in R0), with templates in **React Email** localized through `packages/i18n`.
-  - Object storage on **Cloudflare R2** (S3 API) with presigned uploads and short-TTL signed reads.
-- **Consequences**: no vendor lock-in for storage (S3 API). Email templates are versioned in the repo.
+  - Object storage on **Cloudflare R2** (S3 API) with presigned uploads and short-TTL signed reads, through the AWS SDK v3 (`@aws-sdk/client-s3`, `@aws-sdk/s3-request-presigner`) behind the `ObjectStorage` port in `modules/media`. Presigned uploads sign `Content-Type` and `Content-Length`, so the store rejects any other type or size. Path-style addressing; the endpoint, bucket and keys come from `STORAGE_*`.
+  - Locally and in tests, **SeaweedFS** (`chrislusf/seaweedfs`, S3 gateway) stands in for R2: the compose `storage` service and a Testcontainers container started in the API tests' global setup.
+- **Alternatives**: MinIO as the local stand-in, the usual choice, stopped publishing community Docker images (checked 2026-11-22: `minio/minio` and `quay.io/minio/minio` no longer pull). An in-memory fake would not check signatures, sizes or types. RustFS pulls too, but is younger than SeaweedFS.
+- **Consequences**: no vendor lock-in for storage (S3 API). Email templates are versioned in the repo. The SDK must be built with `requestChecksumCalculation: 'WHEN_REQUIRED'`: by default it signs a checksum of an empty body into presigned URLs, and R2 and SeaweedFS then reject the upload as `BadDigest` (SDK 3.1175, checked 2026-11-22). TECH-02 provisions the R2 bucket per environment, its CORS rule for `WEB_ORIGINS` (`PUT`, `GET`) and a lifecycle rule that expires unconfirmed uploads.

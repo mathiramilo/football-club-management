@@ -41,11 +41,11 @@ Shared across all three: `packages/contracts` (Zod), `packages/domain` (pure bus
 | Idempotency and rate limiting | Idempotency interceptor (keys stored in Postgres, 24 h) · `@nestjs/throttler` with a **Postgres-backed store** (or edge rate limiting) | Required for offline retries (NFR-OFF-01). Avoids adding Redis just for counters. |
 | Push | **Expo Push Service** (`expo-server-sdk`) | Cheap and simple; wraps APNs and FCM, with receipts for token cleanup. |
 | Email | **Postmark or Resend**, templates in **React Email** | Transactional deliverability; templates written as components and localized via ICU. |
-| Storage | **S3-compatible storage (e.g. Cloudflare R2)** via AWS SDK v3 presigned URLs | Direct uploads from the apps, cheap egress. |
+| Storage | **Cloudflare R2** (S3 API) via AWS SDK v3 presigned URLs (ADR-017, accepted for storage) | Direct uploads from the apps, cheap egress. SeaweedFS stands in for it locally and in tests. |
 | Uploads security | Type and size checks, image re-encoding, ClamAV-based scanning in the worker | NFR-SEC-08. |
 | AI | **Official Anthropic TypeScript SDK** (`@anthropic-ai/sdk`) | Tool use and structured outputs for plan generation ([AI architecture](04-ai-architecture.md)). |
 | Logging / errors | **Pino** (`nestjs-pino`) with redaction · **Sentry** (`@sentry/nestjs`) · **PostHog** (`posthog-node`) | Structured logs with request, club and user IDs. Sensitive fields are never logged (NFR-OBS-02). Sentry starts from `instrument.ts` with `--import`; PostHog sends the events only the server knows, such as `sign_in_completed` (ADR-012). |
-| Backend tests | **Vitest** + **Supertest** + **Testcontainers** (real Postgres) | Mandatory backend tests for domain rules, endpoints, authorization and tenant isolation (NFR-MAINT-01). |
+| Backend tests | **Vitest** + **Supertest** + **Testcontainers** (real Postgres, and SeaweedFS for object storage) | Mandatory backend tests for domain rules, endpoints, authorization and tenant isolation (NFR-MAINT-01). |
 | Hosting | API and worker containers in a **São Paulo** region | Lowest latency to Uruguay and Argentina (ADR-011). The API and worker are the same image run as two process types. |
 
 ## 3. Web app
@@ -122,7 +122,7 @@ flowchart LR
 | Web hosting | Vercel | R0 |
 | API + worker hosting | Container platform with a São Paulo region (e.g. Fly.io, AWS ECS/Fargate, Google Cloud Run) | R0 |
 | Database | Managed PostgreSQL 18 in São Paulo (e.g. Neon, Supabase, RDS) with PITR | R0 |
-| Object storage | Cloudflare R2 (S3-compatible) | R1 |
+| Object storage | Cloudflare R2 (S3-compatible; accepted, ADR-017) | R1 |
 | Push | Expo Push Service → APNs / FCM | R1 |
 | Email | Postmark or Resend | R1 |
 | Errors / performance | Sentry | R0 |
@@ -145,7 +145,7 @@ flowchart LR
 | Backend tests | Vitest + Supertest + Testcontainers (mandatory, NFR-MAINT-01) |
 | Frontend tests | **None at unit or component level** (team standard, NFR-MAINT-02) |
 | End-to-end (QA-owned, once QA is staffed) | **Playwright** (web) and **Maestro** (mobile) for critical flows: sign-in, RSVP from a link, roll call, check-in |
-| Local development | Docker Compose (Postgres); seed script with synthetic clubs; Expo development build; `.env` templates without secrets |
+| Local development | Docker Compose (Postgres, Mailpit and SeaweedFS as the S3 stand-in); seed script with synthetic clubs; Expo development build; `.env` templates without secrets |
 
 ### Versions held below latest
 

@@ -59,7 +59,12 @@
         "AUTH_RATE_LIMIT_ENABLED",
         "AUTH_TRUSTED_PROXIES",
         "POSTHOG_API_KEY",
-        "POSTHOG_HOST"
+        "POSTHOG_HOST",
+        "STORAGE_ENDPOINT",
+        "STORAGE_REGION",
+        "STORAGE_BUCKET",
+        "STORAGE_ACCESS_KEY_ID",
+        "STORAGE_SECRET_ACCESS_KEY"
       ]
     },
     "dev:worker": {
@@ -91,7 +96,12 @@
         "AUTH_RATE_LIMIT_ENABLED",
         "AUTH_TRUSTED_PROXIES",
         "POSTHOG_API_KEY",
-        "POSTHOG_HOST"
+        "POSTHOG_HOST",
+        "STORAGE_ENDPOINT",
+        "STORAGE_REGION",
+        "STORAGE_BUCKET",
+        "STORAGE_ACCESS_KEY_ID",
+        "STORAGE_SECRET_ACCESS_KEY"
       ]
     }
   }

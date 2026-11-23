@@ -29,10 +29,10 @@ Mandatory for new backend behavior (NFR-MAINT-01, NFR-SEC-03). Stack: **Vitest +
 - Build data with the shared factories and seed helpers (synthetic clubs and people only). Each test creates what it needs; never depend on another test's data or order.
 - For authorization tests, `createCast(db)` (`test/support/club-cast.ts`) builds a club with a signed-in member for every role in the matrix, plus a member of another club and an anonymous caller; `as(app, actor)` sends requests with that member's session.
 - Control time through the injected clock. Never `sleep`.
-- Fake external providers (Expo Push, email, storage, video, Anthropic) at their client boundary. Never call real providers from tests.
+- Fake external providers (Expo Push, email, video, Anthropic) at their client boundary. Never call real providers from tests. Object storage is the exception: tests use the SeaweedFS container from global setup through the real `ObjectStorage` (ADR-017).
 - Assert problem+json `code`, not message text.
 - NestJS DI needs decorator metadata. Vitest 5 runs on Vite 8, whose Oxc transform emits it from `emitDecoratorMetadata` in `tsconfig.json`, so no SWC plugin is needed. If an injected dependency is `undefined` in a test, check that setting first.
-- Start the Testcontainers Postgres once in Vitest `globalSetup` and hand its URL to tests with `provide` / `inject`. Isolate data per test (each test creates its own club).
+- Start the Testcontainers Postgres and SeaweedFS once in Vitest `globalSetup` and hand their URLs to tests with `provide` / `inject`. Isolate data per test (each test creates its own club).
 - Build the test app with the same `configureApp(app)` as `main.ts`, so tests exercise the real pipes, filters and interceptors.
 - Close what you open: `app.close()`, Prisma `$disconnect()`, pg-boss `stop()`, container `stop()`. For a hanging run, isolate the file, then the test, and look for open handles (e.g. `why-is-node-running`).
 - Flaky tests come from shared state, real time or fixed ports: use the injected clock, per-test data and random ports.

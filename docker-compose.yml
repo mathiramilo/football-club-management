@@ -20,5 +20,18 @@ services:
     ports:
       - '127.0.0.1:${MAILPIT_PORT:-8025}:8025'
 
+  # S3-compatible stand-in for Cloudflare R2 (ADR-017). Buckets are created on the first upload.
+  storage:
+    image: chrislusf/seaweedfs:4.54
+    command: server -s3 -dir=/data -master.volumeSizeLimitMB=1024 -s3.allowedOrigins=http://localhost:3000
+    environment:
+      AWS_ACCESS_KEY_ID: local-storage
+      AWS_SECRET_ACCESS_KEY: local-storage-secret
+    ports:
+      - '127.0.0.1:${STORAGE_PORT:-8333}:8333'
+    volumes:
+      - storage-data:/data
+
 volumes:
   postgres-data:
+  storage-data:

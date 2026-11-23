@@ -60,6 +60,7 @@ Rows marked with an enabler ID don't run yet. They keep these names when that en
 | Install | `pnpm install` | ✅ |
 | Local Postgres | `docker compose up -d postgres`, then copy `apps/api/.env.example` to `apps/api/.env` (if 5432 is taken, set `POSTGRES_PORT` in a root `.env` and match it in `DATABASE_URL`) | ✅ |
 | Local email (catches every message the API sends) | `docker compose up -d mailpit`, then open http://localhost:8025 | ✅ |
+| Local object storage (S3 stand-in for R2; buckets are created on the first upload) | `docker compose up -d storage` | ✅ |
 | Run everything in dev (the API's job worker runs as its own process, `dev:worker`). For the web app, copy `apps/web/.env.example` to `apps/web/.env.local`; `NEXT_PUBLIC_*` values are built into the bundle, so restart after changing them | `pnpm dev` | ✅ |
 | Run the built job worker | `pnpm --filter ./apps/api start:worker` | ✅ |
 | Lint and format check | `pnpm lint` · `pnpm format:check` (`pnpm format` fixes) | ✅ |
