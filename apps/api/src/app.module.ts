@@ -14,6 +14,7 @@ import { IdempotencyModule } from './core/idempotency/idempotency.module.js';
 import { LoggingModule } from './core/logging/logging.module.js';
 import { ObservabilityModule } from './core/observability/observability.module.js';
 import { requestContextOptions } from './core/request-context.js';
+import { ClubsModule } from './modules/clubs/clubs.module.js';
 import { IdentityModule } from './modules/identity/identity.module.js';
 import { MediaModule } from './modules/media/media.module.js';
 
@@ -38,6 +39,7 @@ import { MediaModule } from './modules/media/media.module.js';
     AuthorizationModule,
     HealthModule,
     MediaModule,
+    ClubsModule,
   ],
 })
 export class AppModule {}

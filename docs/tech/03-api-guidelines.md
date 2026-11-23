@@ -88,7 +88,7 @@ Code requests answer `429` in two cases (BR-AUTH-03, NFR-SEC-05):
 | DELETE | `/v1/me` | Request account deletion (AUTH-13). |
 | GET | `/v1/me/legal-documents` | The terms and privacy policy in force, the versions the user accepted, and whether they must accept (AUTH-04, BR-AUTH-08). |
 | POST | `/v1/me/legal-acceptances` | Accept the versions in force; records the platform from `X-Platform`. `409` `LEGAL_DOCUMENT_OUTDATED` for a version no longer in force (AUTH-04). |
-| GET | `/v1/me/clubs` | Memberships with pending-action counts (AUTH-11). |
+| GET | `/v1/me/clubs` | The caller's active clubs, sorted by name, with their Owner and Club Admin flags and current category roles on each club's calendar day; deleted clubs and archived categories are left out (CLUB-01). AUTH-11 adds pending-action counts. |
 | GET | `/v1/me/agenda?from&to&clubId?` | Unified agenda (EVT-17). |
 | GET | `/v1/me/week` | "Tu semana" (EVT-18). |
 | GET | `/v1/me/stats?clubId&categoryId&from&to` | ANL-01 |
@@ -107,7 +107,7 @@ Code requests answer `429` in two cases (BR-AUTH-03, NFR-SEC-05):
 ### Clubs and membership (R1)
 | Method | Path | Purpose |
 |---|---|---|
-| POST | `/v1/clubs` | CLUB-01 |
+| POST | `/v1/clubs` | Create a club: name, country, time zone, and optional short name and colors (BR-CLUB-01). The creator becomes Owner and Club Admin; with `firstCategory` they also become its DT from today in the club time zone (BR-ROLE-06). Answers `201` with the same entry as `GET /v1/me/clubs` (CLUB-01). |
 | GET / PATCH / DELETE | `/v1/clubs/{clubId}` | CLUB-02, CLUB-17 |
 | GET / POST | `/v1/clubs/{clubId}/categories` | CLUB-03 |
 | PATCH | `/v1/clubs/{clubId}/categories/{categoryId}` | Includes `settings` (CLUB-14). |

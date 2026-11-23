@@ -130,6 +130,8 @@ Legend: ✅ allowed · 🔸 allowed with the limitation noted · — not allowed
 | Remove a member from the club | ✅ | ✅ | — | — | — |
 | Leave a club or category | ✅ (after transferring ownership) | ✅ | ✅ | ✅ | ✅ |
 
+Creating a club needs no role: any signed-in user who has accepted the terms can create one and becomes its Owner and Club Admin (CLUB-01, BR-ROLE-06).
+
 ### 4.2 Events and attendance
 
 | Capability | Owner / Admin | DT | Coach | Player |
