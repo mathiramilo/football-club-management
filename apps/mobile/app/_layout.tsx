@@ -14,6 +14,7 @@ import { useUpdateRequiredAt } from '@/lib/app-update';
 import { useAppFonts } from '@/lib/fonts';
 import { locale, messages } from '@/lib/i18n';
 import { useLegalGate } from '@/lib/legal-acceptance';
+import { useProfileGate } from '@/lib/profile';
 import { setUpSentry, withSentry } from '@/lib/sentry';
 import { useIsSignedIn } from '@/lib/session';
 
@@ -43,6 +44,8 @@ function RootStack() {
   const isSignedIn = useIsSignedIn();
   const mustUpdate = useMustUpdate();
   const legalGate = useLegalGate(isSignedIn);
+  const isLegalAccepted = isSignedIn && legalGate === 'accepted';
+  const profileGate = useProfileGate(isLegalAccepted);
 
   useEffect(() => {
     if (isReady) SplashScreen.hide();
@@ -55,8 +58,11 @@ function RootStack() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={!mustUpdate}>
-        <Stack.Protected guard={isSignedIn && legalGate === 'accepted'}>
+        <Stack.Protected guard={isLegalAccepted && profileGate === 'complete'}>
           <Stack.Screen name="(tabs)" />
+        </Stack.Protected>
+        <Stack.Protected guard={isLegalAccepted && profileGate !== 'complete'}>
+          <Stack.Screen name="profile-completion" options={{ gestureEnabled: false }} />
         </Stack.Protected>
         <Stack.Protected guard={isSignedIn && legalGate !== 'accepted'}>
           <Stack.Screen name="legal-acceptance" options={{ gestureEnabled: false }} />

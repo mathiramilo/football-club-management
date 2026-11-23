@@ -2,6 +2,7 @@ import * as Application from 'expo-application';
 import { useIntl } from 'react-intl';
 import { Alert } from 'react-native';
 
+import { ProfilePhotoSection } from '@/components/profile-photo-section';
 import { TabScreen } from '@/components/tab-screen';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -38,6 +39,7 @@ export default function ProfileScreen() {
 
   return (
     <TabScreen title={intl.formatMessage({ id: 'nav.tabs.profile' })}>
+      <ProfilePhotoSection />
       <Button variant="secondary" onPress={confirmSignOut}>
         <Text className="text-danger-strong">{intl.formatMessage({ id: 'profile.signOut' })}</Text>
       </Button>

@@ -197,6 +197,11 @@
       "uploadFailed": "Guardamos tu perfil, pero no pudimos subir la foto.",
       "retry": "Reintentar",
       "skip": "Seguir sin foto"
-    }
+    },
+    "birthdatePlaceholder": "DD/MM/AAAA",
+    "offline": "Necesitás conexión para guardar tu perfil. Probá de nuevo cuando tengas señal."
+  },
+  "permissions": {
+    "photoLibrary": "Para elegir tu foto de perfil, la app necesita acceso a tus fotos."
   }
 }

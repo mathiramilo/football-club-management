@@ -1,3 +1,4 @@
+import messages from '@repo/i18n/messages/es.json';
 import type { ExpoConfig } from 'expo/config';
 
 const variants = {
@@ -71,6 +72,14 @@ const config: ExpoConfig = {
     'expo-router',
     ['expo-splash-screen', { backgroundColor: '#ffffff' }],
     'expo-apple-authentication',
+    [
+      'expo-image-picker',
+      {
+        photosPermission: messages.permissions.photoLibrary,
+        cameraPermission: false,
+        microphonePermission: false,
+      },
+    ],
     [
       '@sentry/react-native/expo',
       {
