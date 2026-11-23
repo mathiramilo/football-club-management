@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
+import { ProfilePhotoSection } from '@/components/profile-photo-section';
 import { SignOutButton } from '@/components/sign-out-button';
 import { TabPage } from '@/components/tab-page';
 
@@ -14,6 +15,7 @@ export default async function ProfilePage() {
 
   return (
     <TabPage title={t('nav.tabs.profile')}>
+      <ProfilePhotoSection />
       <SignOutButton />
       <p className="text-center text-meta text-subtle-foreground">
         {t('profile.version', {

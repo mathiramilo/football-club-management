@@ -112,6 +112,15 @@
       "body": "Si cerrás sesión ahora, se pierden. Esperá a tener conexión para que se envíen.",
       "confirm": "Cerrar igual",
       "cancel": "Esperar"
+    },
+    "photo": {
+      "title": "Foto de perfil",
+      "none": "Todavía no tenés foto.",
+      "removed": "Quitamos tu foto.",
+      "saved": "Guardamos tu foto.",
+      "confirmRemove": "¿Quitar tu foto de perfil?",
+      "confirm": "Quitar",
+      "cancel": "Cancelar"
     }
   },
   "signIn": {
@@ -149,6 +158,45 @@
       "title": "Hay una versión nueva",
       "body": "Recargá la página para seguir usándola.",
       "action": "Recargar"
+    }
+  },
+  "profileCompletion": {
+    "title": "Completá tu perfil",
+    "body": "Así te reconocen tu DT y tus compañeros.",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "nickname": "Apodo (opcional)",
+    "nicknameHint": "Si lo completás, es el nombre que ven los demás.",
+    "birthdate": "Fecha de nacimiento",
+    "birthdateHint": "Después no se puede cambiar.",
+    "save": "Guardar",
+    "fieldErrors": {
+      "required": "Completá este dato.",
+      "tooLong": "Es demasiado largo: hasta {max} caracteres.",
+      "invalidDate": "Ingresá una fecha válida."
+    },
+    "underAge": {
+      "title": "Todavía no podés usar la app",
+      "body": "La app es para personas de 16 años o más. Cuando los cumplas, te esperamos.",
+      "fixDate": "Revisar la fecha",
+      "signOut": "Salir"
+    },
+    "minor": {
+      "title": "¡Listo, ya tenés tu perfil!",
+      "body": "Como tenés menos de 18 años, tu madre, padre o tutor/a tiene que aprobar los check-ins de estado físico antes de que puedas usarlos. Te vamos a avisar cuando haga falta.",
+      "continue": "Continuar"
+    },
+    "photo": {
+      "label": "Foto (opcional)",
+      "choose": "Elegir foto",
+      "change": "Cambiar foto",
+      "remove": "Quitar foto",
+      "preview": "Tu foto de perfil",
+      "preparing": "Preparando la foto…",
+      "unreadable": "No pudimos usar esa imagen. Probá con otra foto.",
+      "uploadFailed": "Guardamos tu perfil, pero no pudimos subir la foto.",
+      "retry": "Reintentar",
+      "skip": "Seguir sin foto"
     }
   }
 }
