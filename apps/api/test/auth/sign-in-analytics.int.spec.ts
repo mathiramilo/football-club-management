@@ -1,5 +1,4 @@
 import type { INestApplication } from '@nestjs/common';
-import type { AnalyticsEventName, AnalyticsEvents } from '@repo/contracts';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -18,19 +17,8 @@ import {
   uniqueSubject,
 } from '../support/auth-fixtures.js';
 import { createTestApp } from '../support/create-test-app.js';
+import { FakeAnalytics } from '../support/fake-analytics.js';
 import { FakeClock } from '../support/fake-clock.js';
-
-class FakeAnalytics extends Analytics {
-  readonly captured: { userId: string; event: AnalyticsEventName; properties: object }[] = [];
-
-  capture<Event extends AnalyticsEventName>(
-    userId: string,
-    event: Event,
-    properties: AnalyticsEvents[Event],
-  ): void {
-    this.captured.push({ userId, event, properties });
-  }
-}
 
 describe('sign_in_completed (F01 telemetry, TECH-10)', () => {
   const email = new FakeEmailSender();

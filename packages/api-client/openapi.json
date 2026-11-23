@@ -104,6 +104,76 @@
           "identity"
         ]
       }
+    },
+    "/v1/me": {
+      "get": {
+        "operationId": "profileGet",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Problem details (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "identity"
+        ]
+      },
+      "patch": {
+        "operationId": "profileUpdate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Problem details (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "identity"
+        ]
+      }
     }
   },
   "info": {
@@ -285,6 +355,114 @@
           "documents"
         ]
       },
+      "ProfileResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "firstName": {
+            "nullable": true,
+            "description": "Null until the profile is completed",
+            "type": "string"
+          },
+          "lastName": {
+            "nullable": true,
+            "description": "Null until the profile is completed",
+            "type": "string"
+          },
+          "nickname": {
+            "nullable": true,
+            "type": "string"
+          },
+          "birthdate": {
+            "nullable": true,
+            "description": "Null until the profile is completed",
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          },
+          "displayName": {
+            "nullable": true,
+            "description": "The nickname, or the first name and last-name initial (BR-AUTH-07); null until the profile is completed",
+            "type": "string"
+          },
+          "isMinor": {
+            "nullable": true,
+            "description": "Whether the user is 16 or 17 (BR-AUTH-05); null until the birthdate is set",
+            "type": "boolean"
+          },
+          "profileComplete": {
+            "type": "boolean",
+            "description": "Whether the first name, last name and birthdate are set (AUTH-05)"
+          },
+          "suggestedName": {
+            "nullable": true,
+            "description": "The name from Google or Apple, to prefill the form; null when there is none",
+            "type": "object",
+            "properties": {
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "firstName",
+              "lastName"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "firstName",
+          "lastName",
+          "nickname",
+          "birthdate",
+          "displayName",
+          "isMinor",
+          "profileComplete",
+          "suggestedName"
+        ],
+        "additionalProperties": false
+      },
+      "UpdateProfileBody": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "nickname": {
+            "description": "Null or an empty string removes it",
+            "nullable": true,
+            "type": "string",
+            "maxLength": 30
+          },
+          "birthdate": {
+            "description": "Set once: after the first save only support can change it (F01 § 5)",
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          }
+        }
+      },
       "ProblemDetails": {
         "type": "object",
         "properties": {
@@ -317,7 +495,9 @@
               "IDEMPOTENCY_REQUEST_IN_PROGRESS",
               "APP_UPDATE_REQUIRED",
               "LEGAL_ACCEPTANCE_REQUIRED",
-              "LEGAL_DOCUMENT_OUTDATED"
+              "LEGAL_DOCUMENT_OUTDATED",
+              "UNDER_MINIMUM_AGE",
+              "BIRTHDATE_LOCKED"
             ]
           },
           "detail": {

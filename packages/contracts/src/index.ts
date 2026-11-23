@@ -6,4 +6,5 @@ export * from './errors/codes.js';
 export * from './errors/problem.js';
 export * from './extensible-enum.js';
 export * from './identity/legal.js';
+export * from './identity/profile.js';
 export * from './platform/app-config.js';

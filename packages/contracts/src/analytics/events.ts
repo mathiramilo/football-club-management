@@ -7,6 +7,7 @@ export type SignInMethod = z.infer<typeof signInMethod>;
 export interface AnalyticsEvents {
   sign_in_started: { method: SignInMethod };
   sign_in_completed: { method: SignInMethod; new_account: boolean };
+  profile_completed: { is_minor: boolean };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEvents;

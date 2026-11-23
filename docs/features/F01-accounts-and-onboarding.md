@@ -29,8 +29,8 @@ This feature is not in the Notion brief. It is a prerequisite for every other fe
 | BR-AUTH-02 | Apple "Hide My Email" relay addresses are accepted. They create separate accounts unless the user signs in with the same Apple ID again. |
 | BR-AUTH-03 | Email one-time codes: 6 digits, valid 10 minutes, single use, at most 5 attempts per code, resend allowed after 60 s, and rate limited per email and per IP (see [NFR](../tech/05-non-functional-requirements.md)). |
 | BR-AUTH-04 | Sessions are kept on the server and expire after 90 days without use, on every device (D-17, ADR-007). A user can sign out of all devices. |
-| BR-AUTH-05 | **Minimum age is 16** (OQ-05). Birthdate is required. Under 16, sign-up is blocked with a friendly explanation. Users aged 16–17 are flagged as **minors**: wellness check-ins stay disabled until a guardian consents ([F07](F07-player-wellness.md)). |
-| BR-AUTH-06 | Required personal fields: first name, last name, birthdate. Optional: nickname (*apodo*), photo, phone number. |
+| BR-AUTH-05 | **Minimum age is 16** (OQ-05). Birthdate is required. Under 16, sign-up is blocked with a friendly explanation, and the birthdate is not stored. Users aged 16–17 are flagged as **minors**: wellness check-ins stay disabled until a guardian consents ([F07](F07-player-wellness.md)). |
+| BR-AUTH-06 | Required personal fields: first name, last name, birthdate. Optional: nickname (*apodo*), photo, phone number. Names take up to 50 characters and the nickname up to 30. |
 | BR-AUTH-07 | **Display name**: the nickname if set, otherwise first name plus last-name initial ("Nicolás P."). Staff always see full names as well. |
 | BR-AUTH-08 | Terms of service and privacy policy are versioned. A material change requires re-acceptance at the next app open, before anything else can be done. Acceptance (version and timestamp) is stored. |
 | BR-AUTH-09 | Opening an invite link resolves club, category and role **before** sign-in, so the user knows what they are joining. After sign-in: if the user is already in that category, the category opens; if the link requires approval, a join request is created; otherwise the user joins immediately. |

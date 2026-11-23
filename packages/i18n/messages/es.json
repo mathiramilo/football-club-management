@@ -43,6 +43,7 @@
   "errors": {
     "APP_UPDATE_REQUIRED": "Hay una versión nueva de la app. Actualizala para seguir usándola.",
     "BAD_REQUEST": "No pudimos procesar el pedido. Probá de nuevo.",
+    "BIRTHDATE_LOCKED": "La fecha de nacimiento no se puede cambiar. Si está mal, escribinos a soporte.",
     "CODE_RATE_LIMITED": "Pediste muchos códigos seguidos. Probá de nuevo en un rato.",
     "CODE_RESEND_TOO_SOON": "Esperá un minuto y pedí un código nuevo.",
     "CONFLICT": "Alguien hizo un cambio al mismo tiempo. Actualizá y probá de nuevo.",
@@ -61,6 +62,7 @@
     "SERVICE_UNAVAILABLE": "El servicio no está disponible en este momento. Probá de nuevo en un rato.",
     "TOO_MANY_ATTEMPTS": "Ese código ya no sirve. Pedí uno nuevo.",
     "UNAUTHENTICATED": "Tu sesión se cerró. Entrá de nuevo.",
+    "UNDER_MINIMUM_AGE": "Para usar la app tenés que tener 16 años o más.",
     "VALIDATION_FAILED": "Revisá los datos y probá de nuevo."
   },
   "home": {

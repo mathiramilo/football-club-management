@@ -15,3 +15,6 @@ export * from './legalDocumentsResponse';
 export * from './legalDocumentStatus';
 export * from './problemDetails';
 export * from './problemDetailsErrorsItem';
+export * from './profileResponse';
+export * from './profileResponseSuggestedName';
+export * from './updateProfileBody';

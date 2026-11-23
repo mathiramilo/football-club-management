@@ -20,7 +20,13 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import type { AcceptLegalDocumentsBody, LegalDocumentsResponse, ProblemDetails } from '../model';
+import type {
+  AcceptLegalDocumentsBody,
+  LegalDocumentsResponse,
+  ProblemDetails,
+  ProfileResponse,
+  UpdateProfileBody,
+} from '../model';
 
 import { apiFetch } from '../../api-fetch';
 import type { ErrorType, BodyType } from '../../api-fetch';
@@ -249,4 +255,208 @@ export const useLegalDocumentsAccept = <TError = ErrorType<ProblemDetails>, TCon
   TContext
 > => {
   return useMutation(getLegalDocumentsAcceptMutationOptions(options), queryClient);
+};
+export const getProfileGetUrl = () => {
+  return `/v1/me`;
+};
+
+export const profileGet = async (
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<ProfileResponse> => {
+  return apiFetch<ProfileResponse>(getProfileGetUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getProfileGetQueryKey = () => {
+  return [`/v1/me`] as const;
+};
+
+export const getProfileGetQueryOptions = <
+  TData = Awaited<ReturnType<typeof profileGet>>,
+  TError = ErrorType<ProblemDetails>,
+>(options?: {
+  query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof profileGet>>, TError, TData>>;
+  request?: SecondParameter<typeof apiFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getProfileGetQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof profileGet>>> = ({ signal }) =>
+    profileGet({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof profileGet>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ProfileGetQueryResult = NonNullable<Awaited<ReturnType<typeof profileGet>>>;
+export type ProfileGetQueryError = ErrorType<ProblemDetails>;
+
+export function useProfileGet<
+  TData = Awaited<ReturnType<typeof profileGet>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof profileGet>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof profileGet>>,
+          TError,
+          Awaited<ReturnType<typeof profileGet>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useProfileGet<
+  TData = Awaited<ReturnType<typeof profileGet>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof profileGet>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof profileGet>>,
+          TError,
+          Awaited<ReturnType<typeof profileGet>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useProfileGet<
+  TData = Awaited<ReturnType<typeof profileGet>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof profileGet>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+export function useProfileGet<
+  TData = Awaited<ReturnType<typeof profileGet>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof profileGet>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getProfileGetQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getProfileUpdateUrl = () => {
+  return `/v1/me`;
+};
+
+export const profileUpdate = async (
+  updateProfileBody: UpdateProfileBody,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<ProfileResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit['headers']>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+  return apiFetch<ProfileResponse>(getProfileUpdateUrl(), {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(updateProfileBody),
+  });
+};
+
+export const getProfileUpdateMutationKey = () => ['profileUpdate'] as const;
+
+export const getProfileUpdateMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof profileUpdate>>,
+    TError,
+    ProfileUpdateMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof profileUpdate>>,
+  TError,
+  ProfileUpdateMutationVariables,
+  TContext
+> => {
+  const mutationKey = getProfileUpdateMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof profileUpdate>>,
+    ProfileUpdateMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return profileUpdate(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ProfileUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof profileUpdate>>>;
+export type ProfileUpdateMutationBody = BodyType<UpdateProfileBody>;
+export type ProfileUpdateMutationError = ErrorType<ProblemDetails>;
+export type ProfileUpdateMutationVariables = { data: BodyType<UpdateProfileBody> };
+
+export const useProfileUpdate = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof profileUpdate>>,
+      TError,
+      ProfileUpdateMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof profileUpdate>>,
+  TError,
+  ProfileUpdateMutationVariables,
+  TContext
+> => {
+  return useMutation(getProfileUpdateMutationOptions(options), queryClient);
 };

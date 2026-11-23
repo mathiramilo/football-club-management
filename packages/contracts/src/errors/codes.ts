@@ -19,6 +19,8 @@ export const errorCode = extensibleEnum([
   'APP_UPDATE_REQUIRED',
   'LEGAL_ACCEPTANCE_REQUIRED',
   'LEGAL_DOCUMENT_OUTDATED',
+  'UNDER_MINIMUM_AGE',
+  'BIRTHDATE_LOCKED',
 ]);
 
 export type ErrorCode = z.infer<typeof errorCode>;
@@ -45,6 +47,8 @@ export const errorCatalog: Record<ErrorCode, ErrorDefinition> = {
   APP_UPDATE_REQUIRED: { status: 426, title: 'App update required' },
   LEGAL_ACCEPTANCE_REQUIRED: { status: 403, title: 'Legal documents not accepted' },
   LEGAL_DOCUMENT_OUTDATED: { status: 409, title: 'Legal document outdated' },
+  UNDER_MINIMUM_AGE: { status: 422, title: 'Under the minimum age' },
+  BIRTHDATE_LOCKED: { status: 409, title: 'Birthdate already set' },
 };
 
 // Better Auth answers /v1/auth/* with { code, message } instead of problem+json (ADR-007).
