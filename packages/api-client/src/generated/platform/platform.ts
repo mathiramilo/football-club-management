@@ -126,7 +126,6 @@ export function useAppConfigGet<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
 export function useAppConfigGet<
   TData = Awaited<ReturnType<typeof appConfigGet>>,
   TError = ErrorType<ProblemDetails>,
