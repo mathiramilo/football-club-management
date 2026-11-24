@@ -84,7 +84,7 @@ Code requests answer `429` in two cases (BR-AUTH-03, NFR-SEC-05):
 | POST | `/v1/auth/revoke-sessions` | Sign out of all devices (AUTH-12). |
 | GET / PATCH | `/v1/me` | Profile (AUTH-05): names, nickname, birthdate, the display name, the minor flag and whether the profile is complete. `422` `UNDER_MINIMUM_AGE` saves nothing (BR-AUTH-05); `409` `BIRTHDATE_LOCKED` once a birthdate is saved. |
 | POST | `/v1/me/photo/uploads` | Presigned upload for a profile photo: `{ mimeType, sizeBytes }` (JPEG, PNG or WebP, at most 300 KB), valid for 10 minutes (AUTH-05). |
-| PUT / DELETE | `/v1/me/photo` | Set the photo from a finished upload (`{ uploadKey }`), re-encoded into 512 and 128 px square WebP, or remove it. Both answer the profile. `404` `UPLOAD_NOT_FOUND`, `422` `UPLOAD_INVALID` (AUTH-05, NFR-SEC-08). |
+| PUT / DELETE | `/v1/me/photo` | Set the photo from a finished upload (`{ uploadKey }`), re-encoded into 512 and 128 px square WebP (fit inside the square with transparency, never cropped), or remove it. Both answer the profile. `404` `UPLOAD_NOT_FOUND`, `422` `UPLOAD_INVALID` (AUTH-05, NFR-SEC-08). |
 | DELETE | `/v1/me` | Request account deletion (AUTH-13). |
 | GET | `/v1/me/legal-documents` | The terms and privacy policy in force, the versions the user accepted, and whether they must accept (AUTH-04, BR-AUTH-08). |
 | POST | `/v1/me/legal-acceptances` | Accept the versions in force; records the platform from `X-Platform`. `409` `LEGAL_DOCUMENT_OUTDATED` for a version no longer in force (AUTH-04). |
@@ -110,7 +110,7 @@ Code requests answer `429` in two cases (BR-AUTH-03, NFR-SEC-05):
 | POST | `/v1/clubs` | Create a club: name, country, time zone, and optional short name and colors (BR-CLUB-01). The creator becomes Owner and Club Admin; with `firstCategory` they also become its DT from today in the club time zone (BR-ROLE-06). Answers `201` with the same entry as `GET /v1/me/clubs` (CLUB-01). |
 | GET / PATCH / DELETE | `/v1/clubs/{clubId}` | CLUB-02, CLUB-17 |
 | POST | `/v1/clubs/{clubId}/uploads` | Presigned upload, one `purpose` per kind of file, valid for 10 minutes. R1 has `club_crest`: `{ purpose, mimeType, sizeBytes }`, JPEG, PNG or WebP, at most 500 KB (BR-CLUB-01). Owner and Club Admin (CLUB-01). |
-| PUT / DELETE | `/v1/clubs/{clubId}/crest` | Set the crest from a finished upload (`{ uploadKey }`), re-encoded into 512 and 128 px square WebP, or remove it. Both answer the club. `404` `UPLOAD_NOT_FOUND`, `422` `UPLOAD_INVALID`. Owner and Club Admin (CLUB-01, NFR-SEC-08). |
+| PUT / DELETE | `/v1/clubs/{clubId}/crest` | Set the crest from a finished upload (`{ uploadKey }`), re-encoded into 512 and 128 px square WebP (fit inside the square with transparency, never cropped), or remove it. Both answer the club. `404` `UPLOAD_NOT_FOUND`, `422` `UPLOAD_INVALID`. Owner and Club Admin (CLUB-01, NFR-SEC-08). |
 | GET / POST | `/v1/clubs/{clubId}/categories` | CLUB-03 |
 | PATCH | `/v1/clubs/{clubId}/categories/{categoryId}` | Includes `settings` (CLUB-14). |
 | POST | `/v1/clubs/{clubId}/categories/{categoryId}/archive` · `/restore` | CLUB-04 |

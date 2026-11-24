@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 
 import { Clock } from '../../core/clock/clock.js';
 import { DomainError } from '../../core/errors/domain-error.js';
-import { ImageProcessor } from './image-processor.js';
+import { ImageProcessor, type SquareFit } from './image-processor.js';
 import { ObjectStorage } from './object-storage.js';
 
 const UPLOAD_TTL_SECONDS = 10 * 60;
@@ -17,6 +17,7 @@ export interface SquareImageLocation {
   readonly folder: string;
   readonly ownerId: string;
   readonly maxBytes: number;
+  readonly fit: SquareFit;
 }
 
 export interface SquareImageUpload {
@@ -71,7 +72,11 @@ export class SquareImages {
     if (upload.status === 'missing') throw new DomainError('UPLOAD_NOT_FOUND');
     const processed =
       upload.status === 'found'
-        ? await this.images.squareWebpVariants(upload.object.body, [IMAGE_SIZE, THUMBNAIL_SIZE])
+        ? await this.images.squareWebpVariants(
+            upload.object.body,
+            [IMAGE_SIZE, THUMBNAIL_SIZE],
+            location.fit,
+          )
         : ({ status: 'invalid' } as const);
     if (processed.status === 'invalid') {
       await this.storage.delete([uploadKey]);

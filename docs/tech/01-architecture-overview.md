@@ -155,7 +155,7 @@ flowchart LR
 3. A storage or provider callback, or client confirmation, triggers verification (type, size), malware scan for documents, and variant generation (thumbnails, WebP).
 4. The media record becomes `ready`. Clients receive signed URLs (short TTL) to read it.
 
-Profile photos (AUTH-05) and club crests (CLUB-01) take the short path: the client confirms with `PUT /v1/me/photo` or `PUT /v1/clubs/{clubId}/crest`, and the API re-encodes the upload into square WebP variants (512 and 128 px) in the same request, since the file is at most 300 KB or 500 KB. Both go through `SquareImages` in the `media` module. Unconfirmed uploads live under `uploads/`, where a bucket lifecycle rule expires them (TECH-02).
+Profile photos (AUTH-05) and club crests (CLUB-01) take the short path: the client confirms with `PUT /v1/me/photo` or `PUT /v1/clubs/{clubId}/crest`, and the API re-encodes the upload into square WebP variants (512 and 128 px) in the same request, since the file is at most 300 KB or 500 KB. A photo is cropped to the square; a crest is fit inside it with a transparent background, so a tall shield is never cut. Both go through `SquareImages` in the `media` module. Unconfirmed uploads live under `uploads/`, where a bucket lifecycle rule expires them (TECH-02).
 
 ### 6.8 Offline and sync (mobile)
 - **Read**: a persisted query cache for the agenda, upcoming events, published plans, assigned routines and nutrition plans (BR-CONT-09).

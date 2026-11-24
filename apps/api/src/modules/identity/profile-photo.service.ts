@@ -14,6 +14,7 @@ const photosOf = (userId: string): SquareImageLocation => ({
   folder: 'profile-photos',
   ownerId: userId,
   maxBytes: PROFILE_PHOTO_MAX_BYTES,
+  fit: 'cover',
 });
 
 @Injectable()

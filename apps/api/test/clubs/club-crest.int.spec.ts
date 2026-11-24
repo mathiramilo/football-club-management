@@ -172,6 +172,29 @@ describe('club crest (CLUB-01, BR-CLUB-01)', () => {
       expect(await storage.read(uploadKey, MAX_BYTES)).toEqual({ status: 'missing' });
     });
 
+    it('fits a crest that is not square inside the square, padded with transparency', async () => {
+      const { owner } = cast.actors;
+      const tallCrest = await sharp({
+        create: { width: 300, height: 600, channels: 3, background: '#1d4ed8' },
+      })
+        .png()
+        .toBuffer();
+      const uploadKey = await uploadCrest(owner, cast.club.id, tallCrest, 'image/png');
+
+      const response = await setCrest(owner, cast.club.id, uploadKey).expect(200);
+
+      const image = await fetch((response.body as ClubSummary).crest?.url ?? '');
+      const { data, info } = await sharp(Buffer.from(await image.arrayBuffer()))
+        .ensureAlpha()
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+      const alphaAt = (x: number, y: number) => data[(y * info.width + x) * info.channels + 3];
+      expect({ width: info.width, height: info.height }).toEqual({ width: 512, height: 512 });
+      expect(alphaAt(0, 0)).toBe(0);
+      expect(alphaAt(256, 0)).toBe(255);
+      expect(alphaAt(256, 511)).toBe(255);
+    });
+
     it('shows the crest to every member in their club list', async () => {
       const crestKey = await crestOfClub(cast.actors.owner);
 

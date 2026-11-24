@@ -16,6 +16,8 @@ const crestsOf = (club: ClubContext): SquareImageLocation => ({
   folder: 'club-crests',
   ownerId: club.clubId,
   maxBytes: CLUB_CREST_MAX_BYTES,
+  // A crest is usually taller than wide: fit it inside the square, never crop it.
+  fit: 'contain',
 });
 
 @Injectable()
