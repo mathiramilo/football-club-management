@@ -71,7 +71,27 @@
     "empty": {
       "title": "Todavía no estás en un equipo",
       "body": "Pedile a tu DT el link de invitación y abrilo en este teléfono."
-    }
+    },
+    "noClub": {
+      "title": "¿Cómo querés empezar?",
+      "body": "Para usar la app tenés que ser parte de un club.",
+      "create": {
+        "title": "Crear un club",
+        "body": "Para coordinadores y DTs: cargá tu club y empezá a organizar tus categorías."
+      },
+      "invite": {
+        "title": "Tengo un link de invitación",
+        "body": "Abrí en este dispositivo el link que te pasaron tu DT o tu club, por ejemplo por WhatsApp."
+      }
+    },
+    "player": {
+      "empty": {
+        "title": "Todavía no hay actividades",
+        "body": "Cuando tu DT cargue una práctica o un partido, lo vas a ver acá."
+      }
+    },
+    "loadFailed": "No pudimos cargar tus clubes.",
+    "retry": "Reintentar"
   },
   "legalAcceptance": {
     "title": "Antes de empezar",
@@ -203,5 +223,97 @@
   },
   "permissions": {
     "photoLibrary": "Para elegir tu foto de perfil, la app necesita acceso a tus fotos."
+  },
+  "createClub": {
+    "title": "Crear club",
+    "back": "Volver",
+    "step": "Paso {step} de {total}",
+    "details": {
+      "title": "Datos del club",
+      "body": "Después vas a poder cambiar todo esto."
+    },
+    "name": "Nombre del club",
+    "shortName": "Nombre corto (opcional)",
+    "shortNameHint": "Se usa donde hay poco espacio.",
+    "country": "País",
+    "timezone": "Zona horaria",
+    "timezoneHint": "Los horarios de las actividades se muestran en esta zona.",
+    "timezoneOption": "{zone} ({city})",
+    "crest": {
+      "label": "Escudo (opcional)",
+      "hint": "Queda mejor con fondo transparente.",
+      "choose": "Elegir escudo",
+      "change": "Cambiar escudo",
+      "remove": "Quitar escudo",
+      "preview": "Escudo del club",
+      "preparing": "Preparando el escudo…",
+      "unreadable": "No pudimos usar esa imagen. Probá con otra en JPG, PNG o WebP.",
+      "uploadFailed": "Creamos el club, pero no pudimos subir el escudo.",
+      "retry": "Reintentar",
+      "skip": "Seguir sin escudo"
+    },
+    "colors": {
+      "primary": "Color principal (opcional)",
+      "secondary": "Color secundario (opcional)",
+      "none": "Sin color",
+      "custom": "Otro color",
+      "adjusted": "Para que el texto se lea bien, la app usa un tono más oscuro de este color.",
+      "swatches": {
+        "red": "Rojo",
+        "maroon": "Bordó",
+        "orange": "Naranja",
+        "yellow": "Amarillo",
+        "green": "Verde",
+        "skyBlue": "Celeste",
+        "blue": "Azul",
+        "violet": "Violeta",
+        "black": "Negro",
+        "white": "Blanco"
+      }
+    },
+    "preview": "Así se va a ver",
+    "next": "Seguir",
+    "category": {
+      "title": "¿También dirigís una categoría?",
+      "body": "Si sos DT, creamos tu categoría y quedás como su DT.",
+      "yes": "Sí, soy DT",
+      "no": "No, solo coordino",
+      "choose": "Elegí una opción.",
+      "name": "Nombre de la categoría",
+      "nameHint": "Por ejemplo: Primera, Sub-17 o Femenino.",
+      "format": "Modalidad"
+    },
+    "submit": "Crear club",
+    "fieldErrors": {
+      "required": "Completá este dato.",
+      "tooShort": "Es demasiado corto: al menos {min} caracteres.",
+      "tooLong": "Es demasiado largo: hasta {max} caracteres."
+    }
+  },
+  "categoryFormats": {
+    "f11": "Fútbol 11",
+    "f9": "Fútbol 9",
+    "f8": "Fútbol 8",
+    "f7": "Fútbol 7",
+    "f5": "Fútbol 5",
+    "futsal": "Futsal"
+  },
+  "staffRoles": {
+    "dt": "DT",
+    "coach": "Profe"
+  },
+  "portal": {
+    "nav": {
+      "label": "Secciones del club",
+      "home": "Inicio",
+      "profile": "Perfil"
+    },
+    "home": {
+      "categories": "Tus categorías",
+      "events": {
+        "title": "Todavía no hay actividades",
+        "body": "Acá vas a ver las próximas prácticas y partidos, y quién confirmó."
+      }
+    }
   }
 }

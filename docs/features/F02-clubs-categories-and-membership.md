@@ -65,6 +65,11 @@ As a club coordinator or DT, I want to create my club so that I can bring my cat
 - On creation I become Owner and Club Admin (BR-ROLE-06), and I am asked "¿También dirigís una categoría?". If yes, I create or select a category and become its DT.
 - I land on the club home. Once CLUB-15 ships (GA), the home shows the admin onboarding checklist.
 
+**Notes**
+- The first-run choice is on Inicio for signed-in users with no club ([UX § 3.4](../ux/01-information-architecture-and-flows.md#34-before-joining-a-club)).
+- The category question is the last step of the form, before the club is saved: the club and the creator's first category are created together. Only "create" applies here, since a new club has no categories to select.
+- The apps offer Uruguay and Argentina; the API accepts any ISO 3166-1 country code.
+
 ### CLUB-02 · Edit club profile and settings
 **Release:** R1 · **Priority:** Must · **Size:** S · **Platforms:** Web, Mobile
 

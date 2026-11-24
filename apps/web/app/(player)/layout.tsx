@@ -1,4 +1,5 @@
 import { ClubTheme } from '@/components/club-theme';
+import { CurrentClubTheme } from '@/components/current-club-theme';
 import { LegalGate } from '@/components/legal-gate';
 import { ProfileGate } from '@/components/profile-gate';
 import { Providers } from '@/components/providers';
@@ -10,8 +11,10 @@ export default function PlayerLayout({ children }: { children: React.ReactNode }
       <ClubTheme primaryColor={null}>
         <LegalGate>
           <ProfileGate>
-            {children}
-            <TabBar />
+            <CurrentClubTheme>
+              {children}
+              <TabBar />
+            </CurrentClubTheme>
           </ProfileGate>
         </LegalGate>
       </ClubTheme>

@@ -43,6 +43,8 @@ Bottom tabs:
 5. **Perfil**: profile, player data per club, notifications, privacy (consents), settings, sign out.
 
 ### 3.2 Mobile: users with any staff role
+Club Admins get this navigation too, even without a staff role (CLUB-01).
+
 Bottom tabs:
 1. **Inicio**: staff dashboard:
    - next events with response counts and warnings;
@@ -62,7 +64,16 @@ A **category selector** in the header filters staff tabs when the user has sever
 Left sidebar: **Inicio** · **Calendario** · **Plantel** (categories, members, requests, invite links) · **Asistencia** (analytics) · **Estado físico** (R2) · **Biblioteca** (R2) · **Planificación** (plans and templates, R2) · **Rutinas** and **Nutrición** (R3) · **Asistente IA** (R3) · **Club** (settings, admins, venues, AI usage).
 Top bar: club switcher, category filter, inbox, profile.
 
-### 3.4 Web: public and player pages
+The portal lives under `/portal`, for Club Admins and staff of the current club. Opening Inicio (`/`) with that navigation goes to `/portal`, and `/portal` sends everyone else back to `/`. CLUB-01 ships a bare frame: the club crest and name, Inicio and Perfil. The top bar comes with AUTH-11 and each section with its story.
+
+### 3.4 Before joining a club
+After profile completion (S-02), a user with no club sees a first-run choice on Inicio, on both platforms:
+- **Crear un club** opens club creation (S-11, CLUB-01).
+- **Tengo un link de invitación** explains how to open the invite link on that device (AUTH-06).
+
+Club creation asks for the club's details, then "¿También dirigís una categoría?", and saves both together. The creator then lands on the staff home (S-05). The current club is remembered on the device. AUTH-11 adds switching between clubs.
+
+### 3.5 Web: public and player pages
 - Public: `/e/{token}` (event landing), `/j/{code}` (invite), `/c/{token}` (claim), `/consent/{token}` (guardian), `/delete-account`, legal pages (`/legal/terms`, `/legal/privacy`).
 - Player web: a responsive equivalent of the mobile player tabs, with a persistent "Descargá la app para recibir recordatorios" banner.
 

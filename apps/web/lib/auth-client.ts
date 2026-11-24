@@ -3,6 +3,7 @@ import { emailOTPClient } from 'better-auth/client/plugins';
 
 import { identifyUser, resetAnalytics } from '@/lib/analytics';
 import { apiUrl } from '@/lib/api-client';
+import { forgetCurrentClub } from '@/lib/current-club-store';
 import { errorMessageKey, type MessageKey } from '@/lib/messages';
 import { signInPath } from '@/lib/next-path';
 
@@ -63,6 +64,7 @@ export const signInWithProvider = (provider: SocialProvider, next: string) =>
 
 export async function signOut() {
   await attempt(() => authClient().signOut());
+  forgetCurrentClub();
   resetAnalytics();
   window.location.assign(signInPath('/'));
 }
