@@ -21,7 +21,7 @@
     "@repo/config": "workspace:*",
     "husky": "9.1.7",
     "prettier": "catalog:",
-    "turbo": "2.11.10"
+    "turbo": "2.11.11"
   },
   "devEngines": {
     "runtime": {

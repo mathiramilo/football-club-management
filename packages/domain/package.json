@@ -21,6 +21,6 @@
     "@repo/config": "workspace:*",
     "eslint": "catalog:",
     "typescript": "catalog:",
-    "vitest": "5.0.5"
+    "vitest": "5.1.0"
   }
 }
