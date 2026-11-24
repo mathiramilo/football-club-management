@@ -3,11 +3,10 @@ import { ChevronLeftIcon } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ClubStripes } from '@/components/club-stripes';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
-
-const stripes = Array.from({ length: 16 }, (_, index) => index);
 
 export function ClubHeader({
   title,
@@ -23,11 +22,7 @@ export function ClubHeader({
   return (
     <View className="overflow-hidden bg-club">
       <StatusBar style="light" />
-      <View aria-hidden pointerEvents="none" className="absolute inset-0 flex-row">
-        {stripes.map((stripe) => (
-          <View key={stripe} className={cn('w-7.5', stripe % 2 === 1 && 'bg-white/7')} />
-        ))}
-      </View>
+      <ClubStripes />
       <SafeAreaView edges={['top']}>
         <View
           className={cn('flex-row items-center gap-1.5 pt-3 pr-4 pb-5', back ? 'pl-2' : 'pl-5')}

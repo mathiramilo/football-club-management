@@ -60,6 +60,7 @@ function RootStack() {
       <Stack.Protected guard={!mustUpdate}>
         <Stack.Protected guard={isLegalAccepted && profileGate === 'complete'}>
           <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="create-club" />
         </Stack.Protected>
         <Stack.Protected guard={isLegalAccepted && profileGate !== 'complete'}>
           <Stack.Screen name="profile-completion" options={{ gestureEnabled: false }} />

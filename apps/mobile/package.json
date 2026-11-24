@@ -20,6 +20,7 @@
     "@react-native-google-signin/google-signin": "16.2.0",
     "@repo/api-client": "workspace:*",
     "@repo/contracts": "workspace:*",
+    "@repo/domain": "workspace:*",
     "@repo/i18n": "workspace:*",
     "@repo/ui-tokens": "workspace:*",
     "@sentry/react-native": "8.28.0",

@@ -3,6 +3,10 @@
     "empty": {
       "title": "Todavía no hay actividades",
       "body": "Cuando te sumes a un equipo, acá vas a ver las prácticas y los partidos."
+    },
+    "staffEmpty": {
+      "title": "Todavía no hay actividades",
+      "body": "Acá vas a ver las prácticas y los partidos de tus categorías."
     }
   },
   "app": {
@@ -68,10 +72,6 @@
     "VALIDATION_FAILED": "Revisá los datos y probá de nuevo."
   },
   "home": {
-    "empty": {
-      "title": "Todavía no estás en un equipo",
-      "body": "Pedile a tu DT el link de invitación y abrilo en este teléfono."
-    },
     "noClub": {
       "title": "¿Cómo querés empezar?",
       "body": "Para usar la app tenés que ser parte de un club.",
@@ -91,7 +91,8 @@
       }
     },
     "loadFailed": "No pudimos cargar tus clubes.",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "offline": "Necesitás conexión para cargar tus clubes. Probá de nuevo cuando tengas señal."
   },
   "legalAcceptance": {
     "title": "Antes de empezar",
@@ -111,7 +112,9 @@
       "home": "Inicio",
       "agenda": "Agenda",
       "team": "Equipo",
-      "profile": "Perfil"
+      "profile": "Perfil",
+      "squad": "Plantel",
+      "more": "Más"
     },
     "label": "Secciones"
   },
@@ -168,6 +171,12 @@
     "empty": {
       "title": "Acá vas a ver a tu equipo",
       "body": "Cuando te sumes, vas a ver a tus compañeros ordenados por línea."
+    }
+  },
+  "squad": {
+    "empty": {
+      "title": "Acá vas a ver tu plantel",
+      "body": "Cuando se sumen jugadores con tu link de invitación, los vas a ver por categoría."
     }
   },
   "updateRequired": {
@@ -236,9 +245,14 @@
     "shortName": "Nombre corto (opcional)",
     "shortNameHint": "Se usa donde hay poco espacio.",
     "country": "País",
+    "countries": {
+      "UY": "Uruguay",
+      "AR": "Argentina"
+    },
     "timezone": "Zona horaria",
     "timezoneHint": "Los horarios de las actividades se muestran en esta zona.",
     "timezoneOption": "{zone} ({city})",
+    "timezoneCity": "Hora de {city}",
     "crest": {
       "label": "Escudo (opcional)",
       "hint": "Queda mejor con fondo transparente.",
@@ -284,6 +298,7 @@
       "format": "Modalidad"
     },
     "submit": "Crear club",
+    "offline": "Necesitás conexión para crear el club. Probá de nuevo cuando tengas señal.",
     "fieldErrors": {
       "required": "Completá este dato.",
       "tooShort": "Es demasiado corto: al menos {min} caracteres.",

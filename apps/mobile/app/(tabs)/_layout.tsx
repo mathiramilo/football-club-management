@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import {
   CalendarDaysIcon,
+  EllipsisIcon,
   HouseIcon,
   type LucideIcon,
   UserIcon,
@@ -12,6 +13,7 @@ import { View } from 'react-native';
 import { ClubTheme } from '@/components/club-theme';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
+import { useCurrentClub } from '@/lib/current-club';
 import { cn } from '@/lib/utils';
 
 function tabIcon(glyph: LucideIcon) {
@@ -44,9 +46,12 @@ function TabLabel({ focused, children }: { focused: boolean; children: string })
 
 export default function TabsLayout() {
   const intl = useIntl();
+  const current = useCurrentClub();
+  const club = current.status === 'ready' ? current.membership.club : null;
+  const isStaff = current.status === 'ready' && current.isStaff;
 
   return (
-    <ClubTheme primaryColor={null}>
+    <ClubTheme primaryColor={club?.primaryColor}>
       <Tabs screenOptions={{ headerShown: false, tabBarLabel: TabLabel }}>
         <Tabs.Screen
           name="index"
@@ -62,20 +67,42 @@ export default function TabsLayout() {
             tabBarIcon: tabIcon(CalendarDaysIcon),
           }}
         />
-        <Tabs.Screen
-          name="team"
-          options={{
-            title: intl.formatMessage({ id: 'nav.tabs.team' }),
-            tabBarIcon: tabIcon(UsersIcon),
-          }}
-        />
-        <Tabs.Screen
-          name="profile"
-          options={{
-            title: intl.formatMessage({ id: 'nav.tabs.profile' }),
-            tabBarIcon: tabIcon(UserIcon),
-          }}
-        />
+        <Tabs.Protected guard={!isStaff}>
+          <Tabs.Screen
+            name="team"
+            options={{
+              title: intl.formatMessage({ id: 'nav.tabs.team' }),
+              tabBarIcon: tabIcon(UsersIcon),
+            }}
+          />
+        </Tabs.Protected>
+        <Tabs.Protected guard={isStaff}>
+          <Tabs.Screen
+            name="squad"
+            options={{
+              title: intl.formatMessage({ id: 'nav.tabs.squad' }),
+              tabBarIcon: tabIcon(UsersIcon),
+            }}
+          />
+        </Tabs.Protected>
+        <Tabs.Protected guard={!isStaff}>
+          <Tabs.Screen
+            name="profile"
+            options={{
+              title: intl.formatMessage({ id: 'nav.tabs.profile' }),
+              tabBarIcon: tabIcon(UserIcon),
+            }}
+          />
+        </Tabs.Protected>
+        <Tabs.Protected guard={isStaff}>
+          <Tabs.Screen
+            name="more"
+            options={{
+              title: intl.formatMessage({ id: 'nav.tabs.more' }),
+              tabBarIcon: tabIcon(EllipsisIcon),
+            }}
+          />
+        </Tabs.Protected>
       </Tabs>
     </ClubTheme>
   );
