@@ -61,6 +61,10 @@ function RootStack() {
         <Stack.Protected guard={isLegalAccepted && profileGate === 'complete'}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="create-club" />
+          <Stack.Screen
+            name="create-invite-link"
+            options={{ headerShown: true, presentation: 'modal' }}
+          />
         </Stack.Protected>
         <Stack.Protected guard={isLegalAccepted && profileGate !== 'complete'}>
           <Stack.Screen name="profile-completion" options={{ gestureEnabled: false }} />
