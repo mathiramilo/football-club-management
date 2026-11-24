@@ -41,6 +41,10 @@ class ReportsController {
 @Module({ controllers: [ReportsController] })
 class ReportsTestModule {}
 
+// The code is letters that never occur in the hex IDs and timestamps of a Sentry event, so the
+// assertion below can only match a leak.
+const signInCode = 'zqxkvw';
+
 describe('Errors reported to Sentry (TECH-10, NFR-OBS-01)', () => {
   const reported = captureSentryEvents();
   let app: INestApplication<App>;
@@ -66,7 +70,7 @@ describe('Errors reported to Sentry (TECH-10, NFR-OBS-01)', () => {
     const { owner } = cast.actors;
 
     const response = await as(app, owner)
-      .get(`${path('crash')}?code=4821`)
+      .get(`${path('crash')}?code=${signInCode}`)
       .expect(500);
 
     await expect.poll(() => reported).toHaveLength(1);
@@ -75,7 +79,8 @@ describe('Errors reported to Sentry (TECH-10, NFR-OBS-01)', () => {
       user: { id: owner.userId },
       tags: { club_id: cast.club.id, request_id: response.headers['x-request-id'] },
     });
-    expect(JSON.stringify(reported)).not.toMatch(/lucia\.prueba|4821/);
+    expect(JSON.stringify(reported)).not.toContain('lucia.prueba');
+    expect(JSON.stringify(reported)).not.toContain(signInCode);
     expect(JSON.stringify(reported)).not.toContain(owner.token);
   });
 
