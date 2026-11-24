@@ -1,7 +1,7 @@
 'use client';
 
 import { usesStaffNavigation } from '@repo/domain';
-import { HouseIcon, ShieldIcon, UserIcon } from 'lucide-react';
+import { HouseIcon, ShieldIcon, UserIcon, UsersIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 
 const links = [
   { href: '/portal', label: 'home', icon: HouseIcon },
+  { href: '/portal/squad', label: 'squad', icon: UsersIcon },
   { href: '/profile', label: 'profile', icon: UserIcon },
 ] as const;
 

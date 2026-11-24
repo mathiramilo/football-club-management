@@ -163,7 +163,7 @@ Profile photos (AUTH-05) and club crests (CLUB-01) take the short path: the clie
 - The UI always shows sync state: queued, syncing or failed with retry.
 
 ### 6.9 Deep links and link previews
-- Public routes on the web domain: `/e/{shareToken}` (event), `/j/{code}` (invite), `/c/{claimToken}` (claim), `/consent/{token}` (guardian), `/delete-account` (info).
+- Public routes on the web domain: `/e/{shareToken}` (event), `/j/{inviteToken}` (invite), `/c/{claimToken}` (claim), `/consent/{token}` (guardian), `/delete-account` (info).
 - iOS universal links and Android App Links open the app for `/e`, `/j` and `/c` when it is installed. The web app serves `/.well-known/apple-app-site-association` and `/.well-known/assetlinks.json` for the builds each environment lists (`APPLE_TEAM_ID`, `APP_LINKS_APP_IDS`, `ANDROID_CERT_FINGERPRINTS`).
 - Event and invite pages render Open Graph tags and a generated OG image (crest, title, date) for WhatsApp previews, never with personal data (EVT-07).
 
