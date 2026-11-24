@@ -25,10 +25,15 @@ import type {
   ClubUploadResponse,
   CreateClubBody,
   CreateClubUploadBody,
+  CreateInviteLinkBody,
+  InviteLink,
+  InviteLinksResponse,
+  InvitePreview,
   MyClub,
   MyClubsResponse,
   ProblemDetails,
   SetClubCrestBody,
+  UpdateInviteLinkBody,
 } from '../model';
 
 import { apiFetch } from '../../api-fetch';
@@ -505,3 +510,513 @@ export const useClubCrestRemove = <TError = ErrorType<ProblemDetails>, TContext 
 > => {
   return useMutation(getClubCrestRemoveMutationOptions(options), queryClient);
 };
+export const getInviteLinksListUrl = (clubId: string, categoryId: string) => {
+  return `/v1/clubs/${clubId}/categories/${categoryId}/invite-links`;
+};
+
+export const inviteLinksList = async (
+  clubId: string,
+  categoryId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<InviteLinksResponse> => {
+  return apiFetch<InviteLinksResponse>(getInviteLinksListUrl(clubId, categoryId), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getInviteLinksListQueryKey = (clubId: string, categoryId: string) => {
+  return [`/v1/clubs/${clubId}/categories/${categoryId}/invite-links`] as const;
+};
+
+export const getInviteLinksListQueryOptions = <
+  TData = Awaited<ReturnType<typeof inviteLinksList>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  clubId: string,
+  categoryId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof inviteLinksList>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getInviteLinksListQueryKey(clubId, categoryId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof inviteLinksList>>> = ({ signal }) =>
+    inviteLinksList(clubId, categoryId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled:
+      clubId !== null && clubId !== undefined && categoryId !== null && categoryId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof inviteLinksList>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type InviteLinksListQueryResult = NonNullable<Awaited<ReturnType<typeof inviteLinksList>>>;
+export type InviteLinksListQueryError = ErrorType<ProblemDetails>;
+
+export function useInviteLinksList<
+  TData = Awaited<ReturnType<typeof inviteLinksList>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  clubId: string,
+  categoryId: string,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof inviteLinksList>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof inviteLinksList>>,
+          TError,
+          Awaited<ReturnType<typeof inviteLinksList>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useInviteLinksList<
+  TData = Awaited<ReturnType<typeof inviteLinksList>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  clubId: string,
+  categoryId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof inviteLinksList>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof inviteLinksList>>,
+          TError,
+          Awaited<ReturnType<typeof inviteLinksList>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useInviteLinksList<
+  TData = Awaited<ReturnType<typeof inviteLinksList>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  clubId: string,
+  categoryId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof inviteLinksList>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useInviteLinksList<
+  TData = Awaited<ReturnType<typeof inviteLinksList>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  clubId: string,
+  categoryId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof inviteLinksList>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getInviteLinksListQueryOptions(clubId, categoryId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getInviteLinksCreateUrl = (clubId: string, categoryId: string) => {
+  return `/v1/clubs/${clubId}/categories/${categoryId}/invite-links`;
+};
+
+export const inviteLinksCreate = async (
+  clubId: string,
+  categoryId: string,
+  createInviteLinkBody: CreateInviteLinkBody,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<InviteLink> => {
+  return apiFetch<InviteLink>(getInviteLinksCreateUrl(clubId, categoryId), {
+    ...options,
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(createInviteLinkBody),
+  });
+};
+
+export const getInviteLinksCreateMutationKey = () => ['inviteLinksCreate'] as const;
+
+export const getInviteLinksCreateMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof inviteLinksCreate>>,
+    TError,
+    InviteLinksCreateMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof inviteLinksCreate>>,
+  TError,
+  InviteLinksCreateMutationVariables,
+  TContext
+> => {
+  const mutationKey = getInviteLinksCreateMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof inviteLinksCreate>>,
+    InviteLinksCreateMutationVariables
+  > = (props) => {
+    const { clubId, categoryId, data } = props ?? {};
+
+    return inviteLinksCreate(clubId, categoryId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type InviteLinksCreateMutationResult = NonNullable<
+  Awaited<ReturnType<typeof inviteLinksCreate>>
+>;
+export type InviteLinksCreateMutationBody = BodyType<CreateInviteLinkBody>;
+export type InviteLinksCreateMutationError = ErrorType<ProblemDetails>;
+export type InviteLinksCreateMutationVariables = {
+  clubId: string;
+  categoryId: string;
+  data: BodyType<CreateInviteLinkBody>;
+};
+
+export const useInviteLinksCreate = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof inviteLinksCreate>>,
+      TError,
+      InviteLinksCreateMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof inviteLinksCreate>>,
+  TError,
+  InviteLinksCreateMutationVariables,
+  TContext
+> => {
+  return useMutation(getInviteLinksCreateMutationOptions(options), queryClient);
+};
+export const getInviteLinksUpdateUrl = (clubId: string, categoryId: string, linkId: string) => {
+  return `/v1/clubs/${clubId}/categories/${categoryId}/invite-links/${linkId}`;
+};
+
+export const inviteLinksUpdate = async (
+  clubId: string,
+  categoryId: string,
+  linkId: string,
+  updateInviteLinkBody: UpdateInviteLinkBody,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<InviteLink> => {
+  return apiFetch<InviteLink>(getInviteLinksUpdateUrl(clubId, categoryId, linkId), {
+    ...options,
+    method: 'PATCH',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(updateInviteLinkBody),
+  });
+};
+
+export const getInviteLinksUpdateMutationKey = () => ['inviteLinksUpdate'] as const;
+
+export const getInviteLinksUpdateMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof inviteLinksUpdate>>,
+    TError,
+    InviteLinksUpdateMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof inviteLinksUpdate>>,
+  TError,
+  InviteLinksUpdateMutationVariables,
+  TContext
+> => {
+  const mutationKey = getInviteLinksUpdateMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof inviteLinksUpdate>>,
+    InviteLinksUpdateMutationVariables
+  > = (props) => {
+    const { clubId, categoryId, linkId, data } = props ?? {};
+
+    return inviteLinksUpdate(clubId, categoryId, linkId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type InviteLinksUpdateMutationResult = NonNullable<
+  Awaited<ReturnType<typeof inviteLinksUpdate>>
+>;
+export type InviteLinksUpdateMutationBody = BodyType<UpdateInviteLinkBody>;
+export type InviteLinksUpdateMutationError = ErrorType<ProblemDetails>;
+export type InviteLinksUpdateMutationVariables = {
+  clubId: string;
+  categoryId: string;
+  linkId: string;
+  data: BodyType<UpdateInviteLinkBody>;
+};
+
+export const useInviteLinksUpdate = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof inviteLinksUpdate>>,
+      TError,
+      InviteLinksUpdateMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof inviteLinksUpdate>>,
+  TError,
+  InviteLinksUpdateMutationVariables,
+  TContext
+> => {
+  return useMutation(getInviteLinksUpdateMutationOptions(options), queryClient);
+};
+export const getInviteLinksRevokeUrl = (clubId: string, categoryId: string, linkId: string) => {
+  return `/v1/clubs/${clubId}/categories/${categoryId}/invite-links/${linkId}`;
+};
+
+export const inviteLinksRevoke = async (
+  clubId: string,
+  categoryId: string,
+  linkId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<void> => {
+  return apiFetch<void>(getInviteLinksRevokeUrl(clubId, categoryId, linkId), {
+    ...options,
+    method: 'DELETE',
+  });
+};
+
+export const getInviteLinksRevokeMutationKey = () => ['inviteLinksRevoke'] as const;
+
+export const getInviteLinksRevokeMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof inviteLinksRevoke>>,
+    TError,
+    InviteLinksRevokeMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof inviteLinksRevoke>>,
+  TError,
+  InviteLinksRevokeMutationVariables,
+  TContext
+> => {
+  const mutationKey = getInviteLinksRevokeMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof inviteLinksRevoke>>,
+    InviteLinksRevokeMutationVariables
+  > = (props) => {
+    const { clubId, categoryId, linkId } = props ?? {};
+
+    return inviteLinksRevoke(clubId, categoryId, linkId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type InviteLinksRevokeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof inviteLinksRevoke>>
+>;
+
+export type InviteLinksRevokeMutationError = ErrorType<ProblemDetails>;
+export type InviteLinksRevokeMutationVariables = {
+  clubId: string;
+  categoryId: string;
+  linkId: string;
+};
+
+export const useInviteLinksRevoke = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof inviteLinksRevoke>>,
+      TError,
+      InviteLinksRevokeMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof inviteLinksRevoke>>,
+  TError,
+  InviteLinksRevokeMutationVariables,
+  TContext
+> => {
+  return useMutation(getInviteLinksRevokeMutationOptions(options), queryClient);
+};
+export const getPublicInvitesPreviewUrl = (token: string) => {
+  return `/v1/public/invites/${token}`;
+};
+
+export const publicInvitesPreview = async (
+  token: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<InvitePreview> => {
+  return apiFetch<InvitePreview>(getPublicInvitesPreviewUrl(token), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getPublicInvitesPreviewQueryKey = (token: string) => {
+  return [`/v1/public/invites/${token}`] as const;
+};
+
+export const getPublicInvitesPreviewQueryOptions = <
+  TData = Awaited<ReturnType<typeof publicInvitesPreview>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  token: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof publicInvitesPreview>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getPublicInvitesPreviewQueryKey(token);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof publicInvitesPreview>>> = ({ signal }) =>
+    publicInvitesPreview(token, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: token !== null && token !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof publicInvitesPreview>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type PublicInvitesPreviewQueryResult = NonNullable<
+  Awaited<ReturnType<typeof publicInvitesPreview>>
+>;
+export type PublicInvitesPreviewQueryError = ErrorType<ProblemDetails>;
+
+export function usePublicInvitesPreview<
+  TData = Awaited<ReturnType<typeof publicInvitesPreview>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  token: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof publicInvitesPreview>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof publicInvitesPreview>>,
+          TError,
+          Awaited<ReturnType<typeof publicInvitesPreview>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function usePublicInvitesPreview<
+  TData = Awaited<ReturnType<typeof publicInvitesPreview>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  token: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof publicInvitesPreview>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof publicInvitesPreview>>,
+          TError,
+          Awaited<ReturnType<typeof publicInvitesPreview>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function usePublicInvitesPreview<
+  TData = Awaited<ReturnType<typeof publicInvitesPreview>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  token: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof publicInvitesPreview>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function usePublicInvitesPreview<
+  TData = Awaited<ReturnType<typeof publicInvitesPreview>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  token: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof publicInvitesPreview>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getPublicInvitesPreviewQueryOptions(token, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}

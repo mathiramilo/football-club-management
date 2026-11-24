@@ -6,6 +6,7 @@ import { type LoggerOptions, stdTimeFunctions } from 'pino';
 import type { Options as HttpLoggerOptions } from 'pino-http';
 
 import type { Env } from '../config/env.js';
+import { scrubPath } from '../observability/scrub-path.js';
 import type { RequestContext } from '../request-context.js';
 
 const REDACTED_KEYS = [
@@ -53,7 +54,8 @@ export function loggerOptions({
   };
 }
 
-// Query strings carry OAuth codes on Better Auth's callbacks, and headers carry the session, so neither is logged.
+// Query strings carry OAuth codes on Better Auth's callbacks, some paths carry invite tokens, and headers
+// carry the session, so none of them is logged.
 export function requestLoggingOptions(): HttpLoggerOptions {
   return {
     autoLogging: {
@@ -65,7 +67,7 @@ export function requestLoggingOptions(): HttpLoggerOptions {
     serializers: {
       req: (request: { method: string; url: string }) => ({
         method: request.method,
-        path: pathOf(request.url),
+        path: scrubPath(request.url),
       }),
       res: (response: { statusCode: number }) => ({ status: response.statusCode }),
     },

@@ -8,11 +8,32 @@ import { ClubCrestService } from './club-crest.service.js';
 import { ClubsController } from './clubs.controller.js';
 import { ClubsRepository } from './clubs.repository.js';
 import { ClubsService } from './clubs.service.js';
+import { InviteCategoryLoader, InviteLinkLoader } from './invite-link-scopes.js';
+import { InviteLinksController } from './invite-links.controller.js';
+import { InviteLinksRepository } from './invite-links.repository.js';
+import { InviteLinksService } from './invite-links.service.js';
+import { InviteTokens } from './invite-tokens.js';
 import { MyClubsController } from './my-clubs.controller.js';
+import { PublicInvitesController } from './public-invites.controller.js';
 
 @Module({
   imports: [AnalyticsModule, ClockModule, MediaModule],
-  controllers: [ClubsController, MyClubsController, ClubCrestController],
-  providers: [ClubCrestService, ClubsRepository, ClubsService],
+  controllers: [
+    ClubsController,
+    MyClubsController,
+    ClubCrestController,
+    InviteLinksController,
+    PublicInvitesController,
+  ],
+  providers: [
+    ClubCrestService,
+    ClubsRepository,
+    ClubsService,
+    InviteCategoryLoader,
+    InviteLinkLoader,
+    InviteLinksRepository,
+    InviteLinksService,
+    InviteTokens,
+  ],
 })
 export class ClubsModule {}

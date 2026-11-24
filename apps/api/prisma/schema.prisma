@@ -189,6 +189,7 @@ model Club {
   categories          Category[]
   clubMemberships     ClubMembership[]
   categoryMemberships CategoryMembership[]
+  inviteLinks         InviteLink[]
   venues              Venue[]
   events              Event[]
   eventCategories     EventCategory[]
@@ -215,6 +216,7 @@ model Category {
   club                Club                 @relation(fields: [clubId], references: [id])
   categoryMemberships CategoryMembership[]
   eventCategories     EventCategory[]
+  inviteLinks         InviteLink[]
 
   @@unique([id, clubId])
   @@index([clubId])
@@ -277,6 +279,34 @@ model CategoryMembership {
   @@index([clubMembershipId])
   @@index([clubId])
   @@map("category_memberships")
+}
+
+model InviteLink {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  clubId           String    @map("club_id") @db.Uuid
+  categoryId       String    @map("category_id") @db.Uuid
+  role             String
+  isDefault        Boolean   @default(false) @map("is_default")
+  tokenHash        String    @unique @map("token_hash")
+  code             String    @unique
+  requiresApproval Boolean   @map("requires_approval")
+  expiresAt        DateTime? @map("expires_at") @db.Timestamptz(6)
+  maxUses          Int?      @map("max_uses")
+  usesCount        Int       @default(0) @map("uses_count")
+  revokedAt        DateTime? @map("revoked_at") @db.Timestamptz(6)
+  createdBy        String?   @map("created_by") @db.Uuid
+  updatedBy        String?   @map("updated_by") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  club     Club     @relation(fields: [clubId], references: [id])
+  category Category @relation(fields: [categoryId, clubId], references: [id, clubId])
+
+  @@unique([id, clubId])
+  @@unique([categoryId], map: "invite_links_one_default_per_category", where: raw("is_default AND revoked_at IS NULL"))
+  @@index([clubId])
+  @@index([categoryId, createdAt], where: raw("revoked_at IS NULL"))
+  @@map("invite_links")
 }
 
 model Venue {

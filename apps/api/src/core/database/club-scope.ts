@@ -6,6 +6,7 @@ export interface ClubContext {
 
 export const CLUB_OWNED_MODELS = [
   'Category',
+  'InviteLink',
   'ClubMembership',
   'CategoryMembership',
   'Venue',

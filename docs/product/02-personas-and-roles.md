@@ -121,6 +121,8 @@ Legend: ✅ allowed · 🔸 allowed with the limitation noted · — not allowed
 | Edit category settings (defaults, reminders, visibility) | ✅ | ✅ | ✅ | — | — |
 | Create player invite links | ✅ | ✅ | ✅ | 🔸 approval always required (BR-CLUB-08) | — |
 | Create staff invite links | ✅ | ✅ | 🔸 Coach role only | — | — |
+| See, share and revoke invite links | ✅ | ✅ | 🔸 player and Coach links | 🔸 player links that require approval; revoke only their own | — |
+| Turn approval on or off on a player link | ✅ | ✅ | ✅ | — | — |
 | Approve or reject join requests | ✅ | ✅ | 🔸 player and Coach requests; DT requests need a Club Admin (BR-CLUB-09) | — | — |
 | Add, move or remove players | ✅ | ✅ | 🔸 add any club member to own categories; move only between own categories; remove from own categories (CLUB-10) | — | — |
 | Assign staff roles | ✅ | ✅ | 🔸 Coach role in own categories | — | — |

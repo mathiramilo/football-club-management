@@ -498,6 +498,268 @@
           "clubs"
         ]
       }
+    },
+    "/v1/clubs/{clubId}/categories/{categoryId}/invite-links": {
+      "get": {
+        "operationId": "inviteLinksList",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "clubId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteLinksResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Problem details (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "clubs"
+        ]
+      },
+      "post": {
+        "operationId": "inviteLinksCreate",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "clubId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInviteLinkBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteLink"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Problem details (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "clubs"
+        ]
+      }
+    },
+    "/v1/clubs/{clubId}/categories/{categoryId}/invite-links/{linkId}": {
+      "patch": {
+        "operationId": "inviteLinksUpdate",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "linkId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "clubId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInviteLinkBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteLink"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Problem details (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "clubs"
+        ]
+      },
+      "delete": {
+        "operationId": "inviteLinksRevoke",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "linkId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "clubId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "default": {
+            "description": "Problem details (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "clubs"
+        ]
+      }
+    },
+    "/v1/public/invites/{token}": {
+      "get": {
+        "operationId": "publicInvitesPreview",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvitePreview"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Problem details (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "clubs"
+        ],
+        "security": []
+      }
     }
   },
   "info": {
@@ -1233,6 +1495,227 @@
           "uploadKey"
         ]
       },
+      "InviteLinksResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InviteLink"
+            },
+            "description": "Active links the caller may share: not revoked, expired or used up. The default link first, then newest first"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "InviteLink": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "role": {
+            "type": "string",
+            "x-extensible-enum": [
+              "player",
+              "coach",
+              "dt"
+            ]
+          },
+          "isDefault": {
+            "type": "boolean",
+            "description": "The category's player link: it never expires and has no use limit (CLUB-05)"
+          },
+          "token": {
+            "type": "string",
+            "description": "The link is <web origin>/j/<token>"
+          },
+          "requiresApproval": {
+            "type": "boolean"
+          },
+          "expiresAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "maxUses": {
+            "nullable": true,
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "usesCount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "canRevoke": {
+            "type": "boolean"
+          },
+          "canChangeApproval": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "categoryId",
+          "role",
+          "isDefault",
+          "token",
+          "requiresApproval",
+          "expiresAt",
+          "maxUses",
+          "usesCount",
+          "createdAt",
+          "canRevoke",
+          "canChangeApproval"
+        ],
+        "additionalProperties": false
+      },
+      "CreateInviteLinkBody": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "player",
+              "coach",
+              "dt"
+            ]
+          },
+          "requiresApproval": {
+            "description": "Default true. Only player links created by a DT or Club Admin may turn it off (BR-CLUB-08)",
+            "type": "boolean"
+          },
+          "expiresInDays": {
+            "description": "Default 30 (BR-AUTH-10)",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 90
+          },
+          "maxUses": {
+            "nullable": true,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          }
+        },
+        "required": [
+          "role"
+        ]
+      },
+      "UpdateInviteLinkBody": {
+        "type": "object",
+        "properties": {
+          "requiresApproval": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "requiresApproval"
+        ]
+      },
+      "InvitePreview": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "x-extensible-enum": [
+              "active",
+              "expired",
+              "revoked",
+              "used_up"
+            ]
+          },
+          "role": {
+            "type": "string",
+            "x-extensible-enum": [
+              "player",
+              "coach",
+              "dt"
+            ]
+          },
+          "club": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "shortName": {
+                "nullable": true,
+                "type": "string"
+              },
+              "primaryColor": {
+                "nullable": true,
+                "type": "string"
+              },
+              "crest": {
+                "nullable": true,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ClubCrest"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "shortName",
+              "primaryColor",
+              "crest"
+            ],
+            "additionalProperties": false
+          },
+          "category": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "format": {
+                "type": "string",
+                "x-extensible-enum": [
+                  "f11",
+                  "f9",
+                  "f8",
+                  "f7",
+                  "f5",
+                  "futsal"
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "format"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "status",
+          "role",
+          "club",
+          "category"
+        ],
+        "additionalProperties": false,
+        "description": "What the link invites to, shown before sign-in (BR-AUTH-09). No personal data"
+      },
       "ProblemDetails": {
         "type": "object",
         "properties": {
@@ -1269,7 +1752,8 @@
               "UNDER_MINIMUM_AGE",
               "BIRTHDATE_LOCKED",
               "UPLOAD_NOT_FOUND",
-              "UPLOAD_INVALID"
+              "UPLOAD_INVALID",
+              "INVITE_LINK_APPROVAL_REQUIRED"
             ]
           },
           "detail": {
