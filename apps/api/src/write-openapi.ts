@@ -11,6 +11,7 @@ if (!outputPath) throw new Error('Usage: node dist/write-openapi.js <output path
 // The env schema requires these at import time, but preview mode never connects or signs anything.
 process.env.DATABASE_URL ??= 'postgresql://openapi@localhost:5432/openapi';
 process.env.BETTER_AUTH_SECRET ??= 'openapi-document-only-never-used-0123456789';
+process.env.INVITE_LINK_SECRET ??= 'openapi-document-only-never-used-0123456789';
 
 const { AppModule } = await import('./app.module.js');
 const app = await NestFactory.create(AppModule, { preview: true, logger: ['error'] });

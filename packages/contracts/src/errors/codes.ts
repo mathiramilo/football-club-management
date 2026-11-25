@@ -23,6 +23,7 @@ export const errorCode = extensibleEnum([
   'BIRTHDATE_LOCKED',
   'UPLOAD_NOT_FOUND',
   'UPLOAD_INVALID',
+  'INVITE_LINK_APPROVAL_REQUIRED',
 ]);
 
 export type ErrorCode = z.infer<typeof errorCode>;
@@ -53,6 +54,7 @@ export const errorCatalog: Record<ErrorCode, ErrorDefinition> = {
   BIRTHDATE_LOCKED: { status: 409, title: 'Birthdate already set' },
   UPLOAD_NOT_FOUND: { status: 404, title: 'Upload not found' },
   UPLOAD_INVALID: { status: 422, title: 'Upload not accepted' },
+  INVITE_LINK_APPROVAL_REQUIRED: { status: 422, title: 'This invite link must require approval' },
 };
 
 // Better Auth answers /v1/auth/* with { code, message } instead of problem+json (ADR-007).

@@ -35,6 +35,7 @@ export const envSchema = z
     EMAIL_FROM: z.email().default('no-reply@example.test'),
     API_BASE_URL: z.url().default('http://localhost:3001'),
     BETTER_AUTH_SECRET: z.string().min(32),
+    INVITE_LINK_SECRET: z.string().min(32),
     WEB_ORIGINS: commaSeparated.pipe(z.array(z.url().transform((url) => new URL(url).origin))),
     AUTH_COOKIE_DOMAIN: optional(z.hostname()),
     GOOGLE_CLIENT_IDS: commaSeparated,

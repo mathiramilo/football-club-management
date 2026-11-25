@@ -3,6 +3,7 @@ import { categoryFormat, type CategoryFormat, staffRole, type StaffRole } from '
 
 import type { ClubContext } from '../../core/database/club-scope.js';
 import { PrismaService } from '../../core/database/prisma.service.js';
+import { InviteLinksRepository } from './invite-links.repository.js';
 
 export interface ClubRecord {
   id: string;
@@ -63,7 +64,10 @@ const calendarDay = (date: Date) => date.toISOString().slice(0, 10);
 
 @Injectable()
 export class ClubsRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly inviteLinks: InviteLinksRepository,
+  ) {}
 
   // A club context starts here, and prisma.forClub refuses to create clubs, so every row is stamped by hand.
   async createWithOwner(
@@ -94,6 +98,7 @@ export class ClubsRepository {
           startsOn: new Date(firstCategory.startsOn),
         },
       });
+      await this.inviteLinks.ensureDefault(tx, { clubId }, category.id, true);
       return {
         ...membership,
         club: created,

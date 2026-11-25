@@ -100,7 +100,7 @@ Code requests answer `429` in two cases (BR-AUTH-03, NFR-SEC-05):
 ### Invites, joins and claims (R1)
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/v1/public/invites/{codeOrToken}` | Invite preview: club, category, role (BR-AUTH-09). |
+| GET | `/v1/public/invites/{token}` | Invite preview, no sign-in: `status` (`active`, `expired`, `revoked`, `used_up`), role, club name, short name, color and crest, category name and format, and no personal data (BR-AUTH-09, BR-AUTH-10). A link of an archived category reads as `revoked`; an unknown token or a deleted club answers `404` (CLUB-05). The 6-character code joins with AUTH-07. |
 | POST | `/v1/invites/{codeOrToken}/accept` | Join or create a join request. |
 | GET | `/v1/public/claims/{token}` · POST `/v1/claims/{token}/accept` | AUTH-09 |
 
@@ -114,7 +114,8 @@ Code requests answer `429` in two cases (BR-AUTH-03, NFR-SEC-05):
 | GET / POST | `/v1/clubs/{clubId}/categories` | CLUB-03 |
 | PATCH | `/v1/clubs/{clubId}/categories/{categoryId}` | Includes `settings` (CLUB-14). |
 | POST | `/v1/clubs/{clubId}/categories/{categoryId}/archive` · `/restore` | CLUB-04 |
-| GET / POST | `/v1/clubs/{clubId}/categories/{categoryId}/invite-links` · DELETE `…/{linkId}` | CLUB-05 |
+| GET / POST | `/v1/clubs/{clubId}/categories/{categoryId}/invite-links` | List the active links the caller may share (not revoked, expired or used up; the default link first, then newest), creating the category's default player link if it has none. Create one: `{ role, requiresApproval?, expiresInDays? (1–90, default 30), maxUses? }`. Each link carries its `token` (the link is `<web origin>/j/<token>`), `canRevoke` and `canChangeApproval`. `422` `INVITE_LINK_APPROVAL_REQUIRED` when a Coach turns approval off (BR-CLUB-08, BR-AUTH-10, CLUB-05). |
+| PATCH / DELETE | `/v1/clubs/{clubId}/categories/{categoryId}/invite-links/{linkId}` | Turn approval on or off on a player link (`{ requiresApproval }`), or revoke a link (`204`). Revoking the default link creates a new one with the same approval setting (CLUB-05). |
 | GET | `/v1/clubs/{clubId}/join-requests?status&categoryId` | CLUB-06 |
 | POST | `/v1/clubs/{clubId}/join-requests/{id}/approve` · `/reject` · `/v1/clubs/{clubId}/join-requests/approve-bulk` | CLUB-06 |
 | GET | `/v1/clubs/{clubId}/members?q&categoryId&role&status&line&cursor` | CLUB-08 |
