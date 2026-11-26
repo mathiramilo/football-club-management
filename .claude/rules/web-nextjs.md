@@ -23,7 +23,7 @@ Task skills: `next-bundle-optimizer` (bundle audits against the public-page budg
 
 | Surface | Rendering | Notes |
 |---|---|---|
-| **Public pages**: `/e/{shareToken}`, `/j/{code}`, `/c/{claimToken}`, `/consent/{token}`, `/delete-account`, legal | Server Components, SSR, short edge caching | Open Graph tags via `generateMetadata` and a generated image (`opengraph-image.tsx` with `next/og`) for WhatsApp previews. **No personal data** in markup, metadata or images (EVT-07). Budget: LCP ≤ 2.5 s on 4G, JS ≤ 150 KB gzipped (NFR-PERF-04). Keep client components out of these routes unless needed. |
+| **Public pages**: `/e/{shareToken}`, `/j/{inviteToken}`, `/c/{claimToken}`, `/consent/{token}`, `/delete-account`, legal | Server Components, SSR, short edge caching | Open Graph tags via `generateMetadata` and a generated image (`opengraph-image.tsx` with `next/og`) for WhatsApp previews. **No personal data** in markup, metadata or images (EVT-07). Budget: LCP ≤ 2.5 s on 4G, JS ≤ 150 KB gzipped (NFR-PERF-04). Keep client components out of these routes unless needed. |
 | **Staff portal** | Client components with TanStack Query hooks | Optimized for ≥ 1280 px, usable from 768 px (NFR-COMP-02). |
 | **Player web fallback** | Mobile-first | The full player experience for players without the app. |
 
@@ -36,6 +36,7 @@ Route groups keep the surfaces apart: `app/(auth)/…`, `app/(player)/…`, `app
 - Never keep per-request data in module-level variables.
 - Load heavy client libraries (Recharts, dnd-kit, Tiptap) with `next/dynamic`, load PostHog and Sentry only after the page has loaded (`instrumentation-client.ts`), and use `optimizePackageImports` for icon libraries.
 - OG images use `next/og` with flexbox-only layout.
+- `next/og` can't draw WebP, which is how crests and photos are stored, and refuses image URLs on `localhost` or private addresses. Fetch the image on the server, convert it to PNG with `sharp` and pass a data URL (`app/(public)/j/[token]/opengraph-image.tsx`).
 
 ## Session and auth
 

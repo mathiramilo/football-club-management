@@ -64,7 +64,7 @@ A **category selector** in the header filters staff tabs when the user has sever
 Left sidebar: **Inicio** · **Calendario** · **Plantel** (categories, members, requests, invite links) · **Asistencia** (analytics) · **Estado físico** (R2) · **Biblioteca** (R2) · **Planificación** (plans and templates, R2) · **Rutinas** and **Nutrición** (R3) · **Asistente IA** (R3) · **Club** (settings, admins, venues, AI usage).
 Top bar: club switcher, category filter, inbox, profile.
 
-The portal lives under `/portal`, for Club Admins and staff of the current club. Opening Inicio (`/`) with that navigation goes to `/portal`, and `/portal` sends everyone else back to `/`. CLUB-01 ships a bare frame: the club crest and name, Inicio and Perfil. The top bar comes with AUTH-11 and each section with its story.
+The portal lives under `/portal`, for Club Admins and staff of the current club. Opening Inicio (`/`) with that navigation goes to `/portal`, and `/portal` sends everyone else back to `/`. CLUB-01 ships a bare frame: the club crest and name, Inicio and Perfil. CLUB-05 adds Plantel, for now with the invite links of the categories the user can invite to (`/portal/squad?category=…`). The top bar comes with AUTH-11 and each section with its story.
 
 ### 3.4 Before joining a club
 After profile completion (S-02), a user with no club sees a first-run choice on Inicio, on both platforms:
@@ -74,7 +74,7 @@ After profile completion (S-02), a user with no club sees a first-run choice on 
 Club creation asks for the club's details, then "¿También dirigís una categoría?", and saves both together. The creator then lands on the staff home (S-05). The current club is remembered on the device. AUTH-11 adds switching between clubs.
 
 ### 3.5 Web: public and player pages
-- Public: `/e/{token}` (event landing), `/j/{code}` (invite), `/c/{token}` (claim), `/consent/{token}` (guardian), `/delete-account`, legal pages (`/legal/terms`, `/legal/privacy`).
+- Public: `/e/{token}` (event landing), `/j/{token}` (invite), `/c/{token}` (claim), `/consent/{token}` (guardian), `/delete-account`, legal pages (`/legal/terms`, `/legal/privacy`).
 - Player web: a responsive equivalent of the mobile player tabs, with a persistent "Descargá la app para recibir recordatorios" banner.
 
 ## 4. Screen inventory

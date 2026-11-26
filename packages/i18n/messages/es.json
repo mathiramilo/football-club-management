@@ -322,7 +322,8 @@
     "nav": {
       "label": "Secciones del club",
       "home": "Inicio",
-      "profile": "Perfil"
+      "profile": "Perfil",
+      "squad": "Plantel"
     },
     "home": {
       "categories": "Tus categorías",
@@ -331,5 +332,88 @@
         "body": "Acá vas a ver las próximas prácticas y partidos, y quién confirmó."
       }
     }
+  },
+  "invite": {
+    "roles": {
+      "player": "jugador/a",
+      "coach": "profe",
+      "dt": "DT"
+    },
+    "metaTitle": "Sumate a {category} de {club}",
+    "metaDescription": "Te invitan a {category} de {club} como {role}.",
+    "heading": "Te invitan a <b>{category}</b> de <b>{club}</b> como {role}",
+    "imageHeading": "Te invitan a {category}",
+    "inactive": {
+      "expired": "Este link venció",
+      "revoked": "Este link ya no funciona",
+      "used_up": "Este link ya llegó a su límite de usos",
+      "body": "Pedile un link nuevo a tu DT."
+    },
+    "notFound": {
+      "title": "No encontramos esta invitación",
+      "body": "Revisá que el link esté completo o pedile uno nuevo a tu DT."
+    }
+  },
+  "inviteLinks": {
+    "title": "Links de invitación",
+    "intro": "Compartí un link en el grupo de WhatsApp para que se sumen a la categoría.",
+    "category": "Categoría",
+    "for": {
+      "player": "Para jugadores",
+      "coach": "Para profes",
+      "dt": "Para DT"
+    },
+    "default": "Link principal",
+    "approval": {
+      "on": "Con aprobación",
+      "off": "Sin aprobación",
+      "label": "Pedir aprobación",
+      "hint": "Revisás cada solicitud antes de que se sumen.",
+      "locked": "Este link siempre pide aprobación."
+    },
+    "expiry": {
+      "never": "No vence",
+      "on": "Vence el {date}"
+    },
+    "uses": "{count, plural, one {# uso} other {# usos}}",
+    "usesOf": "{count} de {max} usos",
+    "share": "Compartir",
+    "copy": "Copiar link",
+    "copied": "Copiamos el link.",
+    "copyFailed": "No pudimos copiar el link.",
+    "shareMessage": "Sumate a {category} de {club} en la app: {url}",
+    "revoke": "Desactivar",
+    "renew": "Cambiar link",
+    "revokeConfirm": {
+      "title": "¿Desactivar este link?",
+      "body": "Quien lo abra va a ver que ya no funciona.",
+      "action": "Desactivar"
+    },
+    "renewConfirm": {
+      "title": "¿Cambiar el link principal?",
+      "body": "El link actual deja de funcionar y se crea uno nuevo para compartir.",
+      "action": "Cambiar link"
+    },
+    "cancel": "Cancelar",
+    "create": {
+      "title": "Crear un link",
+      "open": "Crear link",
+      "role": "Para quién",
+      "expiry": "Vence en",
+      "days": "{count, plural, one {# día} other {# días}}",
+      "maxUses": "Límite de usos (opcional)",
+      "maxUsesHint": "Dejalo vacío para no poner límite.",
+      "submit": "Crear link",
+      "maxUsesInvalid": "Poné un número entre 1 y 1000."
+    },
+    "loadFailed": "No pudimos cargar los links.",
+    "retry": "Reintentar",
+    "noCategories": {
+      "title": "Todavía no tenés categorías",
+      "body": "Cuando dirijas una categoría, vas a poder invitar gente desde acá."
+    },
+    "updateFailed": "No pudimos guardar el cambio. Probá de nuevo.",
+    "link": "Link",
+    "empty": "Todavía no hay otros links activos."
   }
 }
