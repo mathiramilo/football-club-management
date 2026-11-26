@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Tabs, useRouter } from 'expo-router';
 import {
   CalendarDaysIcon,
   EllipsisIcon,
@@ -7,6 +7,7 @@ import {
   UserIcon,
   UsersIcon,
 } from 'lucide-react-native';
+import { useEffect } from 'react';
 import { useIntl } from 'react-intl';
 import { View } from 'react-native';
 
@@ -14,6 +15,7 @@ import { ClubTheme } from '@/components/club-theme';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { useCurrentClub } from '@/lib/current-club';
+import { takeHeldInvite } from '@/lib/held-invite';
 import { cn } from '@/lib/utils';
 
 function tabIcon(glyph: LucideIcon) {
@@ -46,9 +48,15 @@ function TabLabel({ focused, children }: { focused: boolean; children: string })
 
 export default function TabsLayout() {
   const intl = useIntl();
+  const router = useRouter();
   const current = useCurrentClub();
   const club = current.status === 'ready' ? current.membership.club : null;
   const isStaff = current.status === 'ready' && current.isStaff;
+
+  useEffect(() => {
+    const token = takeHeldInvite();
+    if (token) router.push(`/j/${token}`);
+  }, [router]);
 
   return (
     <ClubTheme primaryColor={club?.primaryColor}>

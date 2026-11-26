@@ -75,6 +75,7 @@ function RootStack() {
         <Stack.Protected guard={!isSignedIn}>
           <Stack.Screen name="(auth)" />
         </Stack.Protected>
+        <Stack.Screen name="j/[token]" />
         <Stack.Screen name="+not-found" />
       </Stack.Protected>
       <Stack.Protected guard={mustUpdate}>
