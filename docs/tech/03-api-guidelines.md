@@ -101,7 +101,7 @@ Code requests answer `429` in two cases (BR-AUTH-03, NFR-SEC-05):
 | Method | Path | Purpose |
 |---|---|---|
 | GET | `/v1/public/invites/{token}` | Invite preview, no sign-in: `status` (`active`, `expired`, `revoked`, `used_up`), role, club name, short name, color and crest, category name and format, and no personal data (BR-AUTH-09, BR-AUTH-10). A link of an archived category reads as `revoked`; an unknown token or a deleted club answers `404` (CLUB-05). The 6-character code joins with AUTH-07. |
-| POST | `/v1/invites/{codeOrToken}/accept` | Join or create a join request. |
+| POST | `/v1/invites/{token}/accept` | Join the link's category, or ask to join it. `outcome`: `joined` (player link without approval), `requested` (a pending join request), `already_member` (the caller already holds the role there, without counting a use) or `already_requested`. Joining and requesting count a use. `410` `INVITE_LINK_INACTIVE` for an expired, revoked or used-up link or an archived category; `409` `PROFILE_INCOMPLETE` before profile completion; `404` for an unknown token or a deleted club (BR-AUTH-09, BR-AUTH-10, AUTH-06). The 6-character code and the invite rate limit (NFR-SEC-05) join with AUTH-07. |
 | GET | `/v1/public/claims/{token}` · POST `/v1/claims/{token}/accept` | AUTH-09 |
 
 ### Clubs and membership (R1)

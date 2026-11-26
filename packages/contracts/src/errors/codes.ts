@@ -24,6 +24,8 @@ export const errorCode = extensibleEnum([
   'UPLOAD_NOT_FOUND',
   'UPLOAD_INVALID',
   'INVITE_LINK_APPROVAL_REQUIRED',
+  'INVITE_LINK_INACTIVE',
+  'PROFILE_INCOMPLETE',
 ]);
 
 export type ErrorCode = z.infer<typeof errorCode>;
@@ -55,6 +57,8 @@ export const errorCatalog: Record<ErrorCode, ErrorDefinition> = {
   UPLOAD_NOT_FOUND: { status: 404, title: 'Upload not found' },
   UPLOAD_INVALID: { status: 422, title: 'Upload not accepted' },
   INVITE_LINK_APPROVAL_REQUIRED: { status: 422, title: 'This invite link must require approval' },
+  INVITE_LINK_INACTIVE: { status: 410, title: 'Invite link expired, revoked or used up' },
+  PROFILE_INCOMPLETE: { status: 409, title: 'Profile incomplete' },
 };
 
 // Better Auth answers /v1/auth/* with { code, message } instead of problem+json (ADR-007).

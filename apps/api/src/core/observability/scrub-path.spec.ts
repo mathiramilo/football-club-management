@@ -16,6 +16,12 @@ describe('scrubPath (privacy: tokens never in logs)', () => {
     );
   });
 
+  it('redacts the invite token when accepting it (AUTH-06)', () => {
+    expect(scrubPath('/v1/invites/Y19tKpsMXcghmlkj_t85mw/accept')).toBe(
+      '/v1/invites/[redacted]/accept',
+    );
+  });
+
   it('redacts the invite token inside span names', () => {
     expect(redactTokenPaths('GET /v1/public/invites/Y19tKpsMXcghmlkj_t85mw')).toBe(
       'GET /v1/public/invites/[redacted]',

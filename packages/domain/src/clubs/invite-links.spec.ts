@@ -6,6 +6,8 @@ import {
   canSeeInviteLink,
   type CategoryManager,
   creatableInviteRoles,
+  holdsInviteRole,
+  inviteAcceptOutcome,
   inviteApprovalRequired,
   type InviteRole,
   inviteLinkStatus,
@@ -138,5 +140,58 @@ describe('inviteLinkStatus (BR-AUTH-10)', () => {
         now,
       ),
     ).toBe('revoked');
+  });
+});
+
+describe('holdsInviteRole (BR-AUTH-09)', () => {
+  it('needs the player flag for player links', () => {
+    expect(holdsInviteRole({ isPlayer: true, staffRole: null }, 'player')).toBe(true);
+    expect(holdsInviteRole({ isPlayer: false, staffRole: 'dt' }, 'player')).toBe(false);
+  });
+
+  it('counts a DT as holding the Coach role, but not the other way round', () => {
+    expect(holdsInviteRole({ isPlayer: false, staffRole: 'dt' }, 'coach')).toBe(true);
+    expect(holdsInviteRole({ isPlayer: false, staffRole: 'coach' }, 'coach')).toBe(true);
+    expect(holdsInviteRole({ isPlayer: false, staffRole: 'coach' }, 'dt')).toBe(false);
+  });
+
+  it('holds nothing without a membership in the category', () => {
+    expect(holdsInviteRole(null, 'player')).toBe(false);
+  });
+});
+
+describe('inviteAcceptOutcome (BR-AUTH-09)', () => {
+  const open = { role: 'player', requiresApproval: false } as const;
+  const approval = { role: 'player', requiresApproval: true } as const;
+
+  it('joins immediately through a player link without approval', () => {
+    expect(inviteAcceptOutcome(open, null, false)).toBe('joined');
+  });
+
+  it('joins a staff member of the category as a player too', () => {
+    expect(inviteAcceptOutcome(open, { isPlayer: false, staffRole: 'coach' }, false)).toBe(
+      'joined',
+    );
+  });
+
+  it('creates a request when the link requires approval', () => {
+    expect(inviteAcceptOutcome(approval, null, false)).toBe('requested');
+  });
+
+  it('always creates a request for staff links', () => {
+    expect(inviteAcceptOutcome({ role: 'coach', requiresApproval: false }, null, false)).toBe(
+      'requested',
+    );
+  });
+
+  it('sends someone who already holds the role straight to the category', () => {
+    expect(inviteAcceptOutcome(approval, { isPlayer: true, staffRole: null }, true)).toBe(
+      'already_member',
+    );
+  });
+
+  it('keeps a single pending request', () => {
+    expect(inviteAcceptOutcome(approval, null, true)).toBe('already_requested');
+    expect(inviteAcceptOutcome(open, null, true)).toBe('already_requested');
   });
 });

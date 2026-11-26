@@ -85,8 +85,28 @@ export const invitePreview = z
   .describe('What the link invites to, shown before sign-in (BR-AUTH-09). No personal data')
   .meta({ id: 'InvitePreview' });
 
+export const inviteAcceptOutcomes = [
+  'joined',
+  'already_member',
+  'requested',
+  'already_requested',
+] as const;
+export const inviteAcceptOutcome = extensibleEnum(inviteAcceptOutcomes);
+export type InviteAcceptOutcome = z.infer<typeof inviteAcceptOutcome>;
+
+export const acceptInviteResponse = z
+  .object({
+    outcome: inviteAcceptOutcome.describe(
+      '`joined` and `already_member` open the category; `requested` and `already_requested` wait for staff approval (BR-AUTH-09)',
+    ),
+    clubId: z.uuid(),
+    categoryId: z.uuid(),
+  })
+  .meta({ id: 'AcceptInviteResponse' });
+
 export type InviteLink = z.infer<typeof inviteLink>;
 export type InviteLinksResponse = z.infer<typeof inviteLinksResponse>;
 export type CreateInviteLinkBody = z.infer<typeof createInviteLinkBody>;
 export type UpdateInviteLinkBody = z.infer<typeof updateInviteLinkBody>;
 export type InvitePreview = z.infer<typeof invitePreview>;
+export type AcceptInviteResponse = z.infer<typeof acceptInviteResponse>;

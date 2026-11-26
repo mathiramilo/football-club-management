@@ -21,6 +21,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AcceptInviteResponse,
   ClubSummary,
   ClubUploadResponse,
   CreateClubBody,
@@ -891,6 +892,82 @@ export const useInviteLinksRevoke = <TError = ErrorType<ProblemDetails>, TContex
   TContext
 > => {
   return useMutation(getInviteLinksRevokeMutationOptions(options), queryClient);
+};
+export const getInvitesAcceptUrl = (token: string) => {
+  return `/v1/invites/${token}/accept`;
+};
+
+export const invitesAccept = async (
+  token: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<AcceptInviteResponse> => {
+  return apiFetch<AcceptInviteResponse>(getInvitesAcceptUrl(token), {
+    ...options,
+    method: 'POST',
+  });
+};
+
+export const getInvitesAcceptMutationKey = () => ['invitesAccept'] as const;
+
+export const getInvitesAcceptMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof invitesAccept>>,
+    TError,
+    InvitesAcceptMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof invitesAccept>>,
+  TError,
+  InvitesAcceptMutationVariables,
+  TContext
+> => {
+  const mutationKey = getInvitesAcceptMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof invitesAccept>>,
+    InvitesAcceptMutationVariables
+  > = (props) => {
+    const { token } = props ?? {};
+
+    return invitesAccept(token, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type InvitesAcceptMutationResult = NonNullable<Awaited<ReturnType<typeof invitesAccept>>>;
+
+export type InvitesAcceptMutationError = ErrorType<ProblemDetails>;
+export type InvitesAcceptMutationVariables = { token: string };
+
+export const useInvitesAccept = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof invitesAccept>>,
+      TError,
+      InvitesAcceptMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof invitesAccept>>,
+  TError,
+  InvitesAcceptMutationVariables,
+  TContext
+> => {
+  return useMutation(getInvitesAcceptMutationOptions(options), queryClient);
 };
 export const getPublicInvitesPreviewUrl = (token: string) => {
   return `/v1/public/invites/${token}`;

@@ -34,6 +34,7 @@ model User {
   authSessions     AuthSession[]
   idempotencyKeys  IdempotencyKey[]
   legalAcceptances LegalAcceptance[]
+  joinRequests     JoinRequest[]
 
   @@map("users")
 }
@@ -190,6 +191,7 @@ model Club {
   clubMemberships     ClubMembership[]
   categoryMemberships CategoryMembership[]
   inviteLinks         InviteLink[]
+  joinRequests        JoinRequest[]
   venues              Venue[]
   events              Event[]
   eventCategories     EventCategory[]
@@ -217,6 +219,7 @@ model Category {
   categoryMemberships CategoryMembership[]
   eventCategories     EventCategory[]
   inviteLinks         InviteLink[]
+  joinRequests        JoinRequest[]
 
   @@unique([id, clubId])
   @@index([clubId])
@@ -250,6 +253,7 @@ model ClubMembership {
   categoryMemberships CategoryMembership[]
   eventInvitees       EventInvitee[]       @relation("InviteeMembership")
   proxyRsvps          EventInvitee[]       @relation("RsvpSetBy")
+  possibleDuplicates  JoinRequest[]
 
   @@unique([id, clubId])
   @@unique([clubId, userId])
@@ -299,14 +303,44 @@ model InviteLink {
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  club     Club     @relation(fields: [clubId], references: [id])
-  category Category @relation(fields: [categoryId, clubId], references: [id, clubId])
+  club         Club          @relation(fields: [clubId], references: [id])
+  category     Category      @relation(fields: [categoryId, clubId], references: [id, clubId])
+  joinRequests JoinRequest[]
 
   @@unique([id, clubId])
   @@unique([categoryId], map: "invite_links_one_default_per_category", where: raw("is_default AND revoked_at IS NULL"))
   @@index([clubId])
   @@index([categoryId, createdAt], where: raw("revoked_at IS NULL"))
   @@map("invite_links")
+}
+
+model JoinRequest {
+  id                  String    @id @default(uuid(7)) @db.Uuid
+  clubId              String    @map("club_id") @db.Uuid
+  categoryId          String    @map("category_id") @db.Uuid
+  inviteLinkId        String    @map("invite_link_id") @db.Uuid
+  userId              String    @map("user_id") @db.Uuid
+  requestedPositions  String[]  @default([]) @map("requested_positions")
+  possibleDuplicateOf String?   @map("possible_duplicate_of") @db.Uuid
+  status              String    @default("pending")
+  decidedBy           String?   @map("decided_by") @db.Uuid
+  decidedAt           DateTime? @map("decided_at") @db.Timestamptz(6)
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  club              Club            @relation(fields: [clubId], references: [id])
+  category          Category        @relation(fields: [categoryId, clubId], references: [id, clubId])
+  inviteLink        InviteLink      @relation(fields: [inviteLinkId, clubId], references: [id, clubId])
+  user              User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  possibleDuplicate ClubMembership? @relation(fields: [possibleDuplicateOf, clubId], references: [id, clubId])
+
+  @@unique([categoryId, userId], map: "join_requests_one_pending_per_category", where: raw("status = 'pending'"))
+  @@index([categoryId, status, createdAt])
+  @@index([clubId, status])
+  @@index([inviteLinkId])
+  @@index([userId])
+  @@index([possibleDuplicateOf], where: raw("possible_duplicate_of IS NOT NULL"))
+  @@map("join_requests")
 }
 
 model Venue {

@@ -1,10 +1,7 @@
 import type { ProfilePhoto, ProfileResponse } from '@repo/contracts';
-import { ageStatus, displayName, splitProviderName } from '@repo/domain';
+import { ageStatus, displayName, isProfileComplete, splitProviderName } from '@repo/domain';
 
 import type { ProfileRecord } from './profile.repository.js';
-
-export const isProfileComplete = ({ firstName, lastName, birthdate }: ProfileRecord) =>
-  firstName !== null && lastName !== null && birthdate !== null;
 
 export function serializeProfile(
   profile: ProfileRecord,
