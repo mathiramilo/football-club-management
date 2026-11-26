@@ -1,4 +1,4 @@
-const TOKEN_PATH = /^\/(e|j|c|consent|v1\/public\/invites)\/[^/]+/;
+const TOKEN_PATH = /^\/(e|j|c|join|consent|v1\/invites|v1\/public\/invites)\/[^/]+/;
 const ORIGIN = /^[a-z][a-z\d+.-]*:\/\/[^/]+/i;
 
 export function scrubUrl(url: string): string {

@@ -1,49 +1,21 @@
 'use client';
 
-import { useAppConfigGet } from '@repo/api-client';
 import { SmartphoneIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useSyncExternalStore } from 'react';
+import { useEffect } from 'react';
 
 import { Alert, AlertContent } from '@/components/ui/alert';
 import { requireUpdate } from '@/lib/app-update';
-
-const appConfigStaleTimeMs = 60 * 60 * 1000;
-
-type Store = 'ios' | 'android';
-
-const storesForDevice = (): Store[] => {
-  const userAgent = navigator.userAgent;
-  if (/iPhone|iPad|iPod/i.test(userAgent)) return ['ios'];
-  if (/Android/i.test(userAgent)) return ['android'];
-  return ['ios', 'android'];
-};
-
-let deviceStores: Store[] | undefined;
-
-const subscribe = () => () => undefined;
-
-const useDeviceStores = () =>
-  useSyncExternalStore(
-    subscribe,
-    () => (deviceStores ??= storesForDevice()),
-    () => null,
-  );
+import { useStoreLinks } from '@/lib/store-links';
 
 export function DownloadAppBanner() {
   const t = useTranslations('downloadApp');
-  const { data } = useAppConfigGet({ query: { staleTime: appConfigStaleTimeMs } });
-  const stores = useDeviceStores();
-  const updateRequired = data?.updateRequired === true;
+  const { links, updateRequired } = useStoreLinks();
 
   useEffect(() => {
     if (updateRequired) requireUpdate();
   }, [updateRequired]);
 
-  const links = (stores ?? []).flatMap((store) => {
-    const url = data?.storeUrls[store];
-    return url ? [{ store, url }] : [];
-  });
   if (links.length === 0) return null;
 
   return (
