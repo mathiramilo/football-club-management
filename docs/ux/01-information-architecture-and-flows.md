@@ -75,6 +75,7 @@ Club creation asks for the club's details, then "¿También dirigís una categor
 
 ### 3.5 Web: public and player pages
 - Public: `/e/{token}` (event landing), `/j/{token}` (invite), `/c/{token}` (claim), `/consent/{token}` (guardian), `/delete-account`, legal pages (`/legal/terms`, `/legal/privacy`).
+- Joining: `/j/{token}`'s "Unirme a {category}" opens `/join/{token}`, which asks for sign-in, the terms and the profile first, then joins with one more tap. It ends on "¡Ya sos parte de {category}!" with the store links and "Seguir en la web", or on "Le mandamos tu solicitud al cuerpo técnico" when the link requires approval (AUTH-06). Someone already in the category goes straight to Inicio.
 - Player web: a responsive equivalent of the mobile player tabs, with a persistent "Descargá la app para recibir recordatorios" banner.
 
 ## 4. Screen inventory

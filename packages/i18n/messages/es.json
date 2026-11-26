@@ -348,6 +348,27 @@
     "notFound": {
       "title": "No encontramos esta invitación",
       "body": "Revisá que el link esté completo o pedile uno nuevo a tu DT."
+    },
+    "join": "Unirme a <b>{category}</b>",
+    "joinHint": "Si todavía no ingresaste, te vamos a pedir tu cuenta de Google o Apple, o tu email."
+  },
+  "joinInvite": {
+    "metaTitle": "Unirme al equipo",
+    "loadFailed": "No pudimos cargar la invitación",
+    "retry": "Reintentar",
+    "home": "Ir al inicio",
+    "joined": {
+      "title": "¡Ya sos parte de {category}!",
+      "body": "Descargá la app para recibir los recordatorios de las actividades.",
+      "webBody": "Ya vas a ver las actividades de tu categoría en Inicio.",
+      "continue": "Seguir en la web"
+    },
+    "requested": {
+      "title": "Le mandamos tu solicitud al cuerpo técnico",
+      "body": "Cuando acepten tu solicitud para unirte a {category} de {club}, vas a ver tus actividades acá."
+    },
+    "alreadyRequested": {
+      "title": "Ya pediste unirte a {category}"
     }
   },
   "inviteLinks": {
