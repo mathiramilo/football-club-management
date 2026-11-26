@@ -10,9 +10,13 @@ import { PageMessage } from '@/components/page-message';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getInvitePreview } from '@/lib/invite-preview';
 
+interface InviteProps {
+  params: Promise<{ token: string }>;
+}
+
 const knownRole = (role: string) => inviteRoles.find((known) => known === role) ?? 'player';
 
-export async function generateMetadata({ params }: PageProps<'/j/[token]'>): Promise<Metadata> {
+export async function generateMetadata({ params }: InviteProps): Promise<Metadata> {
   const { token } = await params;
   const [preview, t] = await Promise.all([getInvitePreview(token), getTranslations('invite')]);
   if (!preview) return { title: t('notFound.title'), robots: { index: false } };
@@ -31,7 +35,7 @@ export async function generateMetadata({ params }: PageProps<'/j/[token]'>): Pro
   };
 }
 
-export default function InvitePage({ params }: PageProps<'/j/[token]'>) {
+export default function InvitePage({ params }: InviteProps) {
   return (
     <Suspense fallback={<InviteSkeleton />}>
       <Invite params={params} />
@@ -39,7 +43,7 @@ export default function InvitePage({ params }: PageProps<'/j/[token]'>) {
   );
 }
 
-async function Invite({ params }: Pick<PageProps<'/j/[token]'>, 'params'>) {
+async function Invite({ params }: InviteProps) {
   const { token } = await params;
   const [preview, t] = await Promise.all([getInvitePreview(token), getTranslations('invite')]);
 
