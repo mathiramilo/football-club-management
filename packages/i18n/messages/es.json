@@ -174,12 +174,6 @@
       "body": "Cuando te sumes, vas a ver a tus compañeros ordenados por línea."
     }
   },
-  "squad": {
-    "empty": {
-      "title": "Acá vas a ver tu plantel",
-      "body": "Cuando se sumen jugadores con tu link de invitación, los vas a ver por categoría."
-    }
-  },
   "updateRequired": {
     "title": "Actualizá la app",
     "body": "Esta versión ya no funciona. Instalá la última desde {store, select, ios {la App Store} other {Google Play}} para seguir usándola.",
