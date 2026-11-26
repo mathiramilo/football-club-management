@@ -5,6 +5,7 @@
  * OpenAPI spec version: 1
  */
 
+export * from './acceptInviteResponse';
 export * from './acceptLegalDocumentsBody';
 export * from './acceptLegalDocumentsBodyDocumentsItem';
 export * from './acceptLegalDocumentsBodyDocumentsItemDocument';

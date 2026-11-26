@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { ProfileResponse, UpdateProfileBody } from '@repo/contracts';
-import { ageStatus } from '@repo/domain';
+import { ageStatus, isProfileComplete } from '@repo/domain';
 
 import { Analytics } from '../../core/analytics/analytics.js';
 import { localDate } from '../../core/authorization/club-actor.js';
@@ -8,7 +8,7 @@ import { Clock } from '../../core/clock/clock.js';
 import { DomainError } from '../../core/errors/domain-error.js';
 import { type ProfileRecord, ProfileRepository } from './profile.repository.js';
 import { ProfilePhotoService } from './profile-photo.service.js';
-import { isProfileComplete, serializeProfile } from './profile.serializer.js';
+import { serializeProfile } from './profile.serializer.js';
 
 // BR-AUTH-05: accounts have no time zone, so ages are counted on the calendar day in Uruguay,
 // which Argentina shares.

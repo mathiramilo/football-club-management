@@ -11,6 +11,7 @@ import { createCategory, createClub, createUser } from '../support/factories.js'
 const TABLE_BY_MODEL = {
   Category: 'categories',
   InviteLink: 'invite_links',
+  JoinRequest: 'join_requests',
   ClubMembership: 'club_memberships',
   CategoryMembership: 'category_memberships',
   Venue: 'venues',

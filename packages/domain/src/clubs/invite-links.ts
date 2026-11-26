@@ -64,3 +64,34 @@ export function inviteLinkStatus(link: InviteLinkUsage, now: Date): InviteLinkSt
   if (link.maxUses !== null && link.usesCount >= link.maxUses) return 'used_up';
   return 'active';
 }
+
+export type InviteAcceptOutcome = 'joined' | 'already_member' | 'requested' | 'already_requested';
+
+export interface CategoryStanding {
+  isPlayer: boolean;
+  staffRole: string | null;
+}
+
+export interface AcceptedInviteLink {
+  role: InviteRole;
+  requiresApproval: boolean;
+}
+
+export function holdsInviteRole(standing: CategoryStanding | null, role: InviteRole): boolean {
+  if (!standing) return false;
+  if (role === 'player') return standing.isPlayer;
+  if (role === 'coach') return standing.staffRole === 'coach' || standing.staffRole === 'dt';
+  return standing.staffRole === 'dt';
+}
+
+// BR-AUTH-09: someone who already holds the role goes straight to the category; otherwise the link
+// creates a join request when it requires approval, and joins immediately when it doesn't.
+export function inviteAcceptOutcome(
+  link: AcceptedInviteLink,
+  standing: CategoryStanding | null,
+  hasPendingRequest: boolean,
+): InviteAcceptOutcome {
+  if (holdsInviteRole(standing, link.role)) return 'already_member';
+  if (hasPendingRequest) return 'already_requested';
+  return link.requiresApproval || link.role !== 'player' ? 'requested' : 'joined';
+}

@@ -14,6 +14,8 @@ const managesInviteLinks = clubPolicy({
 export const clubsPolicies = {
   'clubs.club.create': anySignedInUser,
   'clubs.own-memberships.read': anySignedInUser,
+  // BR-AUTH-09: anyone signed in can open an invite link; the link decides what it grants.
+  'clubs.invites.accept': anySignedInUser,
   // Permission matrix § 4.1, "Edit club profile and settings": Owner and Club Admin.
   'clubs.profile.update': clubPolicy({ allows: (actor) => actor.isAdmin }),
   'clubs.invite-links.read': managesInviteLinks,
